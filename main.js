@@ -632,6 +632,12 @@ Game.Launch=function()
 	'<div class="title">Version history</div>'+
 	
 	'</div><div class="subsection update">'+ 
+	'<div class="title">29.03.2024  - Nwero Clicker: v7_16</div>'+
+	'<div class="listing">&bull; This update is a little smaller, redid name, descr. etc for banks, which are now gyms. The full redo is not finished yet, but most of the stuff you see when booting up the game is.</div>'+
+	'<div class="listing">&bull; Made a few more instances of cookie into neuro.</div>'+
+	'<div class="listing">&bull; Xoda also got herself banned from Neurocord AGAIN, this time perma, for posting a screenshot of :NeuroBwaa:. Make of that what you will.</div>'+
+
+	'</div><div class="subsection update">'+ 
 	'<div class="title">15.03.2024  - Nwero Clicker: v7_15</div>'+
 	'<div class="listing">&bull; Remade all easter egg sprites.</div>'+
 	'<div class="listing">&bull; Did all geometry triangles.</div>'+
@@ -738,7 +744,7 @@ Game.Launch=function()
 	'<div class="listing">&bull; "make X cookies just from Y" requirements are now higher</div>'+
 	'<div class="listing">&bull; tweaked the prices of some heavenly upgrades to better fit the current cookie economy (it turns out billions of heavenly chips is now very achievable)</div>'+
 	'<div class="listing">&bull; building tooltips now display what % of CpS they contribute through synergy upgrades</div>'+
-	'<div class="listing">&bull; queenbeets now give up to 4% of bank, down from 6%</div>'+
+	'<div class="listing">&bull; queenbeets now give up to 4% of gym, down from 6%</div>'+
 	'<div class="listing">&bull; among other things, season switches now display how many seasonal upgrades you\'re missing, and permanent upgrade slots now display the name of the slotted upgrade</div>'+
 	'<div class="listing">&bull; season switches have reworked prices</div>'+
 	'<div class="listing">&bull; season switches can now be cancelled by clicking them again</div>'+
@@ -832,7 +838,7 @@ Game.Launch=function()
 		
 		Game.SaveTo='CookieClickerGame';
 		if (Game.beta) Game.SaveTo='CookieClickerGameBeta';
-		l('versionNumber').innerHTML='v. '+Game.version+(Game.beta?' <span style="color:#ff0;">Modified Beta (Nwero Clicker v7_15)</span>':'');
+		l('versionNumber').innerHTML='v. '+Game.version+(Game.beta?' <span style="color:#ff0;">Modified Beta (Nwero Clicker v7_16)</span>':'');
 		
 		if (Game.beta) {var me=l('linkVersionBeta');me.parentNode.removeChild(me);}
 		else if (Game.version==1.0466) {var me=l('linkVersionOld');me.parentNode.removeChild(me);}
@@ -2617,7 +2623,7 @@ Game.Launch=function()
 			var cps=Game.cookiesPs*(1-Game.cpsSucked);
 			if (cost>Game.cookies) priceInfo+='in '+Game.sayTime(((cost-Game.cookies)/cps+1)*Game.fps)+'<br>';
 			priceInfo+=Game.sayTime((cost/cps+1)*Game.fps)+' worth<br>';
-			priceInfo+=Beautify((cost/Game.cookies)*100,1)+'% of bank<br>';
+			priceInfo+=Beautify((cost/Game.cookies)*100,1)+'% of gym<br>';
 			return '<div style="font-size:80%;opacity:0.7;line-height:90%;">'+priceInfo+'</div>';
 		}
 		
@@ -4245,7 +4251,7 @@ Game.Launch=function()
 						this.totalFromChain+=moni;
 						var moniStr=Beautify(moni);
 
-						//break the chain if we're above 5 digits AND it's more than 50% of our bank, it grants more than 6 hours of our CpS, or just a 1% chance each digit (update : removed digit limit)
+						//break the chain if we're above 5 digits AND it's more than 50% of our gym, it grants more than 6 hours of our CpS, or just a 1% chance each digit (update : removed digit limit)
 						if (Math.random()<0.01 || nextMoni>=maxPayout)
 						{
 							this.chain=0;
@@ -4531,7 +4537,7 @@ Game.Launch=function()
 			'Farm':['Luxuriant harvest','Locusts'],
 			'Mining Rig':['Ore vein','Cave-in'],
 			'Factory':['Oiled-up','Jammed machinery'],
-			'Bank':['Juicy profits','Recession'],
+			'Gym':['Juicy profits','Recession'],
 			'Temple':['Fervent adoration','Crisis of faith'],
 			'Wizard tower':['Manabloom','Magivores'],
 			'Shipment':['Delicious lifeforms','Black holes'],
@@ -5540,7 +5546,7 @@ Game.Launch=function()
 					'News : factory-made Neuros linked to obesity, says study.'
 					]));
 					
-					if (Game.Objects['Bank'].amount>0) list.push(choose([
+					if (Game.Objects['Gym'].amount>0) list.push(choose([
 					'News : Neuro loans on the rise as people can no longer afford them with regular money.',
 					'News : Neuros slowly creeping up their way as a competitor to traditional currency!',
 					'News : most bakeries now fitted with ATMs to allow for easy Neuro withdrawals and deposits.',
@@ -5747,7 +5753,7 @@ Game.Launch=function()
 					])+'", reveals celebrity.',
 				choose([
 					'News : scientist predicts imminent Neuro-related "end of the world"; becomes joke among peers.',
-					'News : man robs bank, buys Neuros.',
+					'News : man robs gym, buys Neuros.',
 					'News : scientists establish that the deal with airline food is, in fact, a critical lack of Neuros.',
 					'News : hundreds of tons of Neuros dumped into starving country from airplanes; thousands dead, nation grateful.',
 					'News : new study suggests Neuros neither speed up nor slow down aging, but instead "take you in a different direction".',
@@ -6948,7 +6954,7 @@ Game.Launch=function()
 			if (Game.Has('Grandmas\' grandmas')) list.push('grandmasGrandma');
 			if (Game.Has('Antigrandmas')) list.push('antiGrandma');
 			if (Game.Has('Rainbow grandmas')) list.push('rainbowGrandma');
-			if (Game.Has('Banker grandmas')) list.push('bankGrandma');
+			if (Game.Has('Gymer grandmas')) list.push('gymGrandma');
 			if (Game.Has('Priestess grandmas')) list.push('templeGrandma');
 			if (Game.Has('Witch grandmas')) list.push('witchGrandma');
 			if (Game.Has('Lucky grandmas')) list.push('luckyGrandma');
@@ -7038,7 +7044,7 @@ Game.Launch=function()
 		//Game.last.minigameUrl='minigameDungeon.js';//not yet
 		//Game.last.minigameName='Dungeon';
 		
-		new Game.Object('Bank','bank|banks|banked|Interest rates [X]% better|Interest rates [X]% better','Generates Neuros from interest.',6,15,{base:'bank',xV:8,yV:4,w:56,rows:1,x:0,y:13},0,function(me){
+		new Game.Object('Gym','gym|gyms|pressed|[X] more stamp head|[X] more stamp heads','People stamp neuros as a workout routine.',6,15,{base:'gym',xV:0,yV:0,w:64,rows:1,x:0,y:0},0,function(me){
 			var mult=1;
 			mult*=Game.GetTieredCpsMult(me);
 			mult*=Game.magicCpS(me.name);
@@ -7160,7 +7166,7 @@ Game.Launch=function()
 			'Farm':{name:'Kitchen',desc:'The more kitchens, the more Neuros your employees can produce.',icon:2},
 			'Mining Rig':{name:'Secret recipe',desc:'These give you the edge you need to outsell those pesky competitors.',icon:3},
 			'Factory':{name:'Factory',desc:'Mass production is the future of baking. Seize the day, and synergize!',icon:4},
-			'Bank':{name:'Investor',desc:'Business folks with a nose for profit, ready to finance your venture as long as there\'s money to be made.',icon:5},
+			'Gym':{name:'Investor',desc:'Business folks with a nose for profit, ready to finance your venture as long as there\'s money to be made.',icon:5},
 			'Temple':{name:'Like',desc:'Your social media page is going viral! Amassing likes is the key to a lasting online presence and juicy advertising deals.',icon:9},
 			'Wizard tower':{name:'Meme',desc:'Neuro memes are all the rage! With just the right amount of social media astroturfing, your brand image will be all over the cyberspace.',icon:6},
 			'Shipment':{name:'Supermarket',desc:'A gigantic Neuro emporium - your very own retail chain.',icon:7},
@@ -8266,12 +8272,12 @@ Game.Launch=function()
 		
 		
 		order=525;
-		new Game.TieredUpgrade('Taller tellers','Banks are <b>twice</b> as efficient.<q>Able to process a higher amount of transactions. Careful though, as taller tellers tell tall tales.</q>','Bank',1);
-		new Game.TieredUpgrade('Scissor-resistant credit cards','Banks are <b>twice</b> as efficient.<q>For those truly valued customers.</q>','Bank',2);
-		new Game.TieredUpgrade('Acid-proof vaults','Banks are <b>twice</b> as efficient.<q>You know what they say : better safe than sorry.</q>','Bank',3);
-		new Game.TieredUpgrade('Chocolate coins','Banks are <b>twice</b> as efficient.<q>This revolutionary currency is much easier to melt from and into ingots - and tastes much better, for a change.</q>','Bank',4);
-		new Game.TieredUpgrade('Exponential interest rates','Banks are <b>twice</b> as efficient.<q>Can\'t argue with mathematics! Now fork it over.</q>','Bank',5);
-		new Game.TieredUpgrade('Financial zen','Banks are <b>twice</b> as efficient.<q>The ultimate grail of economic thought; the feng shui of big money, the stock market yoga - the Heimlich maneuver of dimes and nickels.</q>','Bank',6);
+		new Game.TieredUpgrade('Taller tellers','Gyms are <b>twice</b> as efficient.<q>Able to process a higher amount of transactions. Careful though, as taller tellers tell tall tales.</q>','Gym',1);
+		new Game.TieredUpgrade('Scissor-resistant credit cards','Gyms are <b>twice</b> as efficient.<q>For those truly valued customers.</q>','Gym',2);
+		new Game.TieredUpgrade('Acid-proof vaults','Gyms are <b>twice</b> as efficient.<q>You know what they say : better safe than sorry.</q>','Gym',3);
+		new Game.TieredUpgrade('Chocolate coins','Gyms are <b>twice</b> as efficient.<q>This revolutionary currency is much easier to melt from and into ingots - and tastes much better, for a change.</q>','Gym',4);
+		new Game.TieredUpgrade('Exponential interest rates','Gyms are <b>twice</b> as efficient.<q>Can\'t argue with mathematics! Now fork it over.</q>','Gym',5);
+		new Game.TieredUpgrade('Financial zen','Gyms are <b>twice</b> as efficient.<q>The ultimate grail of economic thought; the feng shui of big money, the stock market yoga - the Heimlich maneuver of dimes and nickels.</q>','Gym',6);
 		
 		order=550;
 		new Game.TieredUpgrade('Golden idols','Temples are <b>twice</b> as efficient.<q>Lure even greedier adventurers to retrieve your Neuros. Now that\'s a real idol game!</q>','Temple',1);
@@ -8290,7 +8296,7 @@ Game.Launch=function()
 		new Game.TieredUpgrade('Dark formulas','Wizard towers are <b>twice</b> as efficient.<q>Eldritch forces are at work behind these spells - you get the feeling you really shouldn\'t be messing with those. But I mean, free Neuros, right?</q>','Wizard tower',6);
 
 		order=250;
-		Game.GrandmaSynergy('Banker grandmas','A nice banker to cash in more Neuros.','Bank');
+		Game.GrandmaSynergy('Gymer grandmas','A nice gymer to cash in more Neuros.','Gym');
 		Game.GrandmaSynergy('Priestess grandmas','A nice priestess to praise the one true Baker in the sky.','Temple');
 		Game.GrandmaSynergy('Witch grandmas','A nice witch to cast a zip, and a zoop, and poof! Neuros.','Wizard tower');
 		
@@ -8423,7 +8429,7 @@ Game.Launch=function()
 		order=300;new Game.TieredUpgrade('Fudge fungus','Farms are <b>twice</b> as efficient.<q>A sugary parasite whose tendrils help Neuro growth.<br>Please do not breathe in the spores. In case of spore ingestion, seek medical help within the next 36 seconds.</q>','Farm',7);
 		order=400;new Game.TieredUpgrade('Planetsplitters','Mining Rigs are <b>twice</b> as efficient.<q>These new state-of-the-art excavators have been tested on Merula, Globort and Flwanza VI, among other distant planets which have been curiously quiet lately.</q>','Mining Rig',7);
 		order=500;new Game.TieredUpgrade('Cyborg workforce','Factories are <b>twice</b> as efficient.<q>Semi-synthetic organisms don\'t slack off, don\'t unionize, and have 20% shorter lunch breaks, making them ideal labor fodder.</q>','Factory',7);
-		order=525;new Game.TieredUpgrade('Way of the wallet','Banks are <b>twice</b> as efficient.<q>This new monetary school of thought is all the rage on the banking scene; follow its precepts and you may just profit from it.</q>','Bank',7);
+		order=525;new Game.TieredUpgrade('Way of the wallet','Gyms are <b>twice</b> as efficient.<q>This new monetary school of thought is all the rage on the gyming scene; follow its precepts and you may just profit from it.</q>','Gym',7);
 		order=550;new Game.TieredUpgrade('Creation myth','Temples are <b>twice</b> as efficient.<q>Stories have been circulating about the origins of the very first Neuro that was ever baked; tales of how it all began, in the Dough beyond time and the Ovens of destiny.</q>','Temple',7);
 		order=575;new Game.TieredUpgrade('Cookiemancy','Wizard towers are <b>twice</b> as efficient.<q>There it is; the perfected school of baking magic. From summoning chips to hexing nuts, there is not a single part of Neuro-making that hasn\'t been improved tenfold by magic tricks.</q>','Wizard tower',7);
 		order=600;new Game.TieredUpgrade('Dyson sphere','Shipments are <b>twice</b> as efficient.<q>You\'ve found a way to apply your knowledge of cosmic technology to slightly more local endeavors; this gigantic sphere of meta-materials, wrapping the solar system, is sure to kick your baking abilities up a notch.</q>','Shipment',7);
@@ -8439,7 +8445,7 @@ Game.Launch=function()
 		order=300;new Game.TieredUpgrade('Wheat triffids','Farms are <b>twice</b> as efficient.<q>Taking care of crops is so much easier when your plants can just walk about and help around the farm.<br>Do not pet. Do not feed. Do not attempt to converse with.</q>','Farm',8);
 		order=400;new Game.TieredUpgrade('Canola oil wells','Mining Rigs are <b>twice</b> as efficient.<q>A previously untapped resource, canola oil permeates the underground olifers which grant it its particular taste and lucrative properties.</q>','Mining Rig',8);
 		order=500;new Game.TieredUpgrade('78-hour days','Factories are <b>twice</b> as efficient.<q>Why didn\'t we think of this earlier?</q>','Factory',8);
-		order=525;new Game.TieredUpgrade('The stuff rationale','Banks are <b>twice</b> as efficient.<q>If not now, when? If not it, what? If not things... stuff?</q>','Bank',8);
+		order=525;new Game.TieredUpgrade('The stuff rationale','Gyms are <b>twice</b> as efficient.<q>If not now, when? If not it, what? If not things... stuff?</q>','Gym',8);
 		order=550;new Game.TieredUpgrade('Theocracy','Temples are <b>twice</b> as efficient.<q>You\'ve turned your Neuro empire into a perfect theocracy, gathering the adoration of zillions of followers from every corner of the universe.<br>Don\'t let it go to your head.</q>','Temple',8);
 		order=575;new Game.TieredUpgrade('Rabbit trick','Wizard towers are <b>twice</b> as efficient.<q>Using nothing more than a fancy top hat, your wizards have found a way to simultaneously curb rabbit population and produce heaps of extra Neuros for basically free!<br>Resulting Neuros may or may not be fit for vegans.</q>','Wizard tower',8);
 		order=600;new Game.TieredUpgrade('The final frontier','Shipments are <b>twice</b> as efficient.<q>It\'s been a long road, getting from there to here. It\'s all worth it though - the sights are lovely and the oil prices slightly more reasonable.</q>','Shipment',8);
@@ -8676,8 +8682,8 @@ Game.Launch=function()
 		Game.SynergyUpgrade('Quantum electronics','<q>Your machines won\'t even be sure if they\'re on or off!</q>','Factory','Antimatter condenser','synergy1');
 		Game.SynergyUpgrade('Temporal overclocking','<q>Introduce more quickitude in your system for increased speedation of fastness.</q>','Factory','Time machine','synergy2');
 		
-		Game.SynergyUpgrade('Contracts from beyond','<q>Make sure to read the fine print!</q>','Bank','Portal','synergy1');
-		Game.SynergyUpgrade('Printing presses','<q>Fake bills so real, they\'re almost worth the ink they\'re printed with.</q>','Bank','Factory','synergy2');
+		Game.SynergyUpgrade('Contracts from beyond','<q>Make sure to read the fine print!</q>','Gym','Portal','synergy1');
+		Game.SynergyUpgrade('Printing presses','<q>Fake bills so real, they\'re almost worth the ink they\'re printed with.</q>','Gym','Factory','synergy2');
 		
 		Game.SynergyUpgrade('Paganism','<q>Some deities are better left unworshipped.</q>','Temple','Portal','synergy1');
 		Game.SynergyUpgrade('God particle','<q>Turns out God is much tinier than we thought, I guess.</q>','Temple','Antimatter condenser','synergy2');
@@ -8689,7 +8695,7 @@ Game.Launch=function()
 		Game.SynergyUpgrade('Shipyards','<q>Where carpentry, blind luck, and asbestos insulation unite to produce the most dazzling spaceships on the planet.</q>','Shipment','Factory','synergy2');
 		
 		Game.SynergyUpgrade('Primordial ores','<q>Only when refining the purest metals will you extract the sweetest sap of the earth.</q>','Alchemy lab','Mining Rig','synergy1');
-		Game.SynergyUpgrade('Gold fund','<q>If gold is the backbone of the economy, Neuros, surely, are its hip joints.</q>','Alchemy lab','Bank','synergy2');
+		Game.SynergyUpgrade('Gold fund','<q>If gold is the backbone of the economy, Neuros, surely, are its hip joints.</q>','Alchemy lab','Gym','synergy2');
 		
 		Game.SynergyUpgrade('Infernal crops','<q>Sprinkle regularly with FIRE.</q>','Portal','Farm','synergy1');
 		Game.SynergyUpgrade('Abysmal glimmer','<q>Someone, or something, is staring back at you.<br>Perhaps at all of us.</q>','Portal','Prism','synergy2');
@@ -8697,7 +8703,7 @@ Game.Launch=function()
 		Game.SynergyUpgrade('Relativistic parsec-skipping','<q>People will tell you this isn\'t physically possible.<br>These are people you don\'t want on your ship.</q>','Time machine','Shipment','synergy1');
 		Game.SynergyUpgrade('Primeval glow','<q>From unending times, an ancient light still shines, impossibly pure and fragile in its old age.</q>','Time machine','Prism','synergy2');
 		
-		Game.SynergyUpgrade('Extra physics funding','<q>Time to put your money where your particle colliders are.</q>','Antimatter condenser','Bank','synergy1');
+		Game.SynergyUpgrade('Extra physics funding','<q>Time to put your money where your particle colliders are.</q>','Antimatter condenser','Gym','synergy1');
 		Game.SynergyUpgrade('Chemical proficiency','<q>Discover exciting new elements, such as Fleshmeltium, Inert Shampoo Byproduct #17 and Carbon++!</q>','Antimatter condenser','Alchemy lab','synergy2');
 		
 		Game.SynergyUpgrade('Light magic','<q>Actually not to be taken lightly! No, I\'m serious. 178 people died last year. You don\'t mess around with magic.</q>','Prism','Wizard tower','synergy1');
@@ -8812,7 +8818,7 @@ Game.Launch=function()
 		order=300;new Game.TieredUpgrade('Humane pesticides','Farms are <b>twice</b> as efficient.<q>Made by people, for people, from people and ready to unleash some righteous scorching pain on those pesky insects that so deserve it.</q>','Farm',9);
 		order=400;new Game.TieredUpgrade('Mole people','Mining Rigs are <b>twice</b> as efficient.<q>Engineered from real human beings within your very labs, these sturdy little folks have a knack for finding the tastiest underground minerals in conditions that more expensive machinery probably wouldn\'t survive.</q>','Mining Rig',9);
 		order=500;new Game.TieredUpgrade('Machine learning','Factories are <b>twice</b> as efficient.<q>You figured you might get better productivity if you actually told your workers to learn how to work the machines. Sometimes, it\'s the little things...</q>','Factory',9);
-		order=525;new Game.TieredUpgrade('Edible money','Banks are <b>twice</b> as efficient.<q>It\'s really quite simple; you make all currency too delicious not to eat, solving world hunger and inflation in one fell swoop!</q>','Bank',9);
+		order=525;new Game.TieredUpgrade('Edible money','Gyms are <b>twice</b> as efficient.<q>It\'s really quite simple; you make all currency too delicious not to eat, solving world hunger and inflation in one fell swoop!</q>','Gym',9);
 		order=550;new Game.TieredUpgrade('Sick rap prayers','Temples are <b>twice</b> as efficient.<q>With their ill beat and radical rhymes, these way-hip religious tunes are sure to get all the youngins who thought they were 2 cool 4 church back on the pews and praying for more! Wicked!</q>','Temple',9);
 		order=575;new Game.TieredUpgrade('Deluxe tailored wands','Wizard towers are <b>twice</b> as efficient.<q>In this age of science, most skillful wand-makers are now long gone; but thankfully - not all those wanders are lost.</q>','Wizard tower',9);
 		order=600;new Game.TieredUpgrade('Autopilot','Shipments are <b>twice</b> as efficient.<q>Your ships are now fitted with completely robotic crews! It\'s crazy how much money you save when you don\'t have to compensate the families of those lost in space.</q>','Shipment',9);
@@ -8922,7 +8928,7 @@ Game.Launch=function()
 		order=300;new Game.TieredUpgrade('Barnstars','Farms are <b>twice</b> as efficient.<q>Ah, yes. These help quite a bit. Somehow.</q>','Farm',10);
 		order=400;new Game.TieredUpgrade('Mining Rig canaries','Mining Rigs are <b>twice</b> as efficient.<q>These aren\'t used for anything freaky! The miners just enjoy having a pet or two down there.</q>','Mining Rig',10);
 		order=500;new Game.TieredUpgrade('Brownie point system','Factories are <b>twice</b> as efficient.<q>Oh, these are lovely! You can now reward your factory employees for good behavior, such as working overtime or snitching on coworkers. 58 brownie points gets you a little picture of a brownie, and 178 of those pictures gets you an actual brownie piece for you to do with as you please! Infantilizing? Maybe. Oodles of fun? You betcha!</q>','Factory',10);
-		order=525;new Game.TieredUpgrade('Grand supercycles','Banks are <b>twice</b> as efficient.<q>We let the public think these are complicated financial terms when really we\'re just rewarding the bankers with snazzy bicycles for a job well done. It\'s only natural after you built those fancy gold swimming pools for them, where they can take a dip and catch Kondratiev waves.</q>','Bank',10);
+		order=525;new Game.TieredUpgrade('Grand supercycles','Gyms are <b>twice</b> as efficient.<q>We let the public think these are complicated financial terms when really we\'re just rewarding the gymers with snazzy bicycles for a job well done. It\'s only natural after you built those fancy gold swimming pools for them, where they can take a dip and catch Kondratiev waves.</q>','Gym',10);
 		order=550;new Game.TieredUpgrade('Psalm-reading','Temples are <b>twice</b> as efficient.<q>A theologically dubious and possibly blasphemous blend of fortune-telling and scripture studies.</q>','Temple',10);
 		order=575;new Game.TieredUpgrade('Immobile spellcasting','Wizard towers are <b>twice</b> as efficient.<q>Wizards who master this skill can now cast spells without having to hop and skip and gesticulate embarrassingly, which is much sneakier and honestly quite a relief.</q>','Wizard tower',10);
 		order=600;new Game.TieredUpgrade('Restaurants at the end of the universe','Shipments are <b>twice</b> as efficient.<q>Since the universe is spatially infinite, and therefore can be construed to have infinite ends, you\'ve opened an infinite chain of restaurants where your space truckers can rest and partake in some home-brand Neuro-based meals.</q>','Shipment',10);
@@ -8967,7 +8973,7 @@ Game.Launch=function()
 		order=300;new Game.TieredUpgrade('Lindworms','Farms are <b>twice</b> as efficient.<q>You have to import these from far up north, but they really help areate the soil!</q>','Farm',11);
 		order=400;new Game.TieredUpgrade('Bore again','Mining Rigs are <b>twice</b> as efficient.<q>After extracting so much sediment for so long, you\'ve formed some veritable mountains of your own from the accumulated piles of rock and dirt. Time to dig through those and see if you find anything fun!</q>','Mining Rig',11);
 		order=500;new Game.TieredUpgrade('"Volunteer" interns','Factories are <b>twice</b> as efficient.<q>If you\'re bad at something, always do it for free.</q>','Factory',11);
-		order=525;new Game.TieredUpgrade('Rules of acquisition','Banks are <b>twice</b> as efficient.<q>Rule 387 : a Neuro baked is a Neuro kept.</q>','Bank',11);
+		order=525;new Game.TieredUpgrade('Rules of acquisition','Gyms are <b>twice</b> as efficient.<q>Rule 387 : a Neuro baked is a Neuro kept.</q>','Gym',11);
 		order=550;new Game.TieredUpgrade('War of the gods','Temples are <b>twice</b> as efficient.<q>An interesting game; the only winning move is not to pray.</q>','Temple',11);
 		order=575;new Game.TieredUpgrade('Electricity','Wizard towers are <b>twice</b> as efficient.<q>Ancient magicks and forbidden hexes shroud this arcane knowledge, whose unfathomable power can mysteriously turn darkness into light and shock an elephant to death.</q>','Wizard tower',11);
 		order=600;new Game.TieredUpgrade('Universal alphabet','Shipments are <b>twice</b> as efficient.<q>You\'ve managed to chart a language that can be understood by any sentient species in the galaxy; its exciting vocabulary contains over 56 trillion words that sound and look like sparkly burps, forming intricate sentences that usually translate to something like "give us your Neuros, or else".</q>','Shipment',11);
@@ -9069,7 +9075,7 @@ Game.Launch=function()
 		Game.NewUpgradeCookie({name:'One lone chocolate chip',desc:'The start of something beautiful.',icon:[27,30],require:'Box of not cookies',		power:1,price: Math.pow(10,42)});
 		
 		
-		new Game.Upgrade('Genius accounting','Unlocks <b>extra price information</b>.<br>Each displayed cost now specifies how long it\'ll take you to afford it, and how much of your bank it represents.<q>There\'s no accounting for taste, and yet here we are.</q>',2000000,[11,10]);Game.last.pool='prestige';Game.last.parents=['Inspired checklist'];
+		new Game.Upgrade('Genius accounting','Unlocks <b>extra price information</b>.<br>Each displayed cost now specifies how long it\'ll take you to afford it, and how much of your gym it represents.<q>There\'s no accounting for taste, and yet here we are.</q>',2000000,[11,10]);Game.last.pool='prestige';Game.last.parents=['Inspired checklist'];
 		
 		
 		new Game.Upgrade('Shimmering veil','Unlocks the <b>shimmering veil</b>, a switch that passively boosts your CpS by <b>50%</b>.<br>You start with the veil turned on; however, it is very fragile, and clicking the big Neuro or any golden Neuro or reindeer will turn it off, requiring 24 hours of CpS to turn back on.<q>Hands off!</q>',999999999,[9,10]);Game.last.pool='prestige';Game.last.parents=['Distilled essence of redoubled luck'];
@@ -9448,15 +9454,15 @@ Game.Launch=function()
 		}
 		
 		Game.thresholdIcons=[0,1,2,3,4,5,6,7,8,9,10,11,18,19,20,21,22,23,24,25,26,27,28,29,21,22,23,24,25,26,27,28,29,30];
-		Game.BankAchievements=[];
-		Game.BankAchievement=function(name)
+		Game.GymAchievements=[];
+		Game.GymAchievement=function(name)
 		{
-			var threshold=Math.pow(10,Math.floor(Game.BankAchievements.length*1.5+2));
-			if (Game.BankAchievements.length==0) threshold=1;
-			var achiev=new Game.Achievement(name,'Bake <b>'+Beautify(threshold)+'</b> Neuro'+(threshold==1?'':'s')+' in one ascension.',[Game.thresholdIcons[Game.BankAchievements.length],(Game.BankAchievements.length>23?2:5)]);
+			var threshold=Math.pow(10,Math.floor(Game.GymAchievements.length*1.5+2));
+			if (Game.GymAchievements.length==0) threshold=1;
+			var achiev=new Game.Achievement(name,'Bake <b>'+Beautify(threshold)+'</b> Neuro'+(threshold==1?'':'s')+' in one ascension.',[Game.thresholdIcons[Game.GymAchievements.length],(Game.GymAchievements.length>23?2:5)]);
 			achiev.threshold=threshold;
-			achiev.order=100+Game.BankAchievements.length*0.01;
-			Game.BankAchievements.push(achiev);
+			achiev.order=100+Game.GymAchievements.length*0.01;
+			Game.GymAchievements.push(achiev);
 			return achiev;
 		}
 		Game.CpsAchievements=[];
@@ -9476,22 +9482,22 @@ Game.Launch=function()
 		
 		var order=0;//this is used to set the order in which the items are listed
 		
-		Game.BankAchievement('Wake and bake');
-		Game.BankAchievement('Making some dough');
-		Game.BankAchievement('So baked right now');
-		Game.BankAchievement('Fledgling bakery');
-		Game.BankAchievement('Affluent bakery');
-		Game.BankAchievement('World-famous bakery');
-		Game.BankAchievement('Cosmic bakery');
-		Game.BankAchievement('Galactic bakery');
-		Game.BankAchievement('Universal bakery');
-		Game.BankAchievement('Timeless bakery');
-		Game.BankAchievement('Infinite bakery');
-		Game.BankAchievement('Immortal bakery');
-		Game.BankAchievement('Don\'t stop me now');
-		Game.BankAchievement('You can stop now');
-		Game.BankAchievement('Cookies all the way down');
-		Game.BankAchievement('Overdose');
+		Game.GymAchievement('Wake and bake');
+		Game.GymAchievement('Making some dough');
+		Game.GymAchievement('So baked right now');
+		Game.GymAchievement('Fledgling bakery');
+		Game.GymAchievement('Affluent bakery');
+		Game.GymAchievement('World-famous bakery');
+		Game.GymAchievement('Cosmic bakery');
+		Game.GymAchievement('Galactic bakery');
+		Game.GymAchievement('Universal bakery');
+		Game.GymAchievement('Timeless bakery');
+		Game.GymAchievement('Infinite bakery');
+		Game.GymAchievement('Immortal bakery');
+		Game.GymAchievement('Don\'t stop me now');
+		Game.GymAchievement('You can stop now');
+		Game.GymAchievement('Cookies all the way down');
+		Game.GymAchievement('Overdose');
 		
 		Game.CpsAchievement('Casual baking');
 		Game.CpsAchievement('Hardcore baking');
@@ -9778,11 +9784,11 @@ Game.Launch=function()
 	
 	
 		order=1425;
-		Game.TieredAchievement('Pretty penny','Have <b>1</b> bank.','Bank',1);
-		Game.TieredAchievement('Fit the bill','Have <b>50</b> banks.','Bank',2);
-		Game.TieredAchievement('A loan in the dark','Have <b>100</b> banks.','Bank',3);
-		Game.TieredAchievement('Need for greed','Have <b>150</b> banks.','Bank',4);
-		Game.TieredAchievement('It\'s the economy, stupid','Have <b>200</b> banks.','Bank',5);
+		Game.TieredAchievement('Pretty penny','Have <b>1</b> gym.','Gym',1);
+		Game.TieredAchievement('Fit the bill','Have <b>50</b> gyms.','Gym',2);
+		Game.TieredAchievement('A loan in the dark','Have <b>100</b> gyms.','Gym',3);
+		Game.TieredAchievement('Need for greed','Have <b>150</b> gyms.','Gym',4);
+		Game.TieredAchievement('It\'s the economy, stupid','Have <b>200</b> gyms.','Gym',5);
 		order=1450;
 		Game.TieredAchievement('Your time to shrine','Have <b>1</b> temple.','Temple',1);
 		Game.TieredAchievement('Shady sect','Have <b>50</b> temples.','Temple',2);
@@ -9797,7 +9803,7 @@ Game.Launch=function()
 		Game.TieredAchievement('Magic kingdom','Have <b>200</b> wizard towers.','Wizard tower',5);
 		
 		order=1445;
-		Game.ProductionAchievement('Vested interest','Bank',1);
+		Game.ProductionAchievement('Vested interest','Gym',1);
 		order=1470;
 		Game.ProductionAchievement('New world order','Temple',1);
 		order=1495;
@@ -9816,7 +9822,7 @@ Game.Launch=function()
 		order=1420;
 		Game.ProductionAchievement('Yes I love technology','Factory',2);
 		order=1445;
-		Game.ProductionAchievement('Paid in full','Bank',2);
+		Game.ProductionAchievement('Paid in full','Gym',2);
 		order=1470;
 		Game.ProductionAchievement('Church of Cookiology','Temple',2);
 		order=1495;
@@ -9854,7 +9860,7 @@ Game.Launch=function()
 		order=1200;Game.TieredAchievement('Gardener extraordinaire','Have <b>250</b> farms.','Farm',6);
 		order=1300;Game.TieredAchievement('Tectonic ambassador','Have <b>250</b> mines.','Mining Rig',6);
 		order=1400;Game.TieredAchievement('Rise of the machines','Have <b>250</b> factories.','Factory',6);
-		order=1425;Game.TieredAchievement('Acquire currency','Have <b>250</b> banks.','Bank',6);
+		order=1425;Game.TieredAchievement('Acquire currency','Have <b>250</b> gyms.','Gym',6);
 		order=1450;Game.TieredAchievement('Zealotry','Have <b>250</b> temples.','Temple',6);
 		order=1475;Game.TieredAchievement('The wizarding world','Have <b>250</b> wizard towers.','Wizard tower',6);
 		order=1500;Game.TieredAchievement('Parsec-masher','Have <b>250</b> shipments.','Shipment',6);
@@ -9867,14 +9873,14 @@ Game.Launch=function()
 		order=25000;
 		new Game.Achievement('Here be dragon','Complete your <b>dragon\'s training</b>.',[21,12]);
 		
-		Game.BankAchievement('How?');
-		Game.BankAchievement('The land of milk and cookies');
-		Game.BankAchievement('He who controls the cookies controls the universe');Game.last.baseDesc+='<q>The milk must flow!</q>';Game.last.desc=BeautifyInText(Game.last.baseDesc);
-		Game.BankAchievement('Tonight on Hoarders');
-		Game.BankAchievement('Are you gonna eat all that?');
-		Game.BankAchievement('We\'re gonna need a bigger bakery');
-		Game.BankAchievement('In the mouth of madness');Game.last.baseDesc+='<q>A Neuro is just what we tell each other it is.</q>';Game.last.desc=BeautifyInText(Game.last.baseDesc);
-		Game.BankAchievement('Brought to you by the letter <div style="display:inline-block;background:url(img/money.png);width:16px;height:16px;"></div>');
+		Game.GymAchievement('How?');
+		Game.GymAchievement('The land of milk and cookies');
+		Game.GymAchievement('He who controls the cookies controls the universe');Game.last.baseDesc+='<q>The milk must flow!</q>';Game.last.desc=BeautifyInText(Game.last.baseDesc);
+		Game.GymAchievement('Tonight on Hoarders');
+		Game.GymAchievement('Are you gonna eat all that?');
+		Game.GymAchievement('We\'re gonna need a bigger bakery');
+		Game.GymAchievement('In the mouth of madness');Game.last.baseDesc+='<q>A Neuro is just what we tell each other it is.</q>';Game.last.desc=BeautifyInText(Game.last.baseDesc);
+		Game.GymAchievement('Brought to you by the letter <div style="display:inline-block;background:url(img/money.png);width:16px;height:16px;"></div>');
 	
 	
 		Game.CpsAchievement('A world filled with cookies');
@@ -9914,7 +9920,7 @@ Game.Launch=function()
 		order=1200;Game.TieredAchievement('Seedy business','Have <b>300</b> farms.','Farm',7);
 		order=1300;Game.TieredAchievement('Freak fracking','Have <b>300</b> mines.','Mining Rig',7);
 		order=1400;Game.TieredAchievement('Modern times','Have <b>300</b> factories.','Factory',7);
-		order=1425;Game.TieredAchievement('The nerve of war','Have <b>300</b> banks.','Bank',7);
+		order=1425;Game.TieredAchievement('The nerve of war','Have <b>300</b> gyms.','Gym',7);
 		order=1450;Game.TieredAchievement('Wololo','Have <b>300</b> temples.','Temple',7);
 		order=1475;Game.TieredAchievement('And now for my next trick, I\'ll need a volunteer from the audience','Have <b>300</b> wizard towers.','Wizard tower',7);
 		order=1500;Game.TieredAchievement('It\'s not delivery','Have <b>300</b> shipments.','Shipment',7);
@@ -9952,13 +9958,13 @@ Game.Launch=function()
 		Game.CpsAchievement('The proof of the cookie is in the baking');Game.last.baseDesc+='<q>How can you have any Neuros if you don\'t bake your dough?</q>';Game.last.desc=BeautifyInText(Game.last.baseDesc);
 		Game.CpsAchievement('If it\'s worth doing, it\'s worth overdoing');
 		
-		Game.BankAchievement('The dreams in which I\'m baking are the best I\'ve ever had');
-		Game.BankAchievement('Set for life');
+		Game.GymAchievement('The dreams in which I\'m baking are the best I\'ve ever had');
+		Game.GymAchievement('Set for life');
 		
 		order=1200;Game.TieredAchievement('You and the beanstalk','Have <b>350</b> farms.','Farm',8);
 		order=1300;Game.TieredAchievement('Romancing the stone','Have <b>350</b> mines.','Mining Rig',8);
 		order=1400;Game.TieredAchievement('Ex machina','Have <b>350</b> factories.','Factory',8);
-		order=1425;Game.TieredAchievement('And I need it now','Have <b>350</b> banks.','Bank',8);
+		order=1425;Game.TieredAchievement('And I need it now','Have <b>350</b> gyms.','Gym',8);
 		order=1450;Game.TieredAchievement('Pray on the weak','Have <b>350</b> temples.','Temple',8);
 		order=1475;Game.TieredAchievement('It\'s a kind of magic','Have <b>350</b> wizard towers.','Wizard tower',8);
 		order=1500;Game.TieredAchievement('Make it so','Have <b>350</b> shipments.','Shipment',8);
@@ -9981,7 +9987,7 @@ Game.Launch=function()
 		order=1420;
 		Game.ProductionAchievement('Labor of love','Factory',3);
 		order=1445;
-		Game.ProductionAchievement('Reverse funnel system','Bank',3);
+		Game.ProductionAchievement('Reverse funnel system','Gym',3);
 		order=1470;
 		Game.ProductionAchievement('Thus spoke you','Temple',3);
 		order=1495;
@@ -10010,7 +10016,7 @@ Game.Launch=function()
 		order=1420;
 		new Game.Achievement('Patently genius','Reach level <b>10</b> factories.',[4,26]);Game.Objects['Factory'].levelAchiev10=Game.last;
 		order=1445;
-		new Game.Achievement('A capital idea','Reach level <b>10</b> banks.',[15,26]);Game.Objects['Bank'].levelAchiev10=Game.last;
+		new Game.Achievement('A capital idea','Reach level <b>10</b> gyms.',[15,26]);Game.Objects['Gym'].levelAchiev10=Game.last;
 		order=1470;
 		new Game.Achievement('It belongs in a bakery','Reach level <b>10</b> temples.',[16,26]);Game.Objects['Temple'].levelAchiev10=Game.last;
 		order=1495;
@@ -10065,7 +10071,7 @@ Game.Launch=function()
 		order=1200;Game.TieredAchievement('Harvest moon','Have <b>400</b> farms.','Farm',9);
 		order=1300;Game.TieredAchievement('Mining Rig?','Have <b>400</b> mines.','Mining Rig',9);
 		order=1400;Game.TieredAchievement('In full gear','Have <b>400</b> factories.','Factory',9);
-		order=1425;Game.TieredAchievement('Treacle tart economics','Have <b>400</b> banks.','Bank',9);
+		order=1425;Game.TieredAchievement('Treacle tart economics','Have <b>400</b> gyms.','Gym',9);
 		order=1450;Game.TieredAchievement('Holy cookies, grandma!','Have <b>400</b> temples.','Temple',9);
 		order=1475;Game.TieredAchievement('The Prestige','Have <b>400</b> wizard towers.<q>(Unrelated to the Neuro Clicker feature of the same name.)</q>','Wizard tower',9);
 		order=1500;Game.TieredAchievement('That\'s just peanuts to space','Have <b>400</b> shipments.','Shipment',9);
@@ -10079,7 +10085,7 @@ Game.Launch=function()
 		order=1200;Game.TieredAchievement('Make like a tree','Have <b>450</b> farms.','Farm',10);
 		order=1300;Game.TieredAchievement('Cave story','Have <b>450</b> mines.','Mining Rig',10);
 		order=1400;Game.TieredAchievement('In-cog-neato','Have <b>450</b> factories.','Factory',10);
-		order=1425;Game.TieredAchievement('Save your breath because that\'s all you\'ve got left','Have <b>450</b> banks.','Bank',10);
+		order=1425;Game.TieredAchievement('Save your breath because that\'s all you\'ve got left','Have <b>450</b> gyms.','Gym',10);
 		order=1450;Game.TieredAchievement('Vengeful and almighty','Have <b>450</b> temples.','Temple',10);
 		order=1475;Game.TieredAchievement('Spell it out for you','Have <b>450</b> wizard towers.','Wizard tower',10);
 		order=1500;Game.TieredAchievement('Space space space space space','Have <b>450</b> shipments.<q>It\'s too far away...</q>','Shipment',10);
@@ -10100,10 +10106,10 @@ Game.Launch=function()
 		Game.CpsAchievement('Push it to the limit');
 		Game.CpsAchievement('Green cookies sleep furiously');
 		
-		Game.BankAchievement('Panic! at Nabisco');
-		Game.BankAchievement('Bursting at the seams');
-		Game.BankAchievement('Just about full');
-		Game.BankAchievement('Hungry for more');
+		Game.GymAchievement('Panic! at Nabisco');
+		Game.GymAchievement('Bursting at the seams');
+		Game.GymAchievement('Just about full');
+		Game.GymAchievement('Hungry for more');
 		
 		order=1000;
 		new Game.Achievement('All the other kids with the pumped up clicks','Make <b>100,000,000,000,000,000,000,000</b> Neuros from clicking.',[11,28]);
@@ -10127,8 +10133,8 @@ Game.Launch=function()
 		Game.CpsAchievement('Leisurely pace');
 		Game.CpsAchievement('Hypersonic');
 		
-		Game.BankAchievement('Feed me, Orteil');
-		Game.BankAchievement('And then what?');
+		Game.GymAchievement('Feed me, Orteil');
+		Game.GymAchievement('And then what?');
 		
 		order=7002;
 		new Game.Achievement('Tricentennial and a half','Have at least <b>350 of everything</b>.<q>(it\'s free real estate)</q>',[21,26]);
@@ -10152,7 +10158,7 @@ Game.Launch=function()
 		order=1200;Game.TieredAchievement('Sharpest tool in the shed','Have <b>500</b> farms.','Farm',11);
 		order=1300;Game.TieredAchievement('Hey now, you\'re a rock','Have <b>500</b> mines.','Mining Rig',11);
 		order=1400;Game.TieredAchievement('Break the mold','Have <b>500</b> factories.','Factory',11);
-		order=1425;Game.TieredAchievement('Get the show on, get paid','Have <b>500</b> banks.','Bank',11);
+		order=1425;Game.TieredAchievement('Get the show on, get paid','Have <b>500</b> gyms.','Gym',11);
 		order=1450;Game.TieredAchievement('My world\'s on fire, how about yours','Have <b>500</b> temples.','Temple',11);
 		order=1475;Game.TieredAchievement('The meteor men beg to differ','Have <b>500</b> wizard towers.','Wizard tower',11);
 		order=1500;Game.TieredAchievement('Only shooting stars','Have <b>500</b> shipments.','Shipment',11);
@@ -10184,7 +10190,7 @@ Game.Launch=function()
 		new Game.Achievement('Sierpinski rhomboids','Reach level <b>10</b> fractal engines.',[20,26]);Game.Objects['Fractal engine'].levelAchiev10=Game.last;
 		
 		Game.CpsAchievement('Gotta go fast');
-		Game.BankAchievement('I think it\'s safe to say you\'ve got it made');
+		Game.GymAchievement('I think it\'s safe to say you\'ve got it made');
 		
 		order=6000;
 		new Game.Achievement('Renaissance baker','Own <b>400</b> upgrades and <b>4000</b> buildings.<q>If you have seen further, it is by standing on the shoulders of giants - a mysterious species of towering humanoids until now thought long-extinct.</q>',[10,10]);
@@ -11134,9 +11140,9 @@ Game.Launch=function()
 				buy:function(){Game.Objects['Factory'].sacrifice(100);},
 				costStr:function(){return '100 factories';}},
 			{name:'Krumblor, Neuro dragon',action:'Train Fierce Hoarder<br><small>Aura : all buildings are 2% cheaper</small>',pic:5,
-				cost:function(){return Game.Objects['Bank'].amount>=100;},
-				buy:function(){Game.Objects['Bank'].sacrifice(100);},
-				costStr:function(){return '100 banks';}},
+				cost:function(){return Game.Objects['Gym'].amount>=100;},
+				buy:function(){Game.Objects['Gym'].sacrifice(100);},
+				costStr:function(){return '100 gyms';}},
 			{name:'Krumblor, Neuro dragon',action:'Train Dragon God<br><small>Aura : prestige CpS bonus +5%</small>',pic:5,
 				cost:function(){return Game.Objects['Temple'].amount>=100;},
 				buy:function(){Game.Objects['Temple'].sacrifice(100);},
@@ -12602,9 +12608,9 @@ Game.Launch=function()
 					if (Game.Has('Heavenly key')) Game.Win('Wholesome');
 				}
 			
-				for (var i in Game.BankAchievements)
+				for (var i in Game.GymAchievements)
 				{
-					if (Game.cookiesEarned>=Game.BankAchievements[i].threshold) Game.Win(Game.BankAchievements[i].name);
+					if (Game.cookiesEarned>=Game.GymAchievements[i].threshold) Game.Win(Game.GymAchievements[i].name);
 				}
 				
 				var buildingsOwned=0;
