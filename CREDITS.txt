@@ -1,7 +1,8 @@
-Putting things together, technical management -Superbox
-Some art (mainly borders and the big coin) and original idea -Sandro
-Javascript -Velineste
-Icons and art -Xodabeef
-Zekava -some additional art
+Superbox- Putting things together, technical management 
+Sandro- Some art (mainly borders and the big coin) and original idea 
+Velineste- Code 
+Xodabeef- Art, some code, release packaging, change logging
+Zekava -Some additional art
+Promote -Web version and domain hosting
 
 Neuro-Sama: https://www.twitch.tv/vedal987
