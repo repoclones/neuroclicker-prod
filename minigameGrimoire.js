@@ -11,9 +11,9 @@ M.launch=function()
 		
 		M.spells={
 			'conjure baked goods':{
-				name:'Conjure Valuable Metals',
-				desc:'Summon half an hour worth of your NpS, capped at 15% of your Neuros owned.',
-				failDesc:'Trigger a 15-minute clot and lose 15 minutes of NpS.',
+				name:'Conjure Baked Goods',
+				desc:'Summon half an hour worth of your CpS, capped at 15% of your cookies owned.',
+				failDesc:'Trigger a 15-minute clot and lose 15 minutes of CpS.',
 				icon:[21,11],
 				costMin:2,
 				costPercent:0.4,
@@ -21,8 +21,8 @@ M.launch=function()
 				{
 					var val=Math.max(7,Math.min(Game.cookies*0.15,Game.cookiesPs*60*30));
 					Game.Earn(val);
-					Game.Notify('Conjure Valuable Metals!','You magic <b>'+Beautify(val)+' Neuro'+(val==1?'':'s')+'</b> out of thin air.',[21,11],6);
-					Game.Popup('<div style="font-size:80%;">+'+Beautify(val)+' Neuro'+(val==1?'':'s')+'!</div>',Game.mouseX,Game.mouseY);
+					Game.Notify('Conjure baked goods!','You magic <b>'+Beautify(val)+' cookie'+(val==1?'':'s')+'</b> out of thin air.',[21,11],6);
+					Game.Popup('<div style="font-size:80%;">+'+Beautify(val)+' cookie'+(val==1?'':'s')+'!</div>',Game.mouseX,Game.mouseY);
 				},
 				fail:function()
 				{
@@ -31,13 +31,13 @@ M.launch=function()
 					val=Math.min(Game.cookies,val);
 					Game.Spend(val);
 					Game.Notify(buff.name,buff.desc,buff.icon,6);
-					Game.Popup('<div style="font-size:80%;">Backfire!<br>Summoning failed! Lost '+Beautify(val)+' Neuro'+(val==1?'':'s')+'!</div>',Game.mouseX,Game.mouseY);
+					Game.Popup('<div style="font-size:80%;">Backfire!<br>Summoning failed! Lost '+Beautify(val)+' cookie'+(val==1?'':'s')+'!</div>',Game.mouseX,Game.mouseY);
 				},
 			},
 			'hand of fate':{
 				name:'Force the Hand of Fate',
-				desc:'Summon a random golden Neuro. Each existing golden Neuro makes this spell +15% more likely to backfire.',
-				failDesc:'Summon an unlucky wrath Neuro.',
+				desc:'Summon a random golden cookie. Each existing golden cookie makes this spell +15% more likely to backfire.',
+				failDesc:'Summon an unlucky wrath cookie.',
 				icon:[22,11],
 				costMin:10,
 				costPercent:0.6,
@@ -51,7 +51,7 @@ M.launch=function()
 					var choices=[];
 					choices.push('frenzy','multiply cookies');
 					if (!Game.hasBuff('Dragonflight')) choices.push('click frenzy');
-					if (Math.random()<0.1) choices.push('chain Neuro','Neuro storm','blab');
+					if (Math.random()<0.1) choices.push('chain cookie','cookie storm','blab');
 					if (Game.BuildingsOwned>=10 && Math.random()<0.25) choices.push('building special');
 					//if (Math.random()<0.2) choices.push('clot','cursed finger','ruin cookies');
 					if (Math.random()<0.15) choices=['cookie storm drop'];
@@ -113,7 +113,7 @@ M.launch=function()
 			},
 			'spontaneous edifice':{
 				name:'Spontaneous Edifice',
-				desc:'The spell picks a random building you could afford if you had twice your current Neuros, and gives it to you for free. The building selected must be under 400, and cannot be your most-built one (unless it is your only one).',
+				desc:'The spell picks a random building you could afford if you had twice your current cookies, and gives it to you for free. The building selected must be under 400, and cannot be your most-built one (unless it is your only one).',
 				failDesc:'Lose a random building.',
 				icon:[24,11],
 				costMin:20,
