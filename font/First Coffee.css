@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'First Coffee';
+    src: url('fonts/First-Coffee.eot');
+    src: url('fonts/First-Coffee.eot?#iefix') format('embedded-opentype'),
+         url('fonts/First-Coffee.woff2') format('woff2'),
+         url('fonts/First-Coffee.woff') format('woff'),
+         url('fonts/First-Coffee.ttf')  format('truetype'),
+         url('fonts/First-Coffee.svg#First Coffee') format('svg');
+}
