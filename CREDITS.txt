@@ -1,8 +1,10 @@
-Putting things together, technical management -Superbox
+Putting things together, technical management, now also JS I guess -Superbox
 Some art (mainly borders and the big coin) and original idea -Sandro
-Javascript -Velineste
+Javascript -Velineste (note: I don't think they actually did any JS)
 Icons and art -Xodabeef
 Zekava -some additional art
 Promote -web version and domain hosting
 
 Neuro-Sama: https://www.twitch.tv/vedal987
+
+//Note: this credits file appears quite outdated

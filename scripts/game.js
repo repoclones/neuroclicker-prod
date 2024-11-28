@@ -4,18 +4,21 @@ GAME INITIALIZATION
 import {BETA, VERSION} from "./constants.js";
 import {chooseRandomElement, elementByID, replaceAll} from "./helpers.js";
 import {Loader} from "./loader.js";
-import { AddEvent } from "./addEvent.js";
+import {AddEvent} from "./addEvent.js";
 import {saveAs} from "./saveAs.js";
 import {b64_to_utf8, utf8_to_b64} from "./stringConverters.js";
 import {Timer} from "./timer.js";
 import {Pic} from "./pic.js";
 import {PlaySound} from "./playSound.js";
-import {pack, unpack, unpack2, pack3} from "./packing.js";
+import {pack3, unpack, unpack2} from "./packing.js";
 
 export const Game = {};
 
+//Object.defineProperty(Math, 'random', { writable: false });
+//Object.defineProperty(Math, 'floor', { writable: false });
+
 const beautifyInTextFilter = /((\d+,*)+)/g;//new regex
-const a = /\d\d?\d?(?:,\d\d\d)*/g;//old regex
+//const a = /\d\d?\d?(?:,\d\d\d)*/g;//old regex
 
 const formatLong = [' thousand', ' million', ' billion', ' trillion', ' quadrillion', ' quintillion', ' sextillion', ' septillion', ' octillion', ' nonillion'];
 let prefixes = ['', 'un', 'duo', 'tre', 'quattuor', 'quin', 'sex', 'septen', 'octo', 'novem'];
@@ -159,8 +162,8 @@ Game.Launch = function () {
         'or the <a href="http://cookieclicker.wikia.com/wiki/Cookie_Clicker_Wiki" target="_blank">wiki</a>.</div>' +
         '<div class="listing">News and teasers are usually posted on my <a href="http://orteil42.tumblr.com/" target="_blank">tumblr</a> and <a href="http://twitter.com/orteil42" target="_blank">twitter</a>.</div>' +
         '<div class="listing" id="supportSection"><b style="color:#fff;opacity:1;">Cookie Clicker is 100% free, forever.</b> Want to support us so we can keep developing games? Here\'s some ways you can help :<div style="margin:4px 12px;line-height:150%;">' +
-        '<br>&bull; support us on <a href="https://www.patreon.com/dashnet" target="_blank" class="highlightHover" style="background:#f86754;box-shadow:0px 0px 0px 1px #c52921 inset,0px 2px 0px #ff966d inset;text-shadow:0px -1px 0px #ff966d,0px 1px 0px #c52921;text-decoration:none;color:#fff;font-weight:bold;padding:1px 4px;">Patreon</a> <span style="opacity:0.5;">(there\'s perks!)</span>' +
-        '<br>&bull; <form target="_blank" action="https://www.paypal.com/cgi-bin/webscr" method="post" id="donate"><input type="hidden" name="cmd" value="_s-xclick"><input type="hidden" name="hosted_button_id" value="BBN2WL3TC6QH4"><input type="submit" id="donateButton" value="donate" name="submit" alt="PayPal — The safer, easier way to pay online."><img alt="" border="0" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1" height="1"></form> to our PayPal' +
+        '<br>&bull; support us on <a href="https://www.patreon.com/dashnet" target="_blank" class="highlightHover" style="background:#f86754;box-shadow:0 0 0 1px #c52921 inset,0 2px 0 #ff966d inset;text-shadow:0 -1px 0 #ff966d,0 1px 0 #c52921;text-decoration:none;color:#fff;font-weight:bold;padding:1px 4px;">Patreon</a> <span style="opacity:0.5;">(there\'s perks!)</span>' +
+        '<br>&bull; <form target="_blank" action="https://www.paypal.com/cgi-bin/webscr" method="post" id="donate"><input type="hidden" name="cmd" value="_s-xclick"><input type="hidden" name="hosted_button_id" value="BBN2WL3TC6QH4"><input type="submit" id="donateButton" value="donate" name="submit" alt="PayPal — The safer, easier way to pay online."><img alt="" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1" height="1"></form> to our PayPal' +
         '<br>&bull; disable your adblocker<br>&bull; check out our <a href="http://www.redbubble.com/people/dashnet" target="_blank">rad cookie shirts, hoodies and stickers</a>!<br>&bull; (if you want!)</div></div>' +
         '<div class="listing warning">Note : if you find a new bug after an update and you\'re using a 3rd-party add-on, make sure it\'s not just your add-on causing it!</div>' +
         '<div class="listing warning">Warning : clearing your browser cache or cookies <small>(what else?)</small> will result in your save being wiped. Export your save and back it up first!</div>' +
@@ -364,6 +367,7 @@ Game.Launch = function () {
 
 
     Game.Init = function () {
+        let i;
         let me;
         Game.ready = 1;
 
@@ -389,10 +393,7 @@ Game.Launch = function () {
         if (Game.beta) Game.SaveTo = 'CookieClickerGameBeta';
         elementByID('versionNumber').innerHTML = 'v. ' + Game.version + (Game.beta ? ' <span style="color:#ff0;">Modified (Nwero Clicker v7_17)</span>' : '');
 
-        if (Game.beta) {
-            me = elementByID('linkVersionBeta');
-            me.parentNode.removeChild(me);
-        } else if (Game.version === 1.0466) {
+        if (Game.version === 1.0466) {
             me = elementByID('linkVersionOld');
             me.parentNode.removeChild(me);
         } else {
@@ -455,9 +456,9 @@ Game.Launch = function () {
         Game.lumpRefill = 0;//time when we last used a sugar lump (on minigame refills etc)
 
         Game.makeSeed = function () {
-            var chars = 'abcdefghijklmnopqrstuvwxyz'.split('');
-            var str = '';
-            for (var i = 0; i < 5; i++) {
+            const chars = 'abcdefghijklmnopqrstuvwxyz'.split('');
+            let str = '';
+            for (let i = 0; i < 5; i++) {
                 str += chooseRandomElement(chars);
             }
             return str;
@@ -494,7 +495,7 @@ Game.Launch = function () {
         Game.windowW = window.innerWidth;
         Game.windowH = window.innerHeight;
 
-        window.addEventListener('resize', function (event) {
+        window.addEventListener('resize', function () {
             Game.windowW = window.innerWidth;
             Game.windowH = window.innerHeight;
 
@@ -890,7 +891,7 @@ Game.Launch = function () {
             else {
                 if (Game.heralds === 0) str += 'There are no heralds at the moment. Please consider <b style="color:#bc3aff;">donating to our Patreon</b>!';
                 else {
-                    str += (Game.heralds === 1 ? '<b style="color:#bc3aff;text-shadow:0px 1px 0px #6d0096;">1 herald</b> is' : '<b style="color:#fff;text-shadow:0px 1px 0px #6d0096,0px 0px 6px #bc3aff;">' + Game.heralds + ' heralds</b> are') + ' selflessly inspiring a boost in production for everyone, resulting in<br><b style="color:#cdaa89;text-shadow:0px 1px 0px #7c4532,0px 0px 6px #7c4532;"><div style="width:16px;height:16px;display:inline-block;vertical-align:middle;background:url(img/money.png);"></div> +' + Game.heralds + '% Neuros per second</b>.';
+                    str += (Game.heralds === 1 ? '<b style="color:#bc3aff;text-shadow:0px 1px 0px #6d0096;">1 herald</b> is' : '<b style="color:#fff;text-shadow:0px 1px 0px #6d0096,0px 0px 6px #bc3aff;">' + Game.heralds + ' heralds</b> are') + ' selflessly inspiring a boost in production for everyone, resulting in<br><b style="color:#cdaa89;text-shadow:0px 1px 0px #7c4532,0px 0px 6px #7c4532;"><div style="width:16px;height:16px;display:inline-block;vertical-align:middle;background:url(/img/money.png);"></div> +' + Game.heralds + '% Neuros per second</b>.';
                     str += '<div class="line"></div>';
                     if (Game.ascensionMode === 1) str += 'You are in a <b>Born again</b> run, and are not currently benefiting from heralds.';
                     else if (Game.Has('Heralds')) str += 'You own the <b>Heralds</b> upgrade, and therefore benefit from the production boost.';
@@ -899,7 +900,7 @@ Game.Launch = function () {
             }
             str += '<div class="line"></div><span style="font-size:90%;opacity:0.6;"><b>Heralds</b> are people who have donated to our highest Patreon tier, and are limited to 100.<br>Each herald gives everyone +1% CpS.<br>Heralds benefit everyone playing the game, regardless of whether you donated.</span>';
 
-            str += '<div style="width:31px;height:39px;background:url(img/heraldFlag.png);position:absolute;top:0px;left:8px;"></div><div style="width:31px;height:39px;background:url(img/heraldFlag.png);position:absolute;top:0px;right:8px;"></div>';
+            str += '<div style="width:31px;height:39px;background:url(/img/heraldFlag.png);position:absolute;top:0px;left:8px;"></div><div style="width:31px;height:39px;background:url(/img/heraldFlag.png);position:absolute;top:0px;right:8px;"></div>';
 
             return '<div style="padding:8px;width:300px;text-align:center;" class="prompt"><h3>Heralds</h3><div class="block">' + str + '</div></div>';
         }, 'this');
@@ -911,7 +912,7 @@ Game.Launch = function () {
 
         Game.useLocalStorage = 1;
         Game.localStorageGet = function (key) {
-            var local = 0;
+            let local = 0;
             try {
                 local = window.localStorage.getItem(key);
             } catch (exception) {
@@ -919,12 +920,10 @@ Game.Launch = function () {
             return local;
         }
         Game.localStorageSet = function (key, str) {
-            var local = 0;
             try {
-                local = window.localStorage.setItem(key, str);
+                window.localStorage.setItem(key, str);
             } catch (exception) {
             }
-            return local;
         }
         //window.localStorage.clear();//won't switch back to cookie-based if there is localStorage info
 
@@ -947,15 +946,15 @@ Game.Launch = function () {
 
         Game.FileSave = function () {
             Game.prefs.showBackupWarning = 0;
-            var filename = Game.bakeryName.replace(/[^a-zA-Z0-9]+/g, '') + 'Bakery';
-            var text = Game.WriteSave(1);
-            var blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
+            const filename = Game.bakeryName.replace(/[^a-zA-Z0-9]+/g, '') + 'Bakery';
+            const text = Game.WriteSave(1);
+            const blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
             saveAs(blob, filename + '.txt');
         }
         Game.FileLoad = function (e) {
             if (e.target.files.length === 0) return false;
-            var file = e.target.files[0];
-            var reader = new FileReader();
+            const file = e.target.files[0];
+            const reader = new FileReader();
             reader.onload = function (e) {
                 Game.ImportSaveCode(e.target.result);
             }
@@ -964,10 +963,12 @@ Game.Launch = function () {
 
         Game.toSave = false;
         Game.WriteSave = function (type) {
+            let me;
+            let i;
             Game.toSave = false;
             //type : none is default, 1=return string only, 2=return uncompressed string, 3=return uncompressed, commented string
             Game.lastDate = parseInt(Game.time);
-            var str = '';
+            let str = '';
             if (type === 3) str += '\nGame version\n';
             str += Game.version + '|';
             str += '|';//just in case we need some more stuff here
@@ -980,7 +981,7 @@ Game.Launch = function () {
                 (type === 3 ? '\n	seed : ' : '') + (Game.seed) +
                 '|';
             if (type === 3) str += '\n\nPacked preferences bitfield\n	';
-            var str2 =//prefs
+            let str2 =//prefs
                 (Game.prefs.particles ? '1' : '0') +
                 (Game.prefs.numbers ? '1' : '0') +
                 (Game.prefs.autosave ? '1' : '0') +
@@ -1057,9 +1058,9 @@ Game.Launch = function () {
                 '|';//cookies and lots of other stuff
 
             if (type === 3) str += '\n\nBuildings : amount, bought, Neuros produced, level, minigame data';
-            for (var i in Game.Objects)//buildings
+            for (i in Game.Objects)//buildings
             {
-                var me = Game.Objects[i];
+                me = Game.Objects[i];
                 if (type === 3) str += '\n	' + me.name + ' : ';
                 if (me.vanilla) {
                     str += me.amount + ',' + me.bought + ',' + parseFloat(Math.floor(me.totalCookies)) + ',' + parseInt(me.level);
@@ -1070,23 +1071,22 @@ Game.Launch = function () {
             }
             str += '|';
             if (type === 3) str += '\n\nPacked upgrades bitfield (unlocked and bought)\n	';
-            var toCompress = [];
-            for (var i in Game.UpgradesById)//upgrades
+            let toCompress = [];
+            for (i in Game.UpgradesById)//upgrades
             {
-                var me = Game.UpgradesById[i];
+                me = Game.UpgradesById[i];
                 if (me.vanilla) toCompress.push(Math.min(me.unlocked, 1), Math.min(me.bought, 1));
             }
-            ;
 
             toCompress = pack3(toCompress.join(''));//toCompress=pack(toCompress);//CompressLargeBin(toCompress);
 
             str += toCompress;
             str += '|';
             if (type === 3) str += '\n\nPacked achievements bitfield (won)\n	';
-            var toCompress = [];
-            for (var i in Game.AchievementsById)//achievements
+            toCompress = [];
+            for (i in Game.AchievementsById)//achievements
             {
-                var me = Game.AchievementsById[i];
+                me = Game.AchievementsById[i];
                 if (me.vanilla) toCompress.push(Math.min(me.won));
             }
             toCompress = pack3(toCompress.join(''));//toCompress=pack(toCompress);//CompressLargeBin(toCompress);
@@ -1094,8 +1094,8 @@ Game.Launch = function () {
 
             str += '|';
             if (type === 3) str += '\n\nBuffs : type, maxTime, time, arg1, arg2, arg3';
-            for (var i in Game.buffs) {
-                var me = Game.buffs[i];
+            for (i in Game.buffs) {
+                me = Game.buffs[i];
                 if (me.type) {
                     if (type === 3) str += '\n	' + me.type.name + ' : ';
                     if (me.type.vanilla) {
@@ -1111,14 +1111,14 @@ Game.Launch = function () {
 
             if (type === 3) str += '\n';
 
-            for (var i in Game.customSave) {
+            for (i in Game.customSave) {
                 Game.customSave[i]();
             }
 
             if (type === 2 || type === 3) {
                 return str;
             } else if (type === 1) {
-                str = escape(utf8_to_b64(str) + '!END!');
+                str = encodeURIComponent(utf8_to_b64(str) + '!END!');
                 return str;
             } else {
                 if (Game.useLocalStorage) {
@@ -1127,12 +1127,14 @@ Game.Launch = function () {
                     //a moment of silence for our fallen puns
 
                     //Since this is Neuro Clicker now, that pun doesn't make sense, therefore this comment is useless, maybe it should delete it...
+
+                    //I'm finding some very silly stuff back here
                     str = utf8_to_b64(str) + '!END!';
                     if (str.length < 10) {
                         if (Game.prefs.popups) Game.Popup('Error while saving.<br>Purchasing an upgrade might fix this.');
                         else Game.Notify('Saving failed!', 'Purchasing an upgrade and saving again might fix this.<br>This really shouldn\'t happen; please notify us in the neuro clicker thread.');
                     } else {
-                        str = escape(str);
+                        str = encodeURIComponent(str);
                         Game.localStorageSet(Game.SaveTo, str);//aaand save
                         if (!Game.localStorageGet(Game.SaveTo)) {
                             if (Game.prefs.popups) Game.Popup('Error while saving.<br>Export your save instead!');
@@ -1147,7 +1149,7 @@ Game.Launch = function () {
                     //that's right
                     //we're using cookies
                     //yeah I went there
-                    var now = new Date();//we storin dis for 5 years, people
+                    const now = new Date();//we storin dis for 5 years, people
                     now.setFullYear(now.getFullYear() + 5);//mmh stale cookies
                     str = utf8_to_b64(str) + '!END!';
                     Game.saveData = escape(str);
@@ -2766,7 +2768,7 @@ Game.Launch = function () {
                 if (Game.prefs.askLumps) {
                     PlaySound('snd/tick.mp3');
                     Game.promptConfirmFunc = func;//bit dumb
-                    Game.Prompt('<div class="icon" style="background:url(img/icons.png?v=' + Game.version + ');float:left;margin-left:-8px;margin-top:-8px;background-position:' + (-29 * 48) + 'px ' + (-14 * 48) + 'px;"></div><div style="margin:16px 8px;">Do you want to spend <b>' + Beautify(n) + ' lump' + (n !== 1 ? 's' : '') + '</b> to ' + str + '?</div>', [['Yes', 'Game.lumps-=' + n + ';Game.promptConfirmFunc();Game.promptConfirmFunc=0;Game.recalculateGains=1;Game.ClosePrompt();'], 'No']);
+                    Game.Prompt('<div class="icon" style="background:url(/img/icons.png?v=' + Game.version + ');float:left;margin-left:-8px;margin-top:-8px;background-position:' + (-29 * 48) + 'px ' + (-14 * 48) + 'px;"></div><div style="margin:16px 8px;">Do you want to spend <b>' + Beautify(n) + ' lump' + (n !== 1 ? 's' : '') + '</b> to ' + str + '?</div>', [['Yes', 'Game.lumps-=' + n + ';Game.promptConfirmFunc();Game.promptConfirmFunc=0;Game.recalculateGains=1;Game.ClosePrompt();'], 'No']);
                     return false;
                 } else {
                     Game.lumps -= n;
@@ -2923,8 +2925,11 @@ Game.Launch = function () {
         Game.BigCookieSizeT = 1;
         Game.cookieClickSound = Math.floor(Math.random() * 7) + 1;
         Game.playCookieClickSound = function () {
-            if (Game.prefs.cookiesound) PlaySound('snd/clickb' + (Game.cookieClickSound) + '.mp3', 0.5);
-            else PlaySound('snd/click' + (Game.cookieClickSound) + '.mp3', 0.5);
+            if (typeof Game.cookieClickSound !== 'number' || isNaN(Game.cookieClickSound)) {
+                Game.cookieClickSound = Math.floor(Math.random() * 7) + 1; // Reset to a valid value
+            }
+            if (Game.prefs.cookiesound) PlaySound('/snd/clickb' + (Game.cookieClickSound) + '.mp3', 0.5);
+            else PlaySound('/snd/click' + (Game.cookieClickSound) + '.mp3', 0.5);
             Game.cookieClickSound += Math.floor(Math.random() * 4) + 1;
             if (Game.cookieClickSound > 7) Game.cookieClickSound -= 7;
         }
@@ -3977,7 +3982,7 @@ Game.Launch = function () {
         //generic particles (falling cookies etc)
         //only displayed on left section
         Game.particles = [];
-        for (var i = 0; i < 50; i++) {
+        for (i = 0; i < 50; i++) {
             Game.particles[i] = {
                 x: 0,
                 y: 0,
@@ -3996,8 +4001,8 @@ Game.Launch = function () {
         }
 
         Game.particlesUpdate = function () {
-            for (var i in Game.particles) {
-                var me = Game.particles[i];
+            for (i = 0; i < Game.particles.length; i++) {
+                let me = Game.particles[i];
                 if (me.life !== -1) {
                     if (!me.text) me.yd += 0.2 + Math.random() * 0.1;
                     me.x += me.xd;
@@ -4014,9 +4019,10 @@ Game.Launch = function () {
             //Game.particleAdd(pos X,pos Y,speed X,speed Y,size (multiplier),duration (seconds),layer,picture,text);
             //pick the first free (or the oldest) particle to replace it
             if (1 || Game.prefs.particles) {
-                var highest = 0;
-                var highestI = 0;
-                for (var i in Game.particles) {
+                let i;
+                let highest = 0;
+                let highestI = 0;
+                for (i in Game.particles) {
                     if (Game.particles[i].life === -1) {
                         highestI = i;
                         break;
@@ -4026,13 +4032,13 @@ Game.Launch = function () {
                         highestI = i;
                     }
                 }
-                var auto = 0;
+                let auto = 0;
                 if (x) auto = 1;
-                var i = highestI;
-                var x = x || -64;
+                i = highestI;
+                x = x || -64;
                 if (Game.LeftBackground && !auto) x = Math.floor(Math.random() * Game.LeftBackground.canvas.width);
-                var y = y || -64;
-                var me = Game.particles[i];
+                y = y || -64;
+                let me = Game.particles[i];
                 me.life = 0;
                 me.x = x;
                 me.y = y;
@@ -4046,9 +4052,9 @@ Game.Launch = function () {
                 if (!pic) {
                     if (Game.season === 'fools') pic = 'smallDollars.png';
                     else {
-                        var cookies = [[10, 0]];
-                        for (var i in Game.Upgrades) {
-                            var cookie = Game.Upgrades[i];
+                        const cookies = [[10, 0]];
+                        for (i in Game.Upgrades) {
+                            let cookie = Game.Upgrades[i];
                             if (cookie.bought > 0 && cookie.pool === 'cookie') cookies.push(cookie.icon);
                         }
                         me.picPos = chooseRandomElement(cookies);
@@ -4063,25 +4069,27 @@ Game.Launch = function () {
             return {};
         }
         Game.particlesDraw = function (z) {
-            var ctx = Game.LeftBackground;
+            let ctx = Game.LeftBackground;
             ctx.fillStyle = '#fff';
             ctx.font = '20px Merriweather';
             ctx.textAlign = 'center';
 
-            for (var i in Game.particles) {
-                var me = Game.particles[i];
+            for (let i in Game.particles) {
+                let me = Game.particles[i];
+                if (me.picPos === undefined ) {
+                    me.picPos = [10, 0]
+                }
                 if (me.z === z) {
                     if (me.life !== -1) {
-                        var opacity = 1 - (me.life / (Game.fps * me.dur));
-                        ctx.globalAlpha = opacity;
+                        ctx.globalAlpha = 1 - (me.life / (Game.fps * me.dur));
                         if (me.text) {
                             ctx.fillText(me.text, me.x, me.y);
                         } else {
                             ctx.save();
                             ctx.translate(me.x, me.y);
                             ctx.rotate((me.r / 360) * Math.PI * 2);
-                            var w = 64;
-                            var h = 64;
+                            let w = 64;
+                            let h = 64;
                             if (me.pic === 'icons.png') {
                                 w = 48;
                                 h = 48;
@@ -4104,7 +4112,7 @@ Game.Launch = function () {
         Game.textParticles = [];
         Game.textParticlesY = 0;
         var str = '';
-        for (var i = 0; i < 20; i++) {
+        for (i = 0; i < 20; i++) {
             Game.textParticles[i] = {x: 0, y: 0, life: -1, text: ''};
             str += '<div id="particle' + i + '" class="particle title"></div>';
         }
@@ -4578,6 +4586,7 @@ Game.Launch = function () {
             } else if (Game.onMenu === 'log') {
                 str += replaceAll('[bakeryName]', Game.bakeryName, Game.updateLog);
             } else if (Game.onMenu === 'stats') {
+                let i;
                 var buildingsOwned = 0;
                 buildingsOwned = Game.BuildingsOwned;
                 var upgrades = '';
@@ -4590,7 +4599,7 @@ Game.Launch = function () {
                 var prestigeUpgradesOwned = 0;
 
                 var list = [];
-                for (var i in Game.Upgrades)//sort the upgrades
+                for (i in Game.Upgrades)//sort the upgrades
                 {
                     list.push(Game.Upgrades[i]);
                 }
@@ -4600,7 +4609,7 @@ Game.Launch = function () {
                     else return 0;
                 }
                 list.sort(sortMap);
-                for (var i in list) {
+                for (i in list) {
                     var str2 = '';
                     var me = list[i];
 
@@ -4625,7 +4634,7 @@ Game.Launch = function () {
                 var achievementsTotal = 0;
 
                 var list = [];
-                for (var i in Game.Achievements)//sort the achievements
+                for (i in Game.Achievements)//sort the achievements
                 {
                     list.push(Game.Achievements[i]);
                 }
@@ -4637,7 +4646,7 @@ Game.Launch = function () {
                 list.sort(sortMap);
 
 
-                for (var i in list) {
+                for (i in list) {
                     var me = list[i];
                     //if (me.pool=='normal' || me.won>0) achievementsTotal++;
                     if (Game.CountsAsAchievementOwned(me.pool)) achievementsTotal++;
@@ -4656,45 +4665,45 @@ Game.Launch = function () {
                     'dungeon': '<b>Dungeon achievements</b> <small>(Not technically achievable yet.)</small>',
                     'shadow': '<b>Shadow achievements</b> <small>(These are feats that are either unfair or difficult to attain. They do not give milk.)</small>'
                 };
-                for (var i in achievements) {
+                for (i in achievements) {
                     if (achievements[i] !== '') {
                         if (pools[i]) achievementsStr += '<div class="listing">' + pools[i] + '</div>';
                         achievementsStr += '<div class="listing crateBox">' + achievements[i] + '</div>';
                     }
                 }
 
-                var milkStr = '';
-                for (var i = 0; i < Game.Milks.length; i++) {
+                let milkStr = '';
+                for (i = 0; i < Game.Milks.length; i++) {
                     if (Game.milkProgress >= i) {
-                        var milk = Game.Milks[i];
+                        const milk = Game.Milks[i];
                         milkStr += '<div ' + Game.getTooltip(
-                            '<div class="prompt" style="text-align:center;padding-bottom:6px;white-space:nowrap;margin:0px;padding-bottom:96px;"><h3 style="margin:6px 32px 0px 32px;">' + milk.name + '</h3><div style="opacity:0.75;font-size:9px;">(' + (i === 0 ? 'starter milk' : ('for ' + Beautify(i * 25) + ' achievements')) + ')</div><div class="line"></div><div style="width:100%;height:96px;position:absolute;left:0px;bottom:0px;background:url(img/' + milk.pic + '.png);"></div></div>'
-                            , 'top') + ' style="background:url(img/icons.png) ' + (-milk.icon[0] * 48) + 'px ' + (-milk.icon[1] * 48) + 'px;margin:2px 0px;" class="trophy"></div>';
+                            '<div class="prompt" style="text-align:center;white-space:nowrap;margin:0;padding-bottom:96px;"><h3 style="margin:6px 32px 0 32px;">' + milk.name + '</h3><div style="opacity:0.75;font-size:9px;">(' + (i === 0 ? 'starter milk' : ('for ' + Beautify(i * 25) + ' achievements')) + ')</div><div class="line"></div><div style="width:100%;height:96px;position:absolute;left:0;bottom:0;background:url(/img/' + milk.pic + '.png);"></div></div>'
+                            , 'top') + ' style="background:url(/img/icons.png) ' + (-milk.icon[0] * 48) + 'px ' + (-milk.icon[1] * 48) + 'px;margin:2px 0;" class="trophy"></div>';
                     }
                 }
                 milkStr += '<div style="clear:both;"></div>';
 
-                var santaStr = '';
-                var frames = 15;
+                let santaStr = '';
+                let frames = 15;
                 if (Game.Has('A festive hat')) {
-                    for (var i = 0; i <= Game.santaLevel; i++) {
+                    for (i = 0; i <= Game.santaLevel; i++) {
                         santaStr += '<div ' + Game.getTooltip(
-                            '<div class="prompt" style="text-align:center;padding-bottom:6px;white-space:nowrap;margin:0px 32px;"><div style="width:96px;height:96px;margin:4px auto;background:url(img/santa.png) ' + (-i * 96) + 'px 0px;filter:drop-shadow(0px 3px 2px #000);-webkit-filter:drop-shadow(0px 3px 2px #000);"></div><div class="line"></div><h3>' + Game.santaLevels[i] + '</h3></div>'
-                            , 'top') + ' style="background:url(img/santa.png) ' + (-i * 48) + 'px 0px;background-size:' + (frames * 48) + 'px 48px;" class="trophy"></div>';
+                            '<div class="prompt" style="text-align:center;padding-bottom:6px;white-space:nowrap;margin:0 32px;"><div style="width:96px;height:96px;margin:4px auto;background:url(/img/santa.png) ' + (-i * 96) + 'px 0px;filter:drop-shadow(0px 3px 2px #000);-webkit-filter:drop-shadow(0px 3px 2px #000);"></div><div class="line"></div><h3>' + Game.santaLevels[i] + '</h3></div>'
+                            , 'top') + ' style="background:url(/img/santa.png) ' + (-i * 48) + 'px 0px;background-size:' + (frames * 48) + 'px 48px;" class="trophy"></div>';
                     }
                     santaStr += '<div style="clear:both;"></div>';
                 }
                 var dragonStr = '';
-                var frames = 9;
+                frames = 9;
                 var mainLevels = [0, 4, 8, 21, 22, 23];
                 if (Game.Has('A crumbly egg')) {
-                    for (var i = 0; i <= mainLevels.length; i++) {
+                    for (i = 0; i <= mainLevels.length; i++) {
                         if (Game.dragonLevel >= mainLevels[i]) {
                             var level = Game.dragonLevels[mainLevels[i]];
                             dragonStr += '<div ' + Game.getTooltip(
                                 //'<div style="width:96px;height:96px;margin:4px auto;background:url(img/dragon.png?v='+Game.version+') '+(-level.pic*96)+'px 0px;"></div><div class="line"></div><div style="min-width:200px;text-align:center;margin-bottom:6px;">'+level.name+'</div>'
-                                '<div class="prompt" style="text-align:center;padding-bottom:6px;white-space:nowrap;margin:0px 32px;"><div style="width:96px;height:96px;margin:4px auto;background:url(img/dragon.png?v=' + Game.version + ') ' + (-level.pic * 96) + 'px 0px;filter:drop-shadow(0px 3px 2px #000);-webkit-filter:drop-shadow(0px 3px 2px #000);"></div><div class="line"></div><h3>' + level.name + '</h3></div>'
-                                , 'top') + ' style="background:url(img/dragon.png?v=' + Game.version + ') ' + (-level.pic * 48) + 'px 0px;background-size:' + (frames * 48) + 'px 48px;" class="trophy"></div>';
+                                '<div class="prompt" style="text-align:center;padding-bottom:6px;white-space:nowrap;margin:0 32px;"><div style="width:96px;height:96px;margin:4px auto;background:url(/img/dragon.png?v=' + Game.version + ') ' + (-level.pic * 96) + 'px 0px;filter:drop-shadow(0px 3px 2px #000);-webkit-filter:drop-shadow(0px 3px 2px #000);"></div><div class="line"></div><h3>' + level.name + '</h3></div>'
+                                , 'top') + ' style="background:url(/img/dragon.png?v=' + Game.version + ') ' + (-level.pic * 48) + 'px 0px;background-size:' + (frames * 48) + 'px 48px;" class="trophy"></div>';
                         }
                     }
                     dragonStr += '<div style="clear:both;"></div>';
@@ -6736,7 +6745,7 @@ Game.Launch = function () {
 
         //build object displays
         var muteStr = '<div style="position:absolute;left:8px;bottom:12px;opacity:0.5;">Muted :</div>';
-        for (var i in Game.Objects) {
+        for (i in Game.Objects) {
             me = Game.Objects[i];
             if (me.id > 0) {
                 me.canvas = elementByID('rowCanvas' + me.id);
@@ -8287,7 +8296,7 @@ Game.Launch = function () {
         });
 
         order = 40000;
-        new Game.Upgrade('Magic shenanigans', 'Neuro production <b>multiplied by 1,000</b>.<q>It\'s magic. I ain\'t gotta explain sh<div style="display:inline-block;background:url(img/money.png);width:16px;height:16px;position:relative;top:4px;left:0px;margin:0px -2px;"></div>t.</q>', 7, [17, 5]);//debug purposes only
+        new Game.Upgrade('Magic shenanigans', 'Neuro production <b>multiplied by 1,000</b>.<q>It\'s magic. I ain\'t gotta explain sh<div style="display:inline-block;background:url(/img/money.png);width:16px;height:16px;position:relative;top:4px;left:0px;margin:0px -2px;"></div>t.</q>', 7, [17, 5]);//debug purposes only
         Game.last.pool = 'debug';
 
 
@@ -8343,14 +8352,14 @@ Game.Launch = function () {
             }
             return num;
         }
-        for (var i in Game.eggDrops)//scale egg prices to how many eggs you have
+        for (i in Game.eggDrops)//scale egg prices to how many eggs you have
         {
             Game.Upgrades[Game.eggDrops[i]].priceFunc = function () {
                 return Math.pow(2, Game.GetHowManyEggs()) * 999;
             }
         }
         //{Game.Upgrades[Game.eggDrops[i]].priceFunc=function(){return Math.pow(Game.GetHowManyEggs()+1,2)*Game.cookiesPs*60*5;}}
-        for (var i in Game.rareEggDrops) {
+        for (i in Game.rareEggDrops) {
             Game.Upgrades[Game.rareEggDrops[i]].priceFunc = function () {
                 return Math.pow(3, Game.GetHowManyEggs()) * 999;
             }
@@ -8556,7 +8565,7 @@ Game.Launch = function () {
         };
 
         var slots = ['Permanent upgrade slot I', 'Permanent upgrade slot II', 'Permanent upgrade slot III', 'Permanent upgrade slot IV', 'Permanent upgrade slot V'];
-        for (var i = 0; i < slots.length; i++) {
+        for (i = 0; i < slots.length; i++) {
             Game.Upgrades[slots[i]].descFunc = function (i) {
                 return function () {
                     if (Game.permanentUpgrades[i] === -1) return this.desc;
@@ -9661,7 +9670,7 @@ Game.Launch = function () {
         Game.last.baseDesc = 'Neuro production multiplier <b>+1%</b>.<br>Dropped by baker\'s wheat plants.<q>The only reason you\'d consider these to be Neuros is because you feel slightly sorry for them.</q>';
 
         var gardenDrops = ['Elderwort biscuits', 'Bakeberry cookies', 'Duketater cookies', 'Green yeast digestives', 'Fern tea', 'Ichor syrup', 'Wheat slims'];
-        for (var i in gardenDrops)//scale by CpS
+        for (i in gardenDrops)//scale by CpS
         {
             var it = Game.Upgrades[gardenDrops[i]];
             it.priceFunc = function (cost) {
@@ -10537,19 +10546,19 @@ Game.Launch = function () {
         Game.computeSeasons();
 
         //alert untiered building upgrades
-        for (var i in Game.Upgrades) {
+        for (i in Game.Upgrades) {
             me = Game.Upgrades[i];
             if (me.order >= 200 && me.order < 2000 && !me.tier && me.name.indexOf('grandma') === -1 && me.pool !== 'prestige') console.log(me.name + ' has no tier.');
         }
 
         Game.UpgradesByPool = [];
-        for (var i in Game.Upgrades) {
+        for (i in Game.Upgrades) {
             if (!Game.UpgradesByPool[Game.Upgrades[i].pool]) Game.UpgradesByPool[Game.Upgrades[i].pool] = [];
             Game.UpgradesByPool[Game.Upgrades[i].pool].push(Game.Upgrades[i]);
         }
 
         Game.PrestigeUpgrades = [];
-        for (var i in Game.Upgrades) {
+        for (i in Game.Upgrades) {
             if (Game.Upgrades[i].pool === 'prestige' || Game.Upgrades[i].pool === 'prestigeDecor') {
                 Game.PrestigeUpgrades.push(Game.Upgrades[i]);
                 Game.Upgrades[i].posX = 0;
@@ -10565,14 +10574,14 @@ Game.Launch = function () {
         Game.goldenCookieUpgrades = ['Get lucky', 'Lucky day', 'Serendipity', 'Heavenly luck', 'Lasting fortune', 'Decisive fate', 'Lucky digit', 'Lucky number', 'Lucky payout', 'Golden goose egg'];
 
         Game.cookieUpgrades = [];
-        for (var i in Game.Upgrades) {
+        for (i in Game.Upgrades) {
             me = Game.Upgrades[i];
             if ((me.pool === 'cookie' || me.pseudoCookie)) Game.cookieUpgrades.push(me);
         }
-        for (var i in Game.UnlockAt) {
+        for (i in Game.UnlockAt) {
             Game.Upgrades[Game.UnlockAt[i].name].unlockAt = Game.UnlockAt[i];
         }
-        for (var i in Game.Upgrades) {
+        for (i in Game.Upgrades) {
             if (Game.Upgrades[i].pool === 'prestige') Game.Upgrades[i].order = Game.Upgrades[i].id;
         }
 
@@ -10663,7 +10672,7 @@ Game.Launch = function () {
             592: [180, 608],
         };
 
-        for (var i in Game.UpgradePositions) {
+        for (i in Game.UpgradePositions) {
             Game.UpgradesById[i].posX = Game.UpgradePositions[i][0];
             Game.UpgradesById[i].posY = Game.UpgradePositions[i][1];
         }
@@ -11237,7 +11246,7 @@ Game.Launch = function () {
         Game.GymAchievement('In the mouth of madness');
         Game.last.baseDesc += '<q>A Neuro is just what we tell each other it is.</q>';
         Game.last.desc = BeautifyInText(Game.last.baseDesc);
-        Game.GymAchievement('Brought to you by the letter <div style="display:inline-block;background:url(img/money.png);width:16px;height:16px;"></div>');
+        Game.GymAchievement('Brought to you by the letter <div style="display:inline-block;background:url(/img/money.png);width:16px;height:16px;"></div>');
 
 
         Game.CpsAchievement('A world filled with cookies');
@@ -12004,7 +12013,7 @@ Game.Launch = function () {
         Game.vanilla = 0;//everything we create beyond this will not be saved in the default save
 
 
-        for (var i in Game.customCreate) {
+        for (i in Game.customCreate) {
             Game.customCreate[i]();
         }
 
@@ -12062,7 +12071,7 @@ Game.Launch = function () {
 
         Game.wrinklerHP = 2.1;
         Game.wrinklers = [];
-        for (var i = 0; i < 12; i++) {
+        for (i = 0; i < 12; i++) {
             Game.wrinklers.push({
                 id: parseInt(i),
                 close: 0,
@@ -12468,7 +12477,7 @@ Game.Launch = function () {
         }
 
         Game.santaLevels = ['Festive test tube', 'Festive ornament', 'Festive wreath', 'Festive tree', 'Festive present', 'Festive elf fetus', 'Elf toddler', 'Elfling', 'Young elf', 'Bulky elf', 'Nick', 'Santa Claus', 'Elder Santa', 'True Santa', 'Final Claus'];
-        for (var i in Game.santaDrops)//scale christmas upgrade prices with santa level
+        for (i in Game.santaDrops)//scale christmas upgrade prices with santa level
         {
             Game.Upgrades[Game.santaDrops[i]].priceFunc = function () {
                 return Math.pow(3, Game.santaLevel) * 2525;
@@ -12954,11 +12963,11 @@ Game.Launch = function () {
                     frame = 4;
                 }
 
-                var str = '<div id="specialPic" style="position:absolute;left:-16px;top:-64px;width:96px;height:96px;background:url(img/' + pic + ');background-position:' + (-frame * 96) + 'px 0px;filter:drop-shadow(0px 3px 2px #000);-webkit-filter:drop-shadow(0px 3px 2px #000);"></div>';
+                let str = '<div id="specialPic" style="position:absolute;left:-16px;top:-64px;width:96px;height:96px;background:url(/img/' + pic + ');background-position:' + (-frame * 96) + 'px 0px;filter:drop-shadow(0px 3px 2px #000);-webkit-filter:drop-shadow(0px 3px 2px #000);"></div>';
                 str += '<div class="close" onclick="PlaySound(\'snd/press.mp3\');Game.ToggleSpecialMenu(0);">x</div>';
 
                 if (Game.specialTab === 'santa') {
-                    var moni = Math.pow(Game.santaLevel + 1, Game.santaLevel + 1);
+                    const moni = Math.pow(Game.santaLevel + 1, Game.santaLevel + 1);
 
                     str += '<h3>' + Game.santaLevels[Game.santaLevel] + '</h3>';
                     if (Game.santaLevel < 14) {
@@ -13972,7 +13981,7 @@ Game.Launch = function () {
         }
 
 
-        for (var i in Game.customInit) {
+        for (i in Game.customInit) {
             Game.customInit[i]();
         }
 

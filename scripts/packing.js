@@ -1,17 +1,19 @@
 function pack(bytes) {
-    var chars = [];
-    var len = bytes.length;
-    for (var i = 0, n = len; i < n;) {
+    let chars = [];
+    const len = bytes.length;
+    let i = 0;
+    for (; i < len;) {
         chars.push(((bytes[i++] & 0xff) << 8) | (bytes[i++] & 0xff));
     }
     return String.fromCharCode.apply(null, chars);
 }
 
 function unpack(str) {
-    var bytes = [];
-    var len = str.length;
-    for (var i = 0, n = len; i < n; i++) {
-        var char = str.charCodeAt(i);
+    let bytes = [];
+    const len = str.length;
+    let i = 0;
+    for (; i < len; i++) {
+        let char = str.charCodeAt(i);
         bytes.push(char >>> 8, char & 0xFF);
     }
     return bytes;
@@ -29,8 +31,8 @@ function pack2( string  values) {
 */
 
 function unpack2(/* string */ packed) {
-    var values = '';
-    for (var i = 0; i < packed.length; i++) {
+    let values = '';
+    for (let i = 0; i < packed.length; i++) {
         values += packed.charCodeAt(i).toString(2).substring(1);
     }
     return values;

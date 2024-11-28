@@ -225,97 +225,68 @@ function UncompressLargeBin(arr) {
 (typeof self !== "undefined" && self || typeof window !== "undefined" && window || this.content);
 
 //seeded random function, courtesy of http://davidbau.com/archives/2010/01/30/random_seeds_coded_hints_and_quintillions.html
+//Don't touch, I have no clue how this works but messing with it too much breaks Math.random
+//I honestly have no idea why it even broke like that
 (/**
  * @param {number|PluginArray|Screen|*} a
  * @param {[]} b
- * @param math
+ * @param c
  * @param {number} d
  * @param {number} e
  * @param {number} f
  */
-function (a, b, math, d, e, f) {
-    let j = d - 1;
-
-    function k(a) {
-        let b, c = a.length, e = this, f = 0, g = e.i = e.j = 0, h = e.S = [];
-        for (c || (a = [c++]); d > f;)
-            h[f] = f++;
-        for (f = 0; d > f; f++) h[f] = h[g = j & g + a[f % c] + (b = h[f])], h[g] = b;
-        (e.g = function (a) {
-            let c;
-            let f;
-            let g;
-            let h;
-            let b;
-            for (; a--;)
-                b = h[f = j & f + 1], c = c * d + h[j & (h[f] = h[g = j & g + b]) + (h[g] = b)];
-            return e.i = f, e.j = g, c
-        })(d)
+function(a,b,c,d,e,f){
+    function k(a){
+        var b,c=a.length,e=this,f=0,g=e.i=e.j=0,h=e.S=[];
+        for (c||(a=[c++]);d>f;)
+            h[f]=f++;
+        for (f=0;d>f;f++)
+            h[f]=h[g=j&g+a[f%c]+(b=h[f])],h[g]=b;
+        (e.g=function(a) {
+            for (var b,c=0,f=e.i,g=e.j,h=e.S;a--;)
+                b=h[f=j&f+1],c=c*d+h[j&(h[f]=h[g=j&g+b])+(h[g]=b)];
+            return e.i=f,e.j=g,c})(d)
     }
-
-    function l(a, b) {
-        let e, c = [], d = (typeof a)[0];
-        if (b && "o" === d)
-            for (e in a) try {
-                c.push(l(a[e], b - 1))
-            } catch (f) {
-            }
-        return c.length ? c : "s" === d ? a : a + "\0"
+    function l(a,b){
+        var e,c=[],d=(typeof a)[0];
+        if (b&&"o" === d)
+            for (e in a)
+                try {
+                c.push(l(a[e],b-1))
+            } catch(f) {}
+        return c.length?c:"s" === d?a:a+"\0"
     }
-
-    function m(a, b) {
-        let d, c = a + "", e = 0;
-        for (; c.length > e;)
-            b[j & e] = j & (d ^= 19 * b[j & e]) + c.charCodeAt(e++);
+    function m(a, b)
+    {
+        for (var d,c=a+"",e=0; c.length>e;)
+            b[j&e]=j&(d^=19*b[j&e])+c.charCodeAt(e++);
         return o(b)
     }
-
     function n(c) {
         try {
-            return a.crypto.getRandomValues(c = new Uint8Array(d)), o(c)
-        } catch (e) {
-            return [+new Date, a, a.navigator.plugins, a.screen, o(b)]
+            return a.crypto.getRandomValues(c=new Uint8Array(d)),o(c)
+        } catch(e) {
+            return[+new Date,a,a.navigator.plugins,a.screen,o(b)]
         }
+    }function o(a) {
+        return String.fromCharCode.apply(0,a)
     }
-
-    function o(a) {
-        return String.fromCharCode.apply(0, a)
-    }
-
-    const g = math.pow(d, e), h = math.pow(2, f), i = 2 * h;
-    math.seededRandom = function (a, f) {
-        let j = [], p = m(l(f ? [a, o(b)] : 0 in arguments ? a : n(), 3), j), q = new k(j);
-        return m(o(q.S), b), math.random = function () {
-            let a;
-            let b;
-            let c;
-            for (; h > a;)
-                a = (a + c) * d, b *= d, c = q.g(1);
-            for (; a >= i;)
-                a /= 2, b /= 2, c >>>= 1;
-            return (a + c) / b
-        }, p
-    }, m(math.random(), b)
-})(this, [], Math, 256, 6, 52);
-
-/*
-function grabProps(arr,prop)
-{
-	if (!arr) return [];
-	arr2=[];
-	for (var i=0;i<arr.length;i++)
-	{
-		arr2.push(arr[i][prop]);
-	}
-	return arr2;
-}
- */
+    var g=c.pow(d,e),h=c.pow(2,f),i=2*h,j=d-1;c.seededRandom = function(a, f) {
+        var j=[],p=m(l(f?[a,o(b)]:0 in arguments?a:n(),3),j),q=new k(j);
+        return m(o(q.S),b),c.random=function() {
+            for (var a=q.g(e),b=g,c=0; h>a;)
+                a=(a+c)*d,b*=d,c=q.g(1);
+            for(; a>=i;)a/=2,b/=2,c>>>=1;
+            return(a+c)/b
+        },p
+    },m(c.random(),b)
+})(window,[],Math,256,6,52);
 
 CanvasRenderingContext2D.prototype.fillPattern = function (img, X, Y, W, H, iW, iH, offX, offY) {
     //for when built-in patterns aren't enough
     if (img.alt !== 'blank') {
-        var offX = offX || 0;
-        var offY = offY || 0;
+        offX = offX || 0;
+        offY = offY || 0;
         if (offX < 0) {
             offX = offX - Math.floor(offX / iW) * iW;
         }
@@ -336,7 +307,7 @@ CanvasRenderingContext2D.prototype.fillPattern = function (img, X, Y, W, H, iW, 
     }
 }
 
-var OldCanvasDrawImage = CanvasRenderingContext2D.prototype.drawImage;
+const OldCanvasDrawImage = CanvasRenderingContext2D.prototype.drawImage;
 CanvasRenderingContext2D.prototype.drawImage = function () {
     //only draw the image if it's loaded
     if (arguments[0].alt !== 'blank') OldCanvasDrawImage.apply(this, arguments);
@@ -351,7 +322,7 @@ function FireEvent(el, etype) {
     if (el.fireEvent) {
         el.fireEvent('on' + etype);
     } else {
-        var evObj = document.createEvent('Events');
+        const evObj = document.createEvent('Events');
         evObj.initEvent(etype, true, false);
         el.dispatchEvent(evObj);
     }
@@ -377,6 +348,7 @@ let triggerAnim = function (element, anim) {
     element.classList.add(anim);
 };
 
+//What is even the point of this thing?
 var debugStr = '';
 var Debug = function (what) {
     if (!debugStr) debugStr = what;
