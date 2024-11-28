@@ -214,27 +214,27 @@ M.launch=function()
 		M.dragGod=function(what)
 		{
 			M.dragging=what;
-			var div=l('templeGod'+what.id);
+			var div=elementByID('templeGod'+what.id);
 			var box=div.getBoundingClientRect();
-			var box2=l('templeDrag').getBoundingClientRect();
+			var box2=elementByID('templeDrag').getBoundingClientRect();
 			div.className='ready templeGod titleFont templeDragged';
-			l('templeDrag').appendChild(div);
+			elementByID('templeDrag').appendChild(div);
 			var x=box.left-box2.left;
 			var y=box.top-box2.top;
 			div.style.transform='translate('+(x)+'px,'+(y)+'px)';
-			l('templeGodPlaceholder'+M.dragging.id).style.display='inline-block';
+			elementByID('templeGodPlaceholder'+M.dragging.id).style.display='inline-block';
 			PlaySound('snd/tick.mp3');
 		}
 		M.dropGod=function()
 		{
 			if (!M.dragging) return;
-			var div=l('templeGod'+M.dragging.id);
+			var div=elementByID('templeGod'+M.dragging.id);
 			div.className='ready templeGod titleFont';
 			div.style.transform='none';
 			if (M.slotHovered!=-1 && (M.swaps==0 || M.dragging.slot==M.slotHovered))//dropping on a slot but no swaps left, or slot is the same as the original
 			{
-				if (M.dragging.slot!=-1) l('templeSlot'+M.dragging.slot).appendChild(div);
-				else l('templeGodPlaceholder'+(M.dragging.id)).parentNode.insertBefore(div,l('templeGodPlaceholder'+(M.dragging.id)));
+				if (M.dragging.slot!=-1) elementByID('templeSlot'+M.dragging.slot).appendChild(div);
+				else elementByID('templeGodPlaceholder'+(M.dragging.id)).parentNode.insertBefore(div,elementByID('templeGodPlaceholder'+(M.dragging.id)));
 				PlaySound('snd/sell1.mp3',0.75);
 			}
 			else if (M.slotHovered!=-1)//dropping on a slot
@@ -246,18 +246,18 @@ M.launch=function()
 				if (prev!=-1)
 				{
 					prev=M.godsById[prev];
-					var prevDiv=l('templeGod'+prev.id);
+					var prevDiv=elementByID('templeGod'+prev.id);
 					if (M.dragging.slot!=-1)//swap with god's previous slot
 					{
-						l('templeSlot'+M.dragging.slot).appendChild(prevDiv);
+						elementByID('templeSlot'+M.dragging.slot).appendChild(prevDiv);
 					}
 					else//swap back to roster
 					{
-						var other=l('templeGodPlaceholder'+(prev.id));
+						var other=elementByID('templeGodPlaceholder'+(prev.id));
 						other.parentNode.insertBefore(prevDiv,other);
 					}
 				}
-				l('templeSlot'+M.slotHovered).appendChild(div);
+				elementByID('templeSlot'+M.slotHovered).appendChild(div);
 				M.slotGod(M.dragging,M.slotHovered);
 				
 				PlaySound('snd/tick.mp3');
@@ -268,7 +268,7 @@ M.launch=function()
 			}
 			else//dropping back to roster
 			{
-				var other=l('templeGodPlaceholder'+(M.dragging.id));
+				var other=elementByID('templeGodPlaceholder'+(M.dragging.id));
 				other.parentNode.insertBefore(div,other);
 				other.style.display='none';
 				M.slotGod(M.dragging,-1);
@@ -283,8 +283,8 @@ M.launch=function()
 			M.slotHovered=what;
 			if (M.dragging)
 			{
-				if (M.slotHovered==-1) l('templeGodPlaceholder'+M.dragging.id).style.display='inline-block';
-				else l('templeGodPlaceholder'+M.dragging.id).style.display='none';
+				if (M.slotHovered==-1) elementByID('templeGodPlaceholder'+M.dragging.id).style.display='inline-block';
+				else elementByID('templeGodPlaceholder'+M.dragging.id).style.display='none';
 				PlaySound('snd/clickb'+Math.floor(Math.random()*7+1)+'.mp3',0.75);
 			}
 		}
@@ -303,8 +303,8 @@ M.launch=function()
 		{
 			var god=M.gods[god];
 			if (god.slot==-1) return false;
-			var div=l('templeGod'+god.id);
-			var other=l('templeGodPlaceholder'+(god.id));
+			var div=elementByID('templeGod'+god.id);
+			var other=elementByID('templeGodPlaceholder'+(god.id));
 			other.parentNode.insertBefore(div,other);
 			other.style.display='none';
 			M.slotGod(god,-1);
@@ -315,12 +315,12 @@ M.launch=function()
 		
 		var str='';
 		str+='<style>'+
-		'#templeBG{background:url(img/shadedBorders.png),url(img/pantheonBG.png);background-size:100% 100%,auto;position:absolute;left:0px;right:0px;top:0px;bottom:16px;}'+
+		'#templeBG{background:url(../img/shadedBorders.png),url(../img/pantheonBG.png);background-size:100% 100%,auto;position:absolute;left:0px;right:0px;top:0px;bottom:16px;}'+
 		'#templeContent{position:relative;box-sizing:border-box;padding:4px 24px;text-align:center;}'+
 		'#templeGods{text-align:center;width:100%;padding:8px;box-sizing:border-box;}'+
 		'.templeIcon{pointer-events:none;margin:12px 6px 0px 6px;width:48px;height:48px;opacity:0.8;position:relative;}'+
 		'.templeSlot .templeIcon{margin:2px 6px 0px 6px;}'+
-		'.templeGod{box-shadow:4px 4px 4px #000;cursor:pointer;position:relative;color:#f33;opacity:0.8;text-shadow:0px 0px 4px #000,0px 0px 6px #000;font-weight:bold;font-size:12px;display:inline-block;width:60px;height:74px;background:url(img/spellBG.png);}'+
+		'.templeGod{box-shadow:4px 4px 4px #000;cursor:pointer;position:relative;color:#f33;opacity:0.8;text-shadow:0px 0px 4px #000,0px 0px 6px #000;font-weight:bold;font-size:12px;display:inline-block;width:60px;height:74px;background:url(../img/spellBG.png);}'+
 		'.templeGod.ready{color:rgba(255,255,255,0.8);opacity:1;}'+
 		'.templeGod.ready:hover{color:#fff;}'+
 		'.templeGod:hover,.templeDragged{box-shadow:6px 6px 6px 2px #000;z-index:1000000001;top:-1px;}'+
@@ -389,20 +389,20 @@ M.launch=function()
 			str+='</div>';
 		str+='</div>';
 		div.innerHTML=str;
-		M.swapsL=l('templeSwaps');
-		M.lumpRefill=l('templeLumpRefill');
+		M.swapsL=elementByID('templeSwaps');
+		M.lumpRefill=elementByID('templeLumpRefill');
 		
 		for (var i in M.gods)
 		{
 			var me=M.gods[i];
-			AddEvent(l('templeGodDrag'+me.id),'mousedown',function(what){return function(){M.dragGod(what);}}(me));
-			AddEvent(l('templeGodDrag'+me.id),'mouseup',function(what){return function(){M.dropGod(what);}}(me));
+			AddEvent(elementByID('templeGodDrag'+me.id),'mousedown',function(what){return function(){M.dragGod(what);}}(me));
+			AddEvent(elementByID('templeGodDrag'+me.id),'mouseup',function(what){return function(){M.dropGod(what);}}(me));
 		}
 		for (var i in M.slot)
 		{
 			var me=M.slot[i];
-			AddEvent(l('templeSlot'+i),'mouseover',function(what){return function(){M.hoverSlot(what);}}(i));
-			AddEvent(l('templeSlot'+i),'mouseout',function(what){return function(){M.hoverSlot(-1);}}(i));
+			AddEvent(elementByID('templeSlot'+i),'mouseover',function(what){return function(){M.hoverSlot(what);}}(i));
+			AddEvent(elementByID('templeSlot'+i),'mouseout',function(what){return function(){M.hoverSlot(-1);}}(i));
 		}
 		
 		AddEvent(document,'mouseup',M.dropGod);
@@ -443,7 +443,7 @@ M.launch=function()
 				{
 					var god=M.godsById[parseFloat(bit[ii])];
 					M.slotGod(god,ii);
-					l('templeSlot'+god.slot).appendChild(l('templeGod'+god.id));
+					elementByID('templeSlot'+god.slot).appendChild(elementByID('templeGod'+god.id));
 				}
 			}
 		M.swaps=parseFloat(spl[i++]||3);
@@ -458,8 +458,8 @@ M.launch=function()
 		{
 			var me=M.gods[i];
 			me.slot=-1;
-			var other=l('templeGodPlaceholder'+(me.id));
-			other.parentNode.insertBefore(l('templeGod'+me.id),other);
+			var other=elementByID('templeGodPlaceholder'+(me.id));
+			other.parentNode.insertBefore(elementByID('templeGod'+me.id),other);
 			other.style.display='none';
 		}
 	}
@@ -478,16 +478,16 @@ M.launch=function()
 		//run each draw frame
 		if (M.dragging)
 		{
-			var box=l('templeDrag').getBoundingClientRect();
+			var box=elementByID('templeDrag').getBoundingClientRect();
 			var x=Game.mouseX-box.left-60/2;
 			var y=Game.mouseY-box.top;
 			if (M.slotHovered!=-1)//snap to slots
 			{
-				var box2=l('templeSlot'+M.slotHovered).getBoundingClientRect();
+				var box2=elementByID('templeSlot'+M.slotHovered).getBoundingClientRect();
 				x=box2.left-box.left;
 				y=box2.top-box.top;
 			}
-			l('templeGod'+M.dragging.id).style.transform='translate('+(x)+'px,'+(y)+'px)';
+			elementByID('templeGod'+M.dragging.id).style.transform='translate('+(x)+'px,'+(y)+'px)';
 		}
 		var t=1000*60*60;
 		if (M.swaps==0) t=1000*60*60*16;
@@ -495,6 +495,6 @@ M.launch=function()
 		var t2=M.swapT+t-Date.now();
 		M.swapsL.innerHTML='Worship swaps : <span class="titleFont" style="color:'+(M.swaps>0?'#fff':'#c00')+';">'+M.swaps+'/'+(3)+'</span>'+((M.swaps<3)?' (next in '+Game.sayTime((t2/1000+1)*Game.fps,-1)+')':'');
 	}
-	M.init(l('rowSpecial'+M.parent.id));
+	M.init(elementByID('rowSpecial'+M.parent.id));
 }
 var M=0;

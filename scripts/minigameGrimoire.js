@@ -56,7 +56,7 @@ M.launch=function()
 					//if (Math.random()<0.2) choices.push('clot','cursed finger','ruin cookies');
 					if (Math.random()<0.15) choices=['cookie storm drop'];
 					if (Math.random()<0.0001) choices.push('free sugar lump');
-					newShimmer.force=choose(choices);
+					newShimmer.force=chooseRandomElement(choices);
 					if (newShimmer.force=='cookie storm drop')
 					{
 						newShimmer.sizeMult=Math.random()*0.75+0.25;
@@ -71,7 +71,7 @@ M.launch=function()
 					if (Math.random()<0.1) choices.push('cursed finger','blood frenzy');
 					if (Math.random()<0.003) choices.push('free sugar lump');
 					if (Math.random()<0.1) choices=['blab'];
-					newShimmer.force=choose(choices);
+					newShimmer.force=chooseRandomElement(choices);
 					Game.Popup('<div style="font-size:80%;">Backfire!<br>Sinister fate!</div>',Game.mouseX,Game.mouseY);
 				},
 			},
@@ -131,7 +131,7 @@ M.launch=function()
 					for (var i in Game.Objects)
 					{if ((Game.Objects[i].amount<max || n==1) && Game.Objects[i].getPrice()<=Game.cookies*2 && Game.Objects[i].amount<400) buildings.push(Game.Objects[i]);}
 					if (buildings.length==0){Game.Popup('<div style="font-size:80%;">No buildings to improve!</div>',Game.mouseX,Game.mouseY);return -1;}
-					var building=choose(buildings);
+					var building=chooseRandomElement(buildings);
 					building.buyFree(1);
 					Game.Popup('<div style="font-size:80%;">A new '+building.single+'<br>bursts out of the ground.</div>',Game.mouseX,Game.mouseY);
 				},
@@ -141,7 +141,7 @@ M.launch=function()
 					var buildings=[];
 					for (var i in Game.Objects)
 					{if (Game.Objects[i].amount>0) buildings.push(Game.Objects[i]);}
-					var building=choose(buildings);
+					var building=chooseRandomElement(buildings);
 					building.sacrifice(1);
 					Game.Popup('<div style="font-size:80%;">Backfire!<br>One of your '+building.plural+'<br>disappears in a puff of smoke.</div>',Game.mouseX,Game.mouseY);
 				},
@@ -199,7 +199,7 @@ M.launch=function()
 					for (var i in M.spells)
 					{if (i!='gambler\'s fever dream' && (M.magic-selfCost)>=M.getSpellCost(M.spells[i])*0.5) spells.push(M.spells[i]);}
 					if (spells.length==0){Game.Popup('<div style="font-size:80%;">No eligible spells!</div>',Game.mouseX,Game.mouseY);return -1;}
-					var spell=choose(spells);
+					var spell=chooseRandomElement(spells);
 					var cost=M.getSpellCost(spell)*0.5;
 					setTimeout(function(){
 						var out=M.castSpell(spell,{cost:cost,failChanceMax:0.5,passthrough:true});
@@ -307,9 +307,9 @@ M.launch=function()
 			if (typeof obj.failChanceAdd!=='undefined') failChance+=obj.failChanceAdd;
 			if (typeof obj.failChanceMult!=='undefined') failChance*=obj.failChanceMult;
 			if (typeof obj.failChanceMax!=='undefined') failChance=Math.max(failChance,obj.failChanceMax);
-			Math.seedrandom(Game.seed+'/'+M.spellsCastTotal);
+			Math.seededRandom(Game.seed+'/'+M.spellsCastTotal);
 			if (!spell.fail || Math.random()<(1-failChance)) {out=spell.win();} else {fail=true;out=spell.fail();}
-			Math.seedrandom();
+			Math.seededRandom();
 			if (out!=-1)
 			{
 				if (!spell.passthrough && !obj.passthrough)
@@ -324,7 +324,7 @@ M.launch=function()
 				M.magic-=cost;
 				M.magic=Math.max(0,M.magic);
 				
-				var rect=l('grimoireSpell'+spell.id).getBoundingClientRect();
+				var rect=elementByID('grimoireSpell'+spell.id).getBoundingClientRect();
 				Game.SparkleAt((rect.left+rect.right)/2,(rect.top+rect.bottom)/2-24);
 				
 				if (fail) PlaySound('snd/spellFail.mp3',0.75); else PlaySound('snd/spell.mp3',0.75);
@@ -369,7 +369,7 @@ M.launch=function()
 		
 		var str='';
 		str+='<style>'+
-		'#grimoireBG{background:url(img/shadedBorders.png),url(img/grimoireBG.png);background-size:100% 100%,auto;position:absolute;left:0px;right:0px;top:0px;bottom:16px;}'+
+		'#grimoireBG{background:url(../img/shadedBorders.png),url(../img/grimoireBG.png);background-size:100% 100%,auto;position:absolute;left:0px;right:0px;top:0px;bottom:16px;}'+
 		'#grimoireContent{position:relative;box-sizing:border-box;padding:4px 24px;}'+
 		'#grimoireBar{max-width:95%;margin:4px auto;height:16px;}'+
 		'#grimoireBarFull{transform:scale(1,2);transform-origin:50% 0;height:50%;}'+
@@ -377,7 +377,7 @@ M.launch=function()
 		'#grimoireSpells{text-align:center;width:100%;padding:8px;box-sizing:border-box;}'+
 		'.grimoireIcon{pointer-events:none;margin:2px 6px 0px 6px;width:48px;height:48px;opacity:0.8;position:relative;}'+
 		'.grimoirePrice{pointer-events:none;}'+
-		'.grimoireSpell{box-shadow:4px 4px 4px #000;cursor:pointer;position:relative;color:#f33;opacity:0.8;text-shadow:0px 0px 4px #000,0px 0px 6px #000;font-weight:bold;font-size:12px;display:inline-block;width:60px;height:74px;background:url(img/spellBG.png);}'+
+		'.grimoireSpell{box-shadow:4px 4px 4px #000;cursor:pointer;position:relative;color:#f33;opacity:0.8;text-shadow:0px 0px 4px #000,0px 0px 6px #000;font-weight:bold;font-size:12px;display:inline-block;width:60px;height:74px;background:url(../img/spellBG.png);}'+
 		'.grimoireSpell.ready{color:rgba(255,255,255,0.8);opacity:1;}'+
 		'.grimoireSpell.ready:hover{color:#fff;}'+
 		'.grimoireSpell:hover{box-shadow:6px 6px 6px 2px #000;z-index:1000000001;top:-1px;}'+
@@ -412,15 +412,15 @@ M.launch=function()
 			str+='<div id="grimoireInfo"></div>';
 		str+='</div>';
 		div.innerHTML=str;
-		M.magicBarL=l('grimoireBar');
-		M.magicBarFullL=l('grimoireBarFull');
-		M.magicBarTextL=l('grimoireBarText');
-		M.lumpRefill=l('grimoireLumpRefill');
-		M.infoL=l('grimoireInfo');
+		M.magicBarL=elementByID('grimoireBar');
+		M.magicBarFullL=elementByID('grimoireBarFull');
+		M.magicBarTextL=elementByID('grimoireBarText');
+		M.lumpRefill=elementByID('grimoireLumpRefill');
+		M.infoL=elementByID('grimoireInfo');
 		for (var i in M.spells)
 		{
 			var me=M.spells[i];
-			AddEvent(l('grimoireSpell'+me.id),'click',function(spell){return function(){PlaySound('snd/tick.mp3');M.castSpell(spell);}}(me));
+			AddEvent(elementByID('grimoireSpell'+me.id),'click',function(spell){return function(){PlaySound('snd/tick.mp3');M.castSpell(spell);}}(me));
 		}
 		
 		AddEvent(M.lumpRefill,'click',function(){
@@ -481,9 +481,9 @@ M.launch=function()
 			{
 				var me=M.spells[i];
 				var cost=M.getSpellCost(me);
-				l('grimoirePrice'+me.id).innerHTML=Beautify(cost);
-				if (M.magic<cost) l('grimoireSpell'+me.id).className='grimoireSpell titleFont';
-				else l('grimoireSpell'+me.id).className='grimoireSpell titleFont ready';
+				elementByID('grimoirePrice'+me.id).innerHTML=Beautify(cost);
+				if (M.magic<cost) elementByID('grimoireSpell'+me.id).className='grimoireSpell titleFont';
+				else elementByID('grimoireSpell'+me.id).className='grimoireSpell titleFont ready';
 			}
 		}
 	}
@@ -495,6 +495,6 @@ M.launch=function()
 		M.magicBarL.style.width=(M.magicM*3)+'px';
 		M.infoL.innerHTML='Spells cast : '+Beautify(M.spellsCast)+' (total : '+Beautify(M.spellsCastTotal)+')';
 	}
-	M.init(l('rowSpecial'+M.parent.id));
+	M.init(elementByID('rowSpecial'+M.parent.id));
 }
 var M=0;

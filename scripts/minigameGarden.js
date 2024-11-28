@@ -248,7 +248,7 @@ M.launch=function()
 				q:'The sign of a neglected farmland, this annoying weed spawns from unused dirt and may sometimes spread to other plants, killing them in the process.',
 				onKill:function(x,y,age)
 				{
-					if (Math.random()<0.2*(age/100)) M.plot[y][x]=[M.plants[choose(['brownMold','crumbspore'])].id+1,0];
+					if (Math.random()<0.2*(age/100)) M.plot[y][x]=[M.plants[chooseRandomElement(['brownMold','crumbspore'])].id+1,0];
 				},
 			},
 			
@@ -599,9 +599,9 @@ M.launch=function()
 			if (M.plantsUnlockedN>=M.plantsN)
 			{
 				Game.Win('Keeper of the conservatory');
-				l('gardenTool-3').classList.remove('locked');
+				elementByID('gardenTool-3').classList.remove('locked');
 			}
-			else l('gardenTool-3').classList.add('locked');
+			else elementByID('gardenTool-3').classList.add('locked');
 			
 			return M.plantsUnlockedN;
 		}
@@ -974,7 +974,7 @@ M.launch=function()
 						str+='<div>Combined effects of all your plants :</div>'+effStr;
 					}
 					str+='<div class="line"></div>';
-					str+='<img src="img/gardenTip.png" style="float:right;margin:0px 0px 8px 8px;"/><small style="line-height:100%;">&bull; You can cross-breed plants by planting them close to each other; new plants will grow in the empty tiles next to them.<br>&bull; Unlock new seeds by harvesting mature plants.<br>&bull; When you ascend, your garden plants are reset, but you keep all the seeds you\'ve unlocked.<br>&bull; Your garden has no effect and does not grow while the game is closed.</small>';
+					str+='<img src="../img/gardenTip.png" style="float:right;margin:0px 0px 8px 8px;"/><small style="line-height:100%;">&bull; You can cross-breed plants by planting them close to each other; new plants will grow in the empty tiles next to them.<br>&bull; Unlock new seeds by harvesting mature plants.<br>&bull; When you ascend, your garden plants are reset, but you keep all the seeds you\'ve unlocked.<br>&bull; Your garden has no effect and does not grow while the game is closed.</small>';
 					return str;
 				},
 				func:function(){},
@@ -1006,7 +1006,7 @@ M.launch=function()
 						M.computeEffs();
 						PlaySound('snd/freezeGarden.mp3');
 						this.classList.add('on');
-						l('gardenContent').classList.add('gardenFrozen');
+						elementByID('gardenContent').classList.add('gardenFrozen');
 						
 						
 						for (var y=0;y<6;y++)
@@ -1033,10 +1033,10 @@ M.launch=function()
 						//M.nextFreeze=Date.now()+(Game.Has('Turbo-charged soil')?1:(1000*60*10));
 						M.computeEffs();
 						this.classList.remove('on');
-						l('gardenContent').classList.remove('gardenFrozen');
+						elementByID('gardenContent').classList.remove('gardenFrozen');
 					}
 				},
-				isOn:function(){if (M.freeze){l('gardenContent').classList.add('gardenFrozen');}else{l('gardenContent').classList.remove('gardenFrozen');}return M.freeze;},
+				isOn:function(){if (M.freeze){elementByID('gardenContent').classList.add('gardenFrozen');}else{elementByID('gardenContent').classList.remove('gardenFrozen');}return M.freeze;},
 			},
 			'convert':{
 				name:'Sacrifice garden',
@@ -1109,7 +1109,7 @@ M.launch=function()
 					{
 						var it=M.plants[me.children[i]];
 						if (it.unlocked) children+='<div class="gardenSeedTiny" style="background-position:'+(-0*48)+'px '+(-it.icon*48)+'px;"></div>';
-						else children+='<div class="gardenSeedTiny" style="background-image:url(img/icons.png?v='+Game.version+');background-position:'+(-0*48)+'px '+(-7*48)+'px;opacity:0.35;"></div>';
+						else children+='<div class="gardenSeedTiny" style="background-image:url(../img/icons.png?v='+Game.version+');background-position:'+(-0*48)+'px '+(-7*48)+'px;opacity:0.35;"></div>';
 					}
 				}
 				children+='</div>';
@@ -1150,7 +1150,7 @@ M.launch=function()
 				var str='<div style="padding:8px 4px;min-width:350px;">'+
 					(M.parent.amount<me.req?(
 						'<div style="text-align:center;">Soil unlocked at '+me.req+' farms.</div>'
-					):('<div class="icon" style="background:url(img/gardenPlants.png?v='+Game.version+');float:left;margin-left:-8px;margin-top:-8px;background-position:'+(-me.icon*48)+'px '+(-34*48)+'px;"></div>'+
+					):('<div class="icon" style="background:url(../img/gardenPlants.png?v='+Game.version+');float:left;margin-left:-8px;margin-top:-8px;background-position:'+(-me.icon*48)+'px '+(-34*48)+'px;"></div>'+
 					'<div><div class="name">'+me.name+'</div><div><small>'+((M.soil==me.id)?'Your field is currently using this soil.':(M.nextSoil>Date.now())?'You will be able to change your soil again in '+Game.sayTime((M.nextSoil-Date.now())/1000*30+30,-1)+'.':'Click to use this type of soil for your whole field.')+'</small></div></div>'+
 					'<div class="line"></div>'+
 					'<div class="description">'+
@@ -1167,8 +1167,8 @@ M.launch=function()
 			return function(){
 				var me=M.plantsById[id];
 				var str='<div style="padding:8px 4px;min-width:400px;">'+
-					'<div class="icon" style="background:url(img/gardenPlants.png?v='+Game.version+');float:left;margin-left:-24px;margin-top:-4px;background-position:'+(-0*48)+'px '+(-me.icon*48)+'px;"></div>'+
-					'<div class="icon" style="background:url(img/gardenPlants.png?v='+Game.version+');float:left;margin-left:-24px;margin-top:-28px;background-position:'+(-4*48)+'px '+(-me.icon*48)+'px;"></div>'+
+					'<div class="icon" style="background:url(../img/gardenPlants.png?v='+Game.version+');float:left;margin-left:-24px;margin-top:-4px;background-position:'+(-0*48)+'px '+(-me.icon*48)+'px;"></div>'+
+					'<div class="icon" style="background:url(../img/gardenPlants.png?v='+Game.version+');float:left;margin-left:-24px;margin-top:-28px;background-position:'+(-4*48)+'px '+(-me.icon*48)+'px;"></div>'+
 					'<div style="background:url(img/turnInto.png);width:20px;height:22px;position:absolute;left:28px;top:24px;z-index:1000;"></div>'+
 					(me.plantable?('<div style="float:right;text-align:right;width:100px;"><small>Planting cost :</small><br><span class="price'+(M.canPlant(me)?'':' disabled')+'">'+Beautify(Math.round(shortenNumber(M.getCost(me))))+'</span><br><small>'+Game.sayTime(me.cost*60*30,-1)+' of CpS,<br>minimum '+Beautify(me.costM)+' cookies</small></div>'):'')+
 					'<div style="width:300px;"><div class="name">'+me.name+' seed</div><div><small>'+(me.plantable?'Click to select this seed for planting.':'<span class="red">This seed cannot be planted.</span>')+'<br>Shift+ctrl+click to harvest all mature plants of this type.</small></div></div>'+
@@ -1184,7 +1184,7 @@ M.launch=function()
 				var me=M.toolsById[id];
 				var icon=[me.icon,35];
 				var str='<div style="padding:8px 4px;min-width:350px;">'+
-					'<div class="icon" style="background:url(img/gardenPlants.png?v='+Game.version+');float:left;margin-left:-8px;margin-top:-8px;background-position:'+(-icon[0]*48)+'px '+(-icon[1]*48)+'px;"></div>'+
+					'<div class="icon" style="background:url(../img/gardenPlants.png?v='+Game.version+');float:left;margin-left:-8px;margin-top:-8px;background-position:'+(-icon[0]*48)+'px '+(-icon[1]*48)+'px;"></div>'+
 					'<div><div class="name">'+me.name+'</div></div>'+
 					'<div class="line"></div>'+
 					'<div class="description">'+
@@ -1225,16 +1225,16 @@ M.launch=function()
 					else stage=1;
 					var icon=[stage,me.icon];
 					var str='<div style="padding:8px 4px;min-width:350px;">'+
-						'<div class="icon" style="background:url(img/gardenPlants.png?v='+Game.version+');float:left;margin-left:-8px;margin-top:-8px;background-position:'+(-icon[0]*48)+'px '+(-icon[1]*48)+'px;"></div>'+
+						'<div class="icon" style="background:url(../img/gardenPlants.png?v='+Game.version+');float:left;margin-left:-8px;margin-top:-8px;background-position:'+(-icon[0]*48)+'px '+(-icon[1]*48)+'px;"></div>'+
 						'<div class="name">'+me.name+'</div><div><small>This plant is growing here.</small></div>'+
 						'<div class="line"></div>'+
 						'<div style="text-align:center;">'+
 							'<div style="display:inline-block;position:relative;box-shadow:0px 0px 0px 1px #000,0px 0px 0px 1px rgba(255,255,255,0.5) inset,0px -2px 2px 0px rgba(255,255,255,0.5) inset;width:256px;height:6px;background:linear-gradient(to right,#fff 0%,#0f9 '+me.mature+'%,#3c0 '+(me.mature+0.1)+'%,#960 100%)">'+
 								'<div class="gardenGrowthIndicator" style="left:'+Math.floor((tile[1]/100)*256)+'px;"></div>'+
-								'<div style="background:url(img/gardenPlants.png?v='+Game.version+');background-position:'+(-1*48)+'px '+(-icon[1]*48)+'px;position:absolute;left:'+(0-24)+'px;top:-32px;transform:scale(0.5,0.5);width:48px;height:48px;"></div>'+
-								'<div style="background:url(img/gardenPlants.png?v='+Game.version+');background-position:'+(-2*48)+'px '+(-icon[1]*48)+'px;position:absolute;left:'+((((me.mature*0.333)/100)*256)-24)+'px;top:-32px;transform:scale(0.5,0.5);width:48px;height:48px;"></div>'+
-								'<div style="background:url(img/gardenPlants.png?v='+Game.version+');background-position:'+(-3*48)+'px '+(-icon[1]*48)+'px;position:absolute;left:'+((((me.mature*0.666)/100)*256)-24)+'px;top:-32px;transform:scale(0.5,0.5);width:48px;height:48px;"></div>'+
-								'<div style="background:url(img/gardenPlants.png?v='+Game.version+');background-position:'+(-4*48)+'px '+(-icon[1]*48)+'px;position:absolute;left:'+((((me.mature)/100)*256)-24)+'px;top:-32px;transform:scale(0.5,0.5);width:48px;height:48px;"></div>'+
+								'<div style="background:url(../img/gardenPlants.png?v='+Game.version+');background-position:'+(-1*48)+'px '+(-icon[1]*48)+'px;position:absolute;left:'+(0-24)+'px;top:-32px;transform:scale(0.5,0.5);width:48px;height:48px;"></div>'+
+								'<div style="background:url(../img/gardenPlants.png?v='+Game.version+');background-position:'+(-2*48)+'px '+(-icon[1]*48)+'px;position:absolute;left:'+((((me.mature*0.333)/100)*256)-24)+'px;top:-32px;transform:scale(0.5,0.5);width:48px;height:48px;"></div>'+
+								'<div style="background:url(../img/gardenPlants.png?v='+Game.version+');background-position:'+(-3*48)+'px '+(-icon[1]*48)+'px;position:absolute;left:'+((((me.mature*0.666)/100)*256)-24)+'px;top:-32px;transform:scale(0.5,0.5);width:48px;height:48px;"></div>'+
+								'<div style="background:url(../img/gardenPlants.png?v='+Game.version+');background-position:'+(-4*48)+'px '+(-icon[1]*48)+'px;position:absolute;left:'+((((me.mature)/100)*256)-24)+'px;top:-32px;transform:scale(0.5,0.5);width:48px;height:48px;"></div>'+
 							'</div><br>'+
 							'<b>Stage :</b> '+['bud','sprout','bloom','mature'][stage-1]+'<br>'+
 							'<small>'+(stage==1?'Plant effects : 10%':stage==2?'Plant effects : 25%':stage==3?'Plant effects : 50%':'Plant effects : 100%; may reproduce, will drop seed when harvested')+'</small>'+
@@ -1275,7 +1275,7 @@ M.launch=function()
 		
 		M.buildPanel=function()
 		{
-			if (!l('gardenSeeds')) return false;
+			if (!elementByID('gardenSeeds')) return false;
 			var str='';
 			for (var i in M.plants)
 			{
@@ -1285,12 +1285,12 @@ M.launch=function()
 					str+='<div id="gardenSeedIcon-'+me.id+'" class="gardenSeedIcon shadowFilter" style="background-position:'+(-icon[0]*48)+'px '+(-icon[1]*48)+'px;"></div>';
 				str+='</div>';
 			}
-			l('gardenSeeds').innerHTML=str;
+			elementByID('gardenSeeds').innerHTML=str;
 			
 			for (var i in M.plants)
 			{
 				var me=M.plants[i];
-				me.l=l('gardenSeed-'+me.id);
+				me.l=elementByID('gardenSeed-'+me.id);
 				AddEvent(me.l,'click',function(me){return function()
 				{
 					if (/* !M.freeze && */Game.keys[16] && Game.keys[17])//shift & ctrl
@@ -1323,14 +1323,14 @@ M.launch=function()
 					str+='<div id="gardenToolIcon-'+me.id+'" class="gardenSeedIcon shadowFilter" style="background-position:'+(-icon[0]*48)+'px '+(-icon[1]*48)+'px;"></div>';
 				str+='</div>';
 			}
-			l('gardenTools').innerHTML=str;
+			elementByID('gardenTools').innerHTML=str;
 			
 			for (var i in M.tools)
 			{
 				var me=M.tools[i];
-				AddEvent(l('gardenTool-'+me.id),'click',me.func);
-				AddEvent(l('gardenTool-'+me.id),'mouseover',M.hideCursor);
-				AddEvent(l('gardenTool-'+me.id),'mouseout',M.showCursor);
+				AddEvent(elementByID('gardenTool-'+me.id),'click',me.func);
+				AddEvent(elementByID('gardenTool-'+me.id),'mouseover',M.hideCursor);
+				AddEvent(elementByID('gardenTool-'+me.id),'mouseout',M.showCursor);
 			}
 
 			var str='';
@@ -1342,29 +1342,29 @@ M.launch=function()
 					str+='<div id="gardenSoilIcon-'+me.id+'" class="gardenSeedIcon shadowFilter" style="background-position:'+(-icon[0]*48)+'px '+(-icon[1]*48)+'px;"></div>';
 				str+='</div>';
 			}
-			l('gardenSoils').innerHTML=str;
+			elementByID('gardenSoils').innerHTML=str;
 			
 			for (var i in M.soils)
 			{
 				var me=M.soils[i];
-				AddEvent(l('gardenSoil-'+me.id),'click',function(me){return function(){
+				AddEvent(elementByID('gardenSoil-'+me.id),'click',function(me){return function(){
 					if (M.freeze || M.soil==me.id || M.nextSoil>Date.now() || M.parent.amount<me.req){return false;}
 					PlaySound('snd/toneTick.mp3');
 					M.nextSoil=Date.now()+(Game.Has('Turbo-charged soil')?1:(1000*60*10));
 					M.toCompute=true;M.soil=me.id;M.computeStepT();
-					for (var i in M.soils){var it=M.soils[i];if (it.id==M.soil){l('gardenSoil-'+it.id).classList.add('on');}else{l('gardenSoil-'+it.id).classList.remove('on');}}
+					for (var i in M.soils){var it=M.soils[i];if (it.id==M.soil){elementByID('gardenSoil-'+it.id).classList.add('on');}else{elementByID('gardenSoil-'+it.id).classList.remove('on');}}
 				}}(me));
-				AddEvent(l('gardenSoil-'+me.id),'mouseover',M.hideCursor);
-				AddEvent(l('gardenSoil-'+me.id),'mouseout',M.showCursor);
+				AddEvent(elementByID('gardenSoil-'+me.id),'mouseover',M.hideCursor);
+				AddEvent(elementByID('gardenSoil-'+me.id),'mouseout',M.showCursor);
 			}
 			
-			M.cursorL=l('gardenCursor');
+			M.cursorL=elementByID('gardenCursor');
 		}
 		M.buildPlot=function()
 		{
 			M.toRebuild=false;
-			if (!l('gardenPlot')) return false;
-			if (!l('gardenTile-0-0'))
+			if (!elementByID('gardenPlot')) return false;
+			if (!elementByID('gardenTile-0-0'))
 			{
 				var str='';
 				for (var y=0;y<6;y++)
@@ -1376,13 +1376,13 @@ M.launch=function()
 						str+='</div>';
 					}
 				}
-				l('gardenPlot').innerHTML=str;
+				elementByID('gardenPlot').innerHTML=str;
 				
 				for (var y=0;y<6;y++)
 				{
 					for (var x=0;x<6;x++)
 					{
-						AddEvent(l('gardenTile-'+x+'-'+y),'click',function(x,y){return function()
+						AddEvent(elementByID('gardenTile-'+x+'-'+y),'click',function(x, y){return function()
 						{
 							M.clickTile(x,y);
 						}}(x,y));
@@ -1395,8 +1395,8 @@ M.launch=function()
 				for (var x=0;x<6;x++)
 				{
 					var tile=M.plot[y][x];
-					var tileL=l('gardenTile-'+x+'-'+y);
-					var iconL=l('gardenTileIcon-'+x+'-'+y);
+					var tileL=elementByID('gardenTile-'+x+'-'+y);
+					var iconL=elementByID('gardenTileIcon-'+x+'-'+y);
 					var me=0;
 					if (tile[0]>0)
 					{
@@ -1433,8 +1433,8 @@ M.launch=function()
 				for (var i in M.plants)
 				{
 					var it=M.plants[i];
-					if (it.id==M.seedSelected) {l('gardenSeed-'+it.id).classList.add('on');}
-					else {l('gardenSeed-'+it.id).classList.remove('on');}
+					if (it.id==M.seedSelected) {elementByID('gardenSeed-'+it.id).classList.add('on');}
+					else {elementByID('gardenSeed-'+it.id).classList.remove('on');}
 				}
 			}
 			//PlaySound('snd/tick.mp3');
@@ -1446,7 +1446,7 @@ M.launch=function()
 			if (harvested)
 			{
 				Game.SparkleAt(Game.mouseX,Game.mouseY);
-				PlaySound('snd/harvest'+choose(['1','2','3'])+'.mp3',1,0.2);
+				PlaySound('snd/harvest'+chooseRandomElement(['1','2','3'])+'.mp3',1,0.2);
 			}
 			else
 			{
@@ -1456,7 +1456,7 @@ M.launch=function()
 					M.toRebuild=true;
 					Game.Spend(M.getCost(M.plantsById[what]));
 					Game.SparkleAt(Game.mouseX,Game.mouseY);
-					PlaySound('snd/tillb'+choose(['1','2','3'])+'.mp3',1,0.2);
+					PlaySound('snd/tillb'+chooseRandomElement(['1','2','3'])+'.mp3',1,0.2);
 					return true;
 				}
 			}
@@ -1588,7 +1588,7 @@ M.launch=function()
 		
 		var str='';
 		str+='<style>'+
-		'#gardenBG{background:url(img/shadedBorders.png),url(img/BGgarden.jpg);background-size:100% 100%,auto;position:absolute;left:0px;right:0px;top:0px;bottom:16px;}'+
+		'#gardenBG{background:url(../img/shadedBorders.png),url(../img/BGgarden.jpg);background-size:100% 100%,auto;position:absolute;left:0px;right:0px;top:0px;bottom:16px;}'+
 		'#gardenContent{position:relative;box-sizing:border-box;padding:4px 24px;height:'+(6*M.tileSize+16+48+48)+'px;}'+
 		'.gardenFrozen{box-shadow:0px 0px 16px rgba(255,255,255,1) inset,0px 0px 48px 24px rgba(200,255,225,0.5) inset;}'+
 		'#gardenPanel{text-align:center;margin:0px;padding:0px;position:absolute;left:4px;top:4px;bottom:4px;right:65%;overflow-y:auto;overflow-x:hidden;box-shadow:8px 0px 8px rgba(0,0,0,0.5);}'+
@@ -1598,24 +1598,24 @@ M.launch=function()
 		'.gardenTile{cursor:pointer;width:'+M.tileSize+'px;height:'+M.tileSize+'px;position:absolute;}'+
 		//'.gardenTile:before{transform:translate(0,0);pointer-events:none;content:\'\';display:block;position:absolute;left:0px;top:0px;right:0px;bottom:0px;margin:6px;border-radius:12px;background:rgba(0,0,0,0.1);box-shadow:0px 0px 4px rgba(255,255,255,0.2),-4px 4px 4px 2px rgba(0,0,0,0.2) inset;}'+
 		//'.gardenTile:hover:before{margin:2px;animation:wobble 0.5s;}'+
-		'.gardenTile:before{transform:translate(0,0);opacity:0.65;transition:opacity 0.2s;pointer-events:none;content:\'\';display:block;position:absolute;left:0px;top:0px;right:0px;bottom:0px;margin:0px;background:url(img/gardenPlots.png);}'+
+		'.gardenTile:before{transform:translate(0,0);opacity:0.65;transition:opacity 0.2s;pointer-events:none;content:\'\';display:block;position:absolute;left:0px;top:0px;right:0px;bottom:0px;margin:0px;background:url(../img/gardenPlots.png);}'+
 			'.gardenTile:nth-child(4n+1):before{background-position:40px 0px;}'+
 			'.gardenTile:nth-child(4n+2):before{background-position:80px 0px;}'+
 			'.gardenTile:nth-child(4n+3):before{background-position:120px 0px;}'+
 			'.gardenTile:hover:before{opacity:1;animation:wobble 0.5s;}'+
 			'.noFancy .gardenTile:hover:before{opacity:1;animation:none;}'+
-		'.gardenTileIcon{transform:translate(0,0);pointer-events:none;transform-origin:50% 40px;width:48px;height:48px;position:absolute;left:-'+((48-M.tileSize)/2)+'px;top:-'+((48-M.tileSize)/2+8)+'px;background:url(img/gardenPlants.png?v='+Game.version+');}'+
+		'.gardenTileIcon{transform:translate(0,0);pointer-events:none;transform-origin:50% 40px;width:48px;height:48px;position:absolute;left:-'+((48-M.tileSize)/2)+'px;top:-'+((48-M.tileSize)/2+8)+'px;background:url(../img/gardenPlants.png?v='+Game.version+');}'+
 			'.gardenTile:hover .gardenTileIcon{animation:pucker 0.3s;}'+
 			'.noFancy .gardenTile:hover .gardenTileIcon{animation:none;}'+
 		'#gardenDrag{pointer-events:none;position:absolute;left:0px;top:0px;right:0px;bottom:0px;overflow:hidden;z-index:1000000001;}'+
-		'#gardenCursor{transition:transform 0.1s;display:none;pointer-events:none;width:48px;height:48px;position:absolute;background:url(img/gardenPlants.png?v='+Game.version+');}'+
+		'#gardenCursor{transition:transform 0.1s;display:none;pointer-events:none;width:48px;height:48px;position:absolute;background:url(../img/gardenPlants.png?v='+Game.version+');}'+
 		'.gardenSeed{cursor:pointer;display:inline-block;width:40px;height:40px;position:relative;}'+
 		'.gardenSeed.locked{display:none;}'+
-		'.gardenSeedIcon{pointer-events:none;transform:translate(0,0);display:inline-block;position:absolute;left:-4px;top:-4px;width:48px;height:48px;background:url(img/gardenPlants.png?v='+Game.version+');}'+
+		'.gardenSeedIcon{pointer-events:none;transform:translate(0,0);display:inline-block;position:absolute;left:-4px;top:-4px;width:48px;height:48px;background:url(../img/gardenPlants.png?v='+Game.version+');}'+
 			'.gardenSeed:hover .gardenSeedIcon{animation:bounce 0.8s;z-index:1000000001;}'+
 			'.gardenSeed:active .gardenSeedIcon{animation:pucker 0.2s;}'+
 			'.noFancy .gardenSeed:hover .gardenSeedIcon,.noFancy .gardenSeed:active .gardenSeedIcon{animation:none;}'+
-		'.gardenPanelLabel{font-size:12px;width:100%;padding:2px;margin-top:4px;margin-bottom:-4px;}'+'.gardenSeedTiny{transform:scale(0.5,0.5);margin:-20px -16px;display:inline-block;width:48px;height:48px;background:url(img/gardenPlants.png?v='+Game.version+');}'+
+		'.gardenPanelLabel{font-size:12px;width:100%;padding:2px;margin-top:4px;margin-bottom:-4px;}'+'.gardenSeedTiny{transform:scale(0.5,0.5);margin:-20px -16px;display:inline-block;width:48px;height:48px;background:url(../img/gardenPlants.png?v='+Game.version+');}'+
 		'.gardenSeed.on:before{pointer-events:none;content:\'\';display:block;position:absolute;left:0px;top:0px;right:0px;bottom:0px;margin:-2px;border-radius:12px;transform:rotate(45deg);background:rgba(0,0,0,0.2);box-shadow:0px 0px 8px rgba(255,255,255,0.75);}'+
 		
 		'.gardenGrowthIndicator{background:#000;box-shadow:0px 0px 0px 1px #fff,0px 0px 0px 2px #000,2px 2px 2px 2px rgba(0,0,0,0.5);position:absolute;top:0px;width:1px;height:6px;z-index:100;}'+
@@ -1654,7 +1654,7 @@ M.launch=function()
 		M.buildPlot();
 		M.buildPanel();
 		
-		M.lumpRefill=l('gardenLumpRefill');
+		M.lumpRefill=elementByID('gardenLumpRefill');
 		AddEvent(M.lumpRefill,'click',function(){
 			Game.refillLump(1,function(){
 				M.loopsMult=3;
@@ -1664,7 +1664,7 @@ M.launch=function()
 				PlaySound('snd/pop'+Math.floor(Math.random()*3+1)+'.mp3',0.75);
 			});
 		});
-		AddEvent(l('gardenSeedsUnlocked'),'click',function()
+		AddEvent(elementByID('gardenSeedsUnlocked'),'click',function()
 		{
 			if (Game.sesame)
 			{
@@ -1674,7 +1674,7 @@ M.launch=function()
 					{
 						for (var x=0;x<6;x++)
 						{
-							M.plot[y][x]=[choose(M.plantsById).id+1,Math.floor(Math.random()*100)];
+							M.plot[y][x]=[chooseRandomElement(M.plantsById).id+1,Math.floor(Math.random()*100)];
 						}
 					}
 					M.toRebuild=true;
@@ -1700,11 +1700,11 @@ M.launch=function()
 	}
 	M.onResize=function()
 	{
-		var width=l('gardenContent').offsetWidth;
+		var width=elementByID('gardenContent').offsetWidth;
 		var panelW=Math.min(Math.max(width*0.40,320),width-6*M.tileSize)-8;
 		var fieldW=Math.max(Math.min(width*0.60,width-panelW),6*M.tileSize)-8;
-		l('gardenField').style.width=fieldW+'px';
-		l('gardenPanel').style.width=panelW+'px';
+		elementByID('gardenField').style.width=fieldW+'px';
+		elementByID('gardenPanel').style.width=panelW+'px';
 	}
 	M.onLevel=function(level)
 	{
@@ -1897,7 +1897,7 @@ M.launch=function()
 									{
 										if (Math.random()<M.plantContam[i] && (!M.plants[i].weed || Math.random()<weedMult)) list.push(i);
 									}
-									var contam=choose(list);
+									var contam=chooseRandomElement(list);
 
 									if (contam && me.key!=contam)
 									{
@@ -1946,7 +1946,7 @@ M.launch=function()
 										{
 											if (Math.random()<muts[ii][1] && (!M.plants[muts[ii][0]].weed || Math.random()<weedMult) && ((!M.plants[muts[ii][0]].weed && !M.plants[muts[ii][0]].fungus) || Math.random()<M.plotBoost[y][x][2])) list.push(muts[ii][0]);
 										}
-										if (list.length>0) M.plot[y][x]=[M.plants[choose(list)].id+1,0];
+										if (list.length>0) M.plot[y][x]=[M.plants[chooseRandomElement(list)].id+1,0];
 									}
 									else if (loop==0)
 									{
@@ -1984,7 +1984,7 @@ M.launch=function()
 			}
 			else
 			{
-				var box=l('gardenDrag').getBoundingClientRect();
+				var box=elementByID('gardenDrag').getBoundingClientRect();
 				var x=Game.mouseX-box.left-24;
 				var y=Game.mouseY-box.top;
 				var seed=M.plantsById[M.seedSelected];
@@ -1997,20 +1997,20 @@ M.launch=function()
 		if (Game.drawT%10==0)
 		{
 			M.lumpRefill.style.display='block';
-			if (M.freeze) l('gardenNextTick').innerHTML='Garden is frozen. Unfreeze to resume.';
-			else l('gardenNextTick').innerHTML='Next tick in '+Game.sayTime((M.nextStep-Date.now())/1000*30+30,-1)+'';
-			l('gardenStats').innerHTML='Mature plants harvested : '+Beautify(M.harvests)+' (total : '+Beautify(M.harvestsTotal)+')';
-			if (M.parent.level<M.plotLimits.length) l('gardenPlotSize').innerHTML='<small>Plot size : '+Math.max(1,Math.min(M.plotLimits.length,M.parent.level))+'/'+M.plotLimits.length+'<br>(Upgrades with farm level)</small>';
-			else l('gardenPlotSize').innerHTML='';
-			l('gardenSeedsUnlocked').innerHTML='Seeds<small> ('+M.plantsUnlockedN+'/'+M.plantsN+')</small>';
+			if (M.freeze) elementByID('gardenNextTick').innerHTML='Garden is frozen. Unfreeze to resume.';
+			else elementByID('gardenNextTick').innerHTML='Next tick in '+Game.sayTime((M.nextStep-Date.now())/1000*30+30,-1)+'';
+			elementByID('gardenStats').innerHTML='Mature plants harvested : '+Beautify(M.harvests)+' (total : '+Beautify(M.harvestsTotal)+')';
+			if (M.parent.level<M.plotLimits.length) elementByID('gardenPlotSize').innerHTML='<small>Plot size : '+Math.max(1,Math.min(M.plotLimits.length,M.parent.level))+'/'+M.plotLimits.length+'<br>(Upgrades with farm level)</small>';
+			else elementByID('gardenPlotSize').innerHTML='';
+			elementByID('gardenSeedsUnlocked').innerHTML='Seeds<small> ('+M.plantsUnlockedN+'/'+M.plantsN+')</small>';
 			for (var i in M.soils)
 			{
 				var me=M.soils[i];
-				if (M.parent.amount<me.req) l('gardenSoil-'+me.id).classList.add('disabled');
-				else l('gardenSoil-'+me.id).classList.remove('disabled');
+				if (M.parent.amount<me.req) elementByID('gardenSoil-'+me.id).classList.add('disabled');
+				else elementByID('gardenSoil-'+me.id).classList.remove('disabled');
 			}
 		}
 	}
-	M.init(l('rowSpecial'+M.parent.id));
+	M.init(elementByID('rowSpecial'+M.parent.id));
 }
 var M=0;
