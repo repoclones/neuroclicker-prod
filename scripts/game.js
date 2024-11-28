@@ -11,6 +11,7 @@ import {Timer} from "./timer.js";
 import {Pic} from "./pic.js";
 import {PlaySound} from "./playSound.js";
 import {pack3, unpack, unpack2} from "./packing.js";
+import { UncompressLargeBin } from "./BinCompression.js";
 
 export const Game = {};
 
@@ -120,7 +121,7 @@ Game.Launch = function () {
 
     Game.baseSeason = '';//halloween, christmas, valentines, fools, easter
     //automatic season detection (might not be 100% accurate)
-    var day = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+    let day = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
 
     if (day >= 44 && day <= 47) Game.baseSeason = 'valentines';
 
@@ -130,20 +131,20 @@ Game.Launch = function () {
     else if (day >= 351 && day <= 359) Game.baseSeason = 'christmas';
     else {
         //easter is a pain goddamn
-        var easterDay = function (Y) {
-            var C = Math.floor(Y / 100);
-            var N = Y - 19 * Math.floor(Y / 19);
-            var K = Math.floor((C - 17) / 25);
-            var I = C - Math.floor(C / 4) - Math.floor((C - K) / 3) + 19 * N + 15;
+        let easterDay = (Y => {
+            let C = Math.floor(Y / 100);
+            let N = Y - 19 * Math.floor(Y / 19);
+            let K = Math.floor((C - 17) / 25);
+            let I = C - Math.floor(C / 4) - Math.floor((C - K) / 3) + 19 * N + 15;
             I = I - 30 * Math.floor((I / 30));
             I = I - Math.floor(I / 28) * (1 - Math.floor(I / 28) * Math.floor(29 / (I + 1)) * Math.floor((21 - N) / 11));
-            var J = Y + Math.floor(Y / 4) + I + 2 - C + Math.floor(C / 4);
+            let J = Y + Math.floor(Y / 4) + I + 2 - C + Math.floor(C / 4);
             J = J - 7 * Math.floor(J / 7);
-            var L = I - J;
-            var M = 3 + Math.floor((L + 40) / 44);
-            var D = L + 28 - 31 * Math.floor(M / 4);
+            let L = I - J;
+            let M = 3 + Math.floor((L + 40) / 44);
+            let D = L + 28 - 31 * Math.floor(M / 4);
             return new Date(Y, M - 1, D);
-        }(new Date().getFullYear());
+        })(new Date().getFullYear());
         easterDay = Math.floor((easterDay - new Date(easterDay.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
         if (day >= easterDay - 7 && day <= easterDay) Game.baseSeason = 'easter';
     }
@@ -155,16 +156,16 @@ Game.Launch = function () {
         '<div class="section">Info</div>' +
         '<div class="subsection">' +
         '<div class="title">About</div>' +
-        '<div class="listing">Cookie Clicker is a javascript game by <a href="http://orteil.dashnet.org" target="_blank">Orteil</a> and <a href="http://dashnet.org" target="_blank">Opti</a>.</div>' +
+        '<div class="listing">Cookie Clicker is a javascript game by <a href="https://orteil.dashnet.org" target="_blank">Orteil</a> and <a href=https:///dashnet.org" target="_blank">Opti</a>.</div>' +
         //'<div class="listing">We have an <a href="https://discordapp.com/invite/cookie" target="_blank">official Discord</a>, as well as a <a href="http://forum.dashnet.org" target="_blank">forum</a>; '+
         '<div class="listing">We have an <a href="https://discordapp.com/invite/cookie" target="_blank">official Discord</a>; ' +
-        'if you\'re looking for help, you may also want to visit the <a href="http://www.reddit.com/r/CookieClicker" target="_blank">subreddit</a> ' +
-        'or the <a href="http://cookieclicker.wikia.com/wiki/Cookie_Clicker_Wiki" target="_blank">wiki</a>.</div>' +
-        '<div class="listing">News and teasers are usually posted on my <a href="http://orteil42.tumblr.com/" target="_blank">tumblr</a> and <a href="http://twitter.com/orteil42" target="_blank">twitter</a>.</div>' +
+        'if you\'re looking for help, you may also want to visit the <a href="https://www.reddit.com/r/CookieClicker" target="_blank">subreddit</a> ' +
+        'or the <a href="https://cookieclicker.wikia.com/wiki/Cookie_Clicker_Wiki" target="_blank">wiki</a>.</div>' +
+        '<div class="listing">News and teasers are usually posted on my <a href="https://orteil42.tumblr.com/" target="_blank">tumblr</a> and <a href=https:///twitter.com/orteil42" target="_blank">twitter</a>.</div>' +
         '<div class="listing" id="supportSection"><b style="color:#fff;opacity:1;">Cookie Clicker is 100% free, forever.</b> Want to support us so we can keep developing games? Here\'s some ways you can help :<div style="margin:4px 12px;line-height:150%;">' +
         '<br>&bull; support us on <a href="https://www.patreon.com/dashnet" target="_blank" class="highlightHover" style="background:#f86754;box-shadow:0 0 0 1px #c52921 inset,0 2px 0 #ff966d inset;text-shadow:0 -1px 0 #ff966d,0 1px 0 #c52921;text-decoration:none;color:#fff;font-weight:bold;padding:1px 4px;">Patreon</a> <span style="opacity:0.5;">(there\'s perks!)</span>' +
         '<br>&bull; <form target="_blank" action="https://www.paypal.com/cgi-bin/webscr" method="post" id="donate"><input type="hidden" name="cmd" value="_s-xclick"><input type="hidden" name="hosted_button_id" value="BBN2WL3TC6QH4"><input type="submit" id="donateButton" value="donate" name="submit" alt="PayPal — The safer, easier way to pay online."><img alt="" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1" height="1"></form> to our PayPal' +
-        '<br>&bull; disable your adblocker<br>&bull; check out our <a href="http://www.redbubble.com/people/dashnet" target="_blank">rad cookie shirts, hoodies and stickers</a>!<br>&bull; (if you want!)</div></div>' +
+        '<br>&bull; disable your adblocker<br>&bull; check out our <a href="https://www.redbubble.com/people/dashnet" target="_blank">rad cookie shirts, hoodies and stickers</a>!<br>&bull; (if you want!)</div></div>' +
         '<div class="listing warning">Note : if you find a new bug after an update and you\'re using a 3rd-party add-on, make sure it\'s not just your add-on causing it!</div>' +
         '<div class="listing warning">Warning : clearing your browser cache or cookies <small>(what else?)</small> will result in your save being wiped. Export your save and back it up first!</div>' +
 
@@ -181,6 +182,11 @@ Game.Launch = function () {
 
         '</div><div class="subsection">' +
         '<div class="title">Version history</div>' +
+
+        '</div><div class="subsection update">' +
+        '<div class="title">28.11.2024  - Nwero Clicker: v7_18_experimental</div>' +
+        '<div class="listing">&bull; Refactor all the code from main.js and index.html. (rare Superbox appearance here)</div>' +
+        '<div class="listing">&bull; Fixed a bug causing random garbage characters at the ends of upgrade quote strings in the process</div>' +
 
         '</div><div class="subsection update">' +
         '<div class="title">29.03.2024  - Nwero Clicker: v7_17</div>' +
@@ -270,7 +276,7 @@ Game.Launch = function () {
         '<div class="listing">&bull; went back in time and invented cookies and computer mice, ensuring Cookie Clicker would one day come to exist</div>' +
         '<div class="listing">&bull; game now fully compliant with Geneva Conventions</div>' +
         '<div class="listing">&bull; dropped support for TI-84 version</div>' +
-        '<div class="listing">&bull; released a low-res retro version of the game, playable here : <a href="http://orteil.dashnet.org/experiments/cookie/" target="_blank">orteil.dashnet.org/experiments/cookie</a></div>' +
+        '<div class="listing">&bull; released a low-res retro version of the game, playable here : <a href="https://orteil.dashnet.org/experiments/cookie/" target="_blank">orteil.dashnet.org/experiments/cookie</a></div>' +
         '<div class="listing">&bull; updated version number</div>' +
 
         '</div><div class="subsection update small">' +
@@ -329,14 +335,14 @@ Game.Launch = function () {
 
     Game.ready = 0;
 
-    Game.Load = function () {
+    Game.Load = () => {
         //l('javascriptError').innerHTML='<div style="padding:64px 128px;"><div class="title">Loading...</div></div>';
         Game.Loader = new Loader();
         Game.Loader.domain = 'img/';
         Game.Loader.loaded = Game.Init;
         Game.Loader.Load(['filler.png']);
     }
-    Game.ErrorFrame = function () {
+    Game.ErrorFrame = () => {
         elementByID('javascriptError').innerHTML =
             '<div class="title">Oops. Wrong address!</div>' +
             '<div>It looks like you\'re accessing Cookie Clicker from another URL than the official one.<br>' +
@@ -344,7 +350,7 @@ Game.Launch = function () {
             '<small>(If for any reason, you are unable to access the game on the official URL, we are currently working on a second domain.)</small></div>';
     }
     Game.timedout = false;
-    Game.Timeout = function () {
+    Game.Timeout = () => {
         Game.WriteSave();
         Game.killShimmers();
         elementByID('javascriptError').innerHTML = 'Cookie Clicker is in sleep mode' + (Game.Has('Twin Gates of Transcendence') ? ' and generating offline cookies' : '') + '.<br><a ' + Game.clickStr + '="Game.Resume();">Click here</a> to resume from your save file.<br><div style="font-style:italic;font-size:65%;line-height:110%;opacity:0.75;">(this happens when too many frames are skipped at once,<br>usually when the game has been running in the background for a while)<br>(you can turn this feature off in the settings menu)</div>';
@@ -352,7 +358,7 @@ Game.Launch = function () {
         Game.timedout = true;
         console.log('[=== Game timed out and has been put in sleep mode. Data was saved. ===]');
     }
-    Game.Resume = function () {
+    Game.Resume = () => {
         elementByID('javascriptError').innerHTML = '';
         elementByID('javascriptError').style.display = 'none';
         Game.timedout = false;
@@ -366,7 +372,10 @@ Game.Launch = function () {
     }
 
 
-    Game.Init = function () {
+    Game.Init = () => {
+        let pool = '';
+        let power = 0;
+        let order;
         let i;
         let me;
         Game.ready = 1;
@@ -391,7 +400,7 @@ Game.Launch = function () {
 
         Game.SaveTo = 'CookieClickerGame';
         if (Game.beta) Game.SaveTo = 'CookieClickerGameBeta';
-        elementByID('versionNumber').innerHTML = 'v. ' + Game.version + (Game.beta ? ' <span style="color:#ff0;">Modified (Nwero Clicker v7_17)</span>' : '');
+        elementByID('versionNumber').innerHTML = 'v. ' + Game.version + (Game.beta ? ' <span style="color:#ff0;">Modified (Nwero Clicker v7_18_EXPERIMENTAL)</span>' : '');
 
         if (Game.version === 1.0466) {
             me = elementByID('linkVersionOld');
@@ -400,6 +409,8 @@ Game.Launch = function () {
             me = elementByID('linkVersionLive');
             me.parentNode.removeChild(me);
         }
+
+        let icon = [0, me.icon * 64];
 
         //l('links').innerHTML=(Game.beta?'<a href="../" target="blank">Live version</a> | ':'<a href="beta" target="blank">Try the beta!</a> | ')+'<a href="http://orteil.dashnet.org/experiments/cookie/" target="blank">Classic</a>';
         //l('links').innerHTML='<a href="http://orteil.dashnet.org/experiments/cookie/" target="blank">Cookie Clicker Classic</a>';
@@ -415,10 +426,10 @@ Game.Launch = function () {
         Game.frameNumber = 0;
         Game.currentFps = Game.fps;
         Game.previousFps = Game.currentFps;
-        Game.getFps = function () {
+        Game.getFps = () => {
             Game.frameNumber++;
-            var currentTime = (Date.now() - Game.fpsStartTime) / 1000;
-            var result = Math.floor((Game.frameNumber / currentTime));
+            let currentTime = (Date.now() - Game.fpsStartTime) / 1000;
+            let result = Math.floor((Game.frameNumber / currentTime));
             if (currentTime > 1) {
                 Game.fpsStartTime = Date.now();
                 Game.frameNumber = 0;
@@ -455,7 +466,7 @@ Game.Launch = function () {
         Game.lumpT = Date.now();//time when the current lump started forming
         Game.lumpRefill = 0;//time when we last used a sugar lump (on minigame refills etc)
 
-        Game.makeSeed = function () {
+        Game.makeSeed = () => {
             const chars = 'abcdefghijklmnopqrstuvwxyz'.split('');
             let str = '';
             for (let i = 0; i < 5; i++) {
@@ -495,12 +506,12 @@ Game.Launch = function () {
         Game.windowW = window.innerWidth;
         Game.windowH = window.innerHeight;
 
-        window.addEventListener('resize', function () {
+        window.addEventListener('resize', () => {
             Game.windowW = window.innerWidth;
             Game.windowH = window.innerHeight;
 
-            for (var i in Game.Objects) {
-                var me = Game.Objects[i];
+            for (let i in Game.Objects) {
+                let me = Game.Objects[i];
                 me.toResize = true;
                 if (me.minigame && me.minigame.onResize) me.minigame.onResize();
             }
@@ -511,7 +522,7 @@ Game.Launch = function () {
         Game.lastDate = parseInt(Date.now());//when we last saved the game (used to compute "cookies made since we closed the game" etc)
 
         Game.prefs = [];
-        Game.DefaultPrefs = function () {
+        Game.DefaultPrefs = () => {
             Game.prefs.particles = 1;//particle effects : falling cookies etc
             Game.prefs.numbers = 1;//numbers that pop up when clicking the cookie
             Game.prefs.autosave = 1;//save the game every minute or so
@@ -539,14 +550,14 @@ Game.Launch = function () {
         }
         Game.DefaultPrefs();
 
-        window.onbeforeunload = function (event) {
+        window.onbeforeunload = event => {
             if (Game.prefs && Game.prefs.warn) {
                 if (typeof event == 'undefined') event = window.event;
                 if (event) event.returnValue = 'Are you sure you want to close Cookie Clicker?';
             }
         }
 
-        Game.Mobile = function () {
+        Game.Mobile = () => {
             if (!Game.mobile) {
                 elementByID('wrapper').className = 'mobile';
                 Game.mobile = 1;
@@ -556,8 +567,8 @@ Game.Launch = function () {
             }
         }
 
-        Game.showBackupWarning = function () {
-            Game.Notify('Back up your save!', 'Hello again! Just a reminder that you may want to back up your Cookie Clicker save every once in a while, just in case.<br>To do so, go to Options and hit "Export save" or "Save to file"!<div class="line"></div><a style="float:right;" onclick="Game.prefs.showBackupWarning=0;==CLOSETHIS()==">Don\'t show this again</a>', [25, 7]);
+        Game.showBackupWarning = () => {
+            Game.Notify('Back up your save!', 'Hello again! Just a reminder that you may want to back up your Cookie Clicker save every once in a while, just in case.<br>To do so, go to Options and hit "Export save" or "Save to file"!<div class="line"></div><a style="float:right;" onclick="Game.prefs.showBackupWarning=0;==CLOSETHIS()===">Don\'t show this again</a>', [25, 7]);
         }
 
         /*=====================================================================================
@@ -579,10 +590,9 @@ Game.Launch = function () {
         Game.customCookieClicks = [];//add to the cookie click calls
         Game.customCreate = [];//create your new upgrades and achievements in there
 
-        Game.LoadMod = function (url)//this loads the mod at the given URL and gives the script an automatic id (URL "http://example.com/my_mod.js" gives the id "modscript_my_mod")
-        {
-            var js = document.createElement('script');
-            var id = url.split('/');
+        Game.LoadMod = url => {
+            const js = document.createElement('script');
+            let id = url.split('/');
             id = id[id.length - 1].split('.')[0];
             js.setAttribute('type', 'text/javascript');
             js.setAttribute('id', 'modscript_' + id);
@@ -606,22 +616,20 @@ Game.Launch = function () {
         /*=====================================================================================
 		BAKERY NAME
 		=======================================================================================*/
-        Game.RandomBakeryName = function () {
-            return (Math.random() > 0.05 ? (chooseRandomElement(['Magic', 'Fantastic', 'Fancy', 'Sassy', 'Snazzy', 'Pretty', 'Cute', 'Pirate', 'Ninja', 'Zombie', 'Robot', 'Radical', 'Urban', 'Cool', 'Hella', 'Sweet', 'Awful', 'Double', 'Triple', 'Turbo', 'Techno', 'Disco', 'Electro', 'Dancing', 'Wonder', 'Mutant', 'Space', 'Science', 'Medieval', 'Future', 'Captain', 'Bearded', 'Lovely', 'Tiny', 'Big', 'Fire', 'Water', 'Frozen', 'Metal', 'Plastic', 'Solid', 'Liquid', 'Moldy', 'Shiny', 'Happy', 'Happy Little', 'Slimy', 'Tasty', 'Delicious', 'Hungry', 'Greedy', 'Lethal', 'Professor', 'Doctor', 'Power', 'Chocolate', 'Crumbly', 'Choklit', 'Righteous', 'Glorious', 'Mnemonic', 'Psychic', 'Frenetic', 'Hectic', 'Crazy', 'Royal', 'El', 'Von']) + ' ') : 'Mc') + chooseRandomElement(['Cookie', 'Biscuit', 'Muffin', 'Scone', 'Cupcake', 'Pancake', 'Chip', 'Sprocket', 'Gizmo', 'Puppet', 'Mitten', 'Sock', 'Teapot', 'Mystery', 'Baker', 'Cook', 'Grandma', 'Click', 'Clicker', 'Spaceship', 'Factory', 'Portal', 'Machine', 'Experiment', 'Monster', 'Panic', 'Burglar', 'Bandit', 'Booty', 'Potato', 'Pizza', 'Burger', 'Sausage', 'Meatball', 'Spaghetti', 'Macaroni', 'Kitten', 'Puppy', 'Giraffe', 'Zebra', 'Parrot', 'Dolphin', 'Duckling', 'Sloth', 'Turtle', 'Goblin', 'Pixie', 'Gnome', 'Computer', 'Pirate', 'Ninja', 'Zombie', 'Robot']);
-        }
-        Game.GetBakeryName = function () {
-            return Game.RandomBakeryName();
-        }
+        Game.RandomBakeryName = () => (Math.random() > 0.05 ? (chooseRandomElement(['Magic', 'Fantastic', 'Fancy', 'Sassy', 'Snazzy', 'Pretty', 'Cute', 'Pirate', 'Ninja', 'Zombie', 'Robot', 'Radical', 'Urban', 'Cool', 'Hella', 'Sweet', 'Awful', 'Double', 'Triple', 'Turbo', 'Techno', 'Disco', 'Electro', 'Dancing', 'Wonder', 'Mutant', 'Space', 'Science', 'Medieval', 'Future', 'Captain', 'Bearded', 'Lovely', 'Tiny', 'Big', 'Fire', 'Water', 'Frozen', 'Metal', 'Plastic', 'Solid', 'Liquid', 'Moldy', 'Shiny', 'Happy', 'Happy Little', 'Slimy', 'Tasty', 'Delicious', 'Hungry', 'Greedy', 'Lethal', 'Professor', 'Doctor', 'Power', 'Chocolate', 'Crumbly', 'Choklit', 'Righteous', 'Glorious', 'Mnemonic', 'Psychic', 'Frenetic', 'Hectic', 'Crazy', 'Royal', 'El', 'Von']) + ' ') : 'Mc') + chooseRandomElement(['Cookie', 'Biscuit', 'Muffin', 'Scone', 'Cupcake', 'Pancake', 'Chip', 'Sprocket', 'Gizmo', 'Puppet', 'Mitten', 'Sock', 'Teapot', 'Mystery', 'Baker', 'Cook', 'Grandma', 'Click', 'Clicker', 'Spaceship', 'Factory', 'Portal', 'Machine', 'Experiment', 'Monster', 'Panic', 'Burglar', 'Bandit', 'Booty', 'Potato', 'Pizza', 'Burger', 'Sausage', 'Meatball', 'Spaghetti', 'Macaroni', 'Kitten', 'Puppy', 'Giraffe', 'Zebra', 'Parrot', 'Dolphin', 'Duckling', 'Sloth', 'Turtle', 'Goblin', 'Pixie', 'Gnome', 'Computer', 'Pirate', 'Ninja', 'Zombie', 'Robot'])
+
+        Game.GetBakeryName = () => Game.RandomBakeryName()
+
         Game.bakeryName = Game.GetBakeryName();
         Game.bakeryNameL = elementByID('bakeryName');
         Game.bakeryNameL.innerHTML = Game.bakeryName + '\'s corpa';
-        Game.bakeryNameSet = function (what) {
+        Game.bakeryNameSet = what => {
             Game.bakeryName = what.replace(/\W+/g, ' ');
             Game.bakeryName = Game.bakeryName.substring(0, 28);
             Game.bakeryNameRefresh();
         }
-        Game.bakeryNameRefresh = function () {
-            var name = Game.bakeryName;
+        Game.bakeryNameRefresh = () => {
+            let name = Game.bakeryName;
             if (name.slice(-1).toLowerCase() === 's') name += '\' corpa'; else name += '\'s corpa';
             Game.bakeryNameL.innerHTML = name;
             name = Game.bakeryName.toLowerCase();
@@ -629,12 +637,12 @@ Game.Launch = function () {
             if (name.indexOf('saysopensesame', name.length - ('saysopensesame').length) > 0 && !Game.sesame) Game.OpenSesame();
             Game.recalculateGains = 1;
         }
-        Game.bakeryNamePrompt = function () {
+        Game.bakeryNamePrompt = () => {
             Game.Prompt('<h3>Name your corpa</h3><div class="block" style="text-align:center;">What should your corpa\'s name be?</div><div class="block"><input type="text" style="text-align:center;width:100%;" id="bakeryNameInput" value="' + Game.bakeryName + '"/></div>', [['Confirm', 'if (l(\'bakeryNameInput\').value.length>0) {Game.bakeryNameSet(l(\'bakeryNameInput\').value);Game.Win(\'What\\\'s in a name\');Game.ClosePrompt();}'], ['Random', 'Game.bakeryNamePromptRandom();'], 'Cancel']);
             elementByID('bakeryNameInput').focus();
             elementByID('bakeryNameInput').select();
         }
-        Game.bakeryNamePromptRandom = function () {
+        Game.bakeryNamePromptRandom = () => {
             elementByID('bakeryNameInput').value = Game.RandomBakeryName();
         }
         AddEvent(Game.bakeryNameL, 'click', Game.bakeryNamePrompt);
@@ -662,14 +670,14 @@ Game.Launch = function () {
             //this.x=x;
             //this.y=y;
             this.origin = origin;
-            var tt = this.tt;
-            var tta = this.tta;
+            let tt = this.tt;
+            let tta = this.tta;
             tt.style.left = 'auto';
             tt.style.top = 'auto';
             tt.style.right = 'auto';
             tt.style.bottom = 'auto';
             if (typeof this.text === 'function') {
-                var text = this.text();
+                text = this.text();
                 if (text === '') tta.style.opacity = '0';
                 else {
                     tt.innerHTML = unescape(text);
@@ -684,10 +692,11 @@ Game.Launch = function () {
             this.on = 1;
         }
         Game.tooltip.update = function () {
-            var X = 0;
-            var Y = 0;
-            var width = this.tt.offsetWidth;
-            var height = this.tt.offsetHeight;
+            let rect;
+            let X = 0;
+            let Y = 0;
+            let width = this.tt.offsetWidth;
+            let height = this.tt.offsetHeight;
             if (this.origin === 'store') {
                 X = Game.windowW - 332 - width;
                 Y = Game.mouseY - 32;
@@ -699,7 +708,7 @@ Game.Launch = function () {
 				this.tta.style.top=Math.max(0,Math.min(Game.windowH-this.tt.clientHeight-64,Y-48))+'px';*/
             } else {
                 if (Game.onCrate) {
-                    var rect = Game.onCrate.getBoundingClientRect();
+                    rect = Game.onCrate.getBoundingClientRect();
                     rect = {left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom};
                     if (rect.left === 0 && rect.top === 0)//if we get that bug where we get stuck in the top-left, move to the mouse (REVISION : just do nothing)
                     {
@@ -732,7 +741,7 @@ Game.Launch = function () {
                     X = Math.max(0, Math.min(Game.windowW - width - 16, X));
                     Y = Math.max(0, Math.min(Game.windowH - height - 64, Y));
                 } else if (this.origin === 'this' && this.from) {
-                    var rect = this.from.getBoundingClientRect();
+                    rect = this.from.getBoundingClientRect();
                     X = (rect.left + rect.right) / 2 - width / 2 - 8;
                     Y = (rect.top) - this.tt.clientHeight - 48;
                     X = Math.max(0, Math.min(Game.windowW - width - 16, X));
@@ -758,7 +767,7 @@ Game.Launch = function () {
                 this.hide();
                 this.shouldHide = 0;
             } else if (Game.drawT % 10 === 0 && typeof (this.text) == 'function') {
-                var text = this.text();
+                let text = this.text();
                 if (text === '') this.tta.style.opacity = '0';
                 else {
                     this.tt.innerHTML = unescape(text);
@@ -771,57 +780,45 @@ Game.Launch = function () {
             this.dynamic = 0;
             this.on = 0;
         }
-        Game.getTooltip = function (text, origin, isCrate) {
+        Game.getTooltip = (text, origin, isCrate) => {
             origin = (origin ? origin : 'middle');
             if (isCrate) return 'onMouseOut="Game.setOnCrate(0);Game.tooltip.shouldHide=1;" onMouseOver="if (!Game.mouseDown) {Game.setOnCrate(this);Game.tooltip.dynamic=0;Game.tooltip.draw(this,\'' + escape(text) + '\',\'' + origin + '\');Game.tooltip.wobble();}"';
             else return 'onMouseOut="Game.tooltip.shouldHide=1;" onMouseOver="Game.tooltip.dynamic=0;Game.tooltip.draw(this,\'' + escape(text) + '\',\'' + origin + '\');Game.tooltip.wobble();"';
         }
-        Game.getDynamicTooltip = function (func, origin, isCrate) {
+        Game.getDynamicTooltip = (func, origin, isCrate) => {
             origin = (origin ? origin : 'middle');
             if (isCrate) return 'onMouseOut="Game.setOnCrate(0);Game.tooltip.shouldHide=1;" onMouseOver="if (!Game.mouseDown) {Game.setOnCrate(this);Game.tooltip.dynamic=1;Game.tooltip.draw(this,' + 'function(){return ' + func + '();}' + ',\'' + origin + '\');Game.tooltip.wobble();}"';
             return 'onMouseOut="Game.tooltip.shouldHide=1;" onMouseOver="Game.tooltip.dynamic=1;Game.tooltip.draw(this,' + 'function(){return ' + func + '();}' + ',\'' + origin + '\');Game.tooltip.wobble();"';
         }
-        Game.attachTooltip = function (el, func, origin) {
+        Game.attachTooltip = (el, func, origin) => {
             if (typeof func === 'string') {
-                var str = func;
-                func = function (str) {
-                    return function () {
-                        return str;
-                    };
-                }(str);
+                let str = func;
+                func = (str => function () {
+                    return str;
+                })(str);
             }
             origin = (origin ? origin : 'middle');
-            AddEvent(el, 'mouseover', function (func, el, origin) {
-                return function () {
-                    Game.tooltip.dynamic = 1;
-                    Game.tooltip.draw(el, func, origin);
-                };
-            }(func, el, origin));
-            AddEvent(el, 'mouseout', function () {
-                return function () {
-                    Game.tooltip.shouldHide = 1;
-                };
-            }());
+            AddEvent(el, 'mouseover', ((func, el, origin) => () => {
+                Game.tooltip.dynamic = 1;
+                Game.tooltip.draw(el, func, origin);
+            })(func, el, origin));
+            AddEvent(el, 'mouseout', (() => () => {
+                Game.tooltip.shouldHide = 1;
+            })());
         }
-        Game.tooltip.wobble = function () {
-            //disabled because this effect doesn't look good with the slight slowdown it might or might not be causing.
-            if (false) {
-                this.tt.className = 'framed';
-                void this.tt.offsetWidth;
-                this.tt.className = 'framed wobbling';
-            }
+        Game.tooltip.wobble = () => {
         }
 
 
         /*=====================================================================================
 		UPDATE CHECKER
 		=======================================================================================*/
-        Game.CheckUpdates = function () {
+        Game.CheckUpdates = () => {
             //ajax('server.php?q=checkupdate',Game.CheckUpdatesResponse);
         }
-        Game.CheckUpdatesResponse = function (response) {
-            var r = response.split('|');
-            var str = '';
+        Game.CheckUpdatesResponse = response => {
+            let r = response.split('|');
+            let str = '';
             if (r[0] === 'alert') {
                 if (r[1]) str = r[1];
             } else if (parseFloat(r[0]) > Game.version) {
@@ -845,15 +842,15 @@ Game.Launch = function () {
         Game.customGrandmaNames = [];
         Game.heralds = 0;
 
-        Game.GrabData = function () {
-            //ajax('/patreon/grab.php',Game.GrabDataResponse);
+        Game.GrabData = () => {
+            //Maybe we could figure out something to put here since heralds don't work?
         }
-        Game.GrabDataResponse = function (response) {
+        Game.GrabDataResponse = response => {
             /*
 				response should be formatted as
 				{"herald":3,"grandma":"a|b|c|...}
 			*/
-            var r = {};
+            let r = {};
             try {
                 r = JSON.parse(response);
                 if (typeof r['herald'] !== 'undefined') {
@@ -885,13 +882,13 @@ Game.Launch = function () {
         Game.attachTooltip(elementByID('topbarIGM'), '<div style="padding:8px;width:250px;text-align:center;">A thing we made that lets you create your own idle games using a simple scripting language.</div>', 'this');
 
         Game.attachTooltip(elementByID('heralds'), function () {
-            var str = '';
+            let str = '';
 
             if (!Game.externalDataLoaded) str += 'Heralds couldn\'t be loaded. There may be an issue with our servers, or you are playing the game locally.';
             else {
                 if (Game.heralds === 0) str += 'There are no heralds at the moment. Please consider <b style="color:#bc3aff;">donating to our Patreon</b>!';
                 else {
-                    str += (Game.heralds === 1 ? '<b style="color:#bc3aff;text-shadow:0px 1px 0px #6d0096;">1 herald</b> is' : '<b style="color:#fff;text-shadow:0px 1px 0px #6d0096,0px 0px 6px #bc3aff;">' + Game.heralds + ' heralds</b> are') + ' selflessly inspiring a boost in production for everyone, resulting in<br><b style="color:#cdaa89;text-shadow:0px 1px 0px #7c4532,0px 0px 6px #7c4532;"><div style="width:16px;height:16px;display:inline-block;vertical-align:middle;background:url(/img/money.png);"></div> +' + Game.heralds + '% Neuros per second</b>.';
+                    str += (Game.heralds === 1 ? '<b style="color:#bc3aff;text-shadow:0 1px 0 #6d0096;">1 herald</b> is' : '<b style="color:#fff;text-shadow:0 1px 0 #6d0096,0 0 6px #bc3aff;">' + Game.heralds + ' heralds</b> are') + ' selflessly inspiring a boost in production for everyone, resulting in<br><b style="color:#cdaa89;text-shadow:0 1px 0 #7c4532,0 0 6px #7c4532;"><div style="width:16px;height:16px;display:inline-block;vertical-align:middle;background:url(/img/money.png);"></div> +' + Game.heralds + '% Neuros per second</b>.';
                     str += '<div class="line"></div>';
                     if (Game.ascensionMode === 1) str += 'You are in a <b>Born again</b> run, and are not currently benefiting from heralds.';
                     else if (Game.Has('Heralds')) str += 'You own the <b>Heralds</b> upgrade, and therefore benefit from the production boost.';
@@ -900,7 +897,7 @@ Game.Launch = function () {
             }
             str += '<div class="line"></div><span style="font-size:90%;opacity:0.6;"><b>Heralds</b> are people who have donated to our highest Patreon tier, and are limited to 100.<br>Each herald gives everyone +1% CpS.<br>Heralds benefit everyone playing the game, regardless of whether you donated.</span>';
 
-            str += '<div style="width:31px;height:39px;background:url(/img/heraldFlag.png);position:absolute;top:0px;left:8px;"></div><div style="width:31px;height:39px;background:url(/img/heraldFlag.png);position:absolute;top:0px;right:8px;"></div>';
+            str += '<div style="width:31px;height:39px;background:url(/img/heraldFlag.png);position:absolute;top:0;left:8px;"></div><div style="width:31px;height:39px;background:url(/img/heraldFlag.png);position:absolute;top:0;right:8px;"></div>';
 
             return '<div style="padding:8px;width:300px;text-align:center;" class="prompt"><h3>Heralds</h3><div class="block">' + str + '</div></div>';
         }, 'this');
@@ -911,7 +908,7 @@ Game.Launch = function () {
 
 
         Game.useLocalStorage = 1;
-        Game.localStorageGet = function (key) {
+        Game.localStorageGet = key => {
             let local = 0;
             try {
                 local = window.localStorage.getItem(key);
@@ -919,7 +916,7 @@ Game.Launch = function () {
             }
             return local;
         }
-        Game.localStorageSet = function (key, str) {
+        Game.localStorageSet = (key, str) => {
             try {
                 window.localStorage.setItem(key, str);
             } catch (exception) {
@@ -930,28 +927,28 @@ Game.Launch = function () {
         /*=====================================================================================
 		SAVE
 		=======================================================================================*/
-        Game.ExportSave = function () {
+        Game.ExportSave = () => {
             Game.prefs.showBackupWarning = 0;
             Game.Prompt('<h3>Export save</h3><div class="block">This is your save code.<br>Copy it and keep it somewhere safe!</div><div class="block"><textarea id="textareaPrompt" style="width:100%;height:128px;" readonly>' + Game.WriteSave(1) + '</textarea></div>', ['All done!']);//prompt('Copy this text and keep it somewhere safe!',Game.WriteSave(1));
             elementByID('textareaPrompt').focus();
             elementByID('textareaPrompt').select();
         }
-        Game.ImportSave = function () {
+        Game.ImportSave = () => {
             Game.Prompt('<h3>Import save</h3><div class="block">Please paste in the code that was given to you on save export.</div><div class="block"><textarea id="textareaPrompt" style="width:100%;height:128px;"></textarea></div>', [['Load', 'if (l(\'textareaPrompt\').value.length>0) {Game.ImportSaveCode(l(\'textareaPrompt\').value);Game.ClosePrompt();}'], 'Nevermind']);//prompt('Please paste in the text that was given to you on save export.','');
             elementByID('textareaPrompt').focus();
         }
-        Game.ImportSaveCode = function (save) {
+        Game.ImportSaveCode = save => {
             if (save && save !== '') Game.LoadSave(save);
         }
 
-        Game.FileSave = function () {
+        Game.FileSave = () => {
             Game.prefs.showBackupWarning = 0;
             const filename = Game.bakeryName.replace(/[^a-zA-Z0-9]+/g, '') + 'Bakery';
             const text = Game.WriteSave(1);
             const blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
             saveAs(blob, filename + '.txt');
         }
-        Game.FileLoad = function (e) {
+        Game.FileLoad = e => {
             if (e.target.files.length === 0) return false;
             const file = e.target.files[0];
             const reader = new FileReader();
@@ -962,7 +959,7 @@ Game.Launch = function () {
         }
 
         Game.toSave = false;
-        Game.WriteSave = function (type) {
+        Game.WriteSave = type => {
             let me;
             let i;
             Game.toSave = false;
@@ -1031,7 +1028,7 @@ Game.Launch = function () {
                 (type === 3 ? '\n	season time left : ' : '') + parseInt(Math.floor(Game.seasonT)) + ';' +
                 (type === 3 ? '\n	season switcher uses : ' : '') + parseInt(Math.floor(Game.seasonUses)) + ';' +
                 (type === 3 ? '\n	current season : ' : '') + (Game.season ? Game.season : '') + ';';
-            var wrinklers = Game.SaveWrinklers();
+            const wrinklers = Game.SaveWrinklers();
             str +=
                 (type === 3 ? '\n	amount of Neuros contained in wrinklers : ' : '') + parseFloat(Math.floor(wrinklers.amount)) + ';' +
                 (type === 3 ? '\n	number of wrinklers : ' : '') + parseInt(Math.floor(wrinklers.number)) + ';' +
@@ -1118,7 +1115,7 @@ Game.Launch = function () {
             if (type === 2 || type === 3) {
                 return str;
             } else if (type === 1) {
-                str = encodeURIComponent(utf8_to_b64(str) + '!END!');
+                str = escape(utf8_to_b64(str) + '!END!');
                 return str;
             } else {
                 if (Game.useLocalStorage) {
@@ -1134,7 +1131,7 @@ Game.Launch = function () {
                         if (Game.prefs.popups) Game.Popup('Error while saving.<br>Purchasing an upgrade might fix this.');
                         else Game.Notify('Saving failed!', 'Purchasing an upgrade and saving again might fix this.<br>This really shouldn\'t happen; please notify us in the neuro clicker thread.');
                     } else {
-                        str = encodeURIComponent(str);
+                        str = escape(str);
                         Game.localStorageSet(Game.SaveTo, str);//aaand save
                         if (!Game.localStorageGet(Game.SaveTo)) {
                             if (Game.prefs.popups) Game.Popup('Error while saving.<br>Export your save instead!');
@@ -1169,18 +1166,23 @@ Game.Launch = function () {
         /*=====================================================================================
 		LOAD
 		=======================================================================================*/
-        Game.salvageSave = function () {
+        Game.salvageSave = () => {
             //for when Cookie Clicker won't load and you need your save
             console.log('===================================================');
             console.log('This is your save data. Copypaste it (without quotation marks) into another version using the "Import save" feature.');
             console.log(Game.localStorageGet(Game.SaveTo));
         }
-        Game.LoadSave = function (data) {
-            var str = '';
+        Game.LoadSave = data => {
+            let percent;
+            let maxTime;
+            let me;
+            let mestr;
+            let actualHeralds = Game.heralds;//we store the actual amount of heralds to restore it later; here we used the amount present in the save to compute offline CpS
+            let str = '';
             if (data) str = unescape(data);
             else {
                 if (Game.useLocalStorage) {
-                    var local = Game.localStorageGet(Game.SaveTo);
+                    const local = Game.localStorageGet(Game.SaveTo);
                     if (!local)//no localstorage save found? let's get the cookie one last time
                     {
                         if (document.cookie.indexOf(Game.SaveTo) >= 0) {
@@ -1197,15 +1199,15 @@ Game.Launch = function () {
                 }
             }
             if (str !== '') {
-                var version = 0;
-                var oldstr = str.split('|');
+                let version = 0;
+                const oldstr = str.split('|');
                 if (oldstr[0] < 1) {
                 } else {
                     str = str.split('!END!')[0];
                     str = b64_to_utf8(str);
                 }
                 if (str !== '') {
-                    var spl = '';
+                    let spl = '';
                     str = str.split('|');
                     version = parseFloat(str[0]);
 
@@ -1232,6 +1234,7 @@ Game.Launch = function () {
                         }, 200);
                     }
                     if (version >= 1) {
+                        let i;
                         Game.T = 0;
 
                         spl = str[2].split(';');//save stats
@@ -1293,7 +1296,7 @@ Game.Launch = function () {
                         Game.seasonT = spl[20] ? parseInt(spl[20]) : 0;
                         Game.seasonUses = spl[21] ? parseInt(spl[21]) : 0;
                         Game.season = spl[22] ? spl[22] : Game.baseSeason;
-                        var wrinklers = {
+                        let wrinklers = {
                             amount: spl[23] ? parseFloat(spl[23]) : 0,
                             number: spl[24] ? parseInt(spl[24]) : 0
                         };
@@ -1324,20 +1327,19 @@ Game.Launch = function () {
                         Game.lumpRefill = spl[45] ? parseInt(spl[45]) : 0;
                         Game.lumpCurrentType = spl[46] ? parseInt(spl[46]) : 0;
                         Game.vault = spl[47] ? spl[47].split(',') : [];
-                        for (var i in Game.vault) {
+                        for (i in Game.vault) {
                             Game.vault[i] = parseInt(Game.vault[i]);
                         }
-                        var actualHeralds = Game.heralds;//we store the actual amount of heralds to restore it later; here we used the amount present in the save to compute offline CpS
                         Game.heralds = spl[48] ? parseInt(spl[48]) : Game.heralds;
 
                         spl = str[5].split(';');//buildings
                         Game.BuildingsOwned = 0;
-                        for (var i in Game.ObjectsById) {
-                            var me = Game.ObjectsById[i];
+                        for (i in Game.ObjectsById) {
+                            me = Game.ObjectsById[i];
                             me.switchMinigame(false);
                             me.pics = [];
                             if (spl[i]) {
-                                var mestr = spl[i].toString().split(',');
+                                mestr = spl[i].toString().split(',');
                                 me.amount = parseInt(mestr[0]);
                                 me.bought = parseInt(mestr[1]);
                                 me.totalCookies = parseFloat(mestr[2]);
@@ -1364,10 +1366,10 @@ Game.Launch = function () {
                         {
                             spl = str[6].split(';');//upgrades
                             Game.UpgradesOwned = 0;
-                            for (var i in Game.UpgradesById) {
-                                var me = Game.UpgradesById[i];
+                            for (i in Game.UpgradesById) {
+                                me = Game.UpgradesById[i];
                                 if (spl[i]) {
-                                    var mestr = spl[i].split(',');
+                                    mestr = spl[i].split(',');
                                     me.unlocked = parseInt(mestr[0]);
                                     me.bought = parseInt(mestr[1]);
                                     if (me.bought && Game.CountsAsUpgradeOwned(me.pool)) Game.UpgradesOwned++;
@@ -1378,10 +1380,10 @@ Game.Launch = function () {
                             }
                             if (str[7]) spl = str[7].split(';'); else spl = [];//achievements
                             Game.AchievementsOwned = 0;
-                            for (var i in Game.AchievementsById) {
-                                var me = Game.AchievementsById[i];
+                            for (i in Game.AchievementsById) {
+                                me = Game.AchievementsById[i];
                                 if (spl[i]) {
-                                    var mestr = spl[i].split(',');
+                                    mestr = spl[i].split(',');
                                     me.won = parseInt(mestr[0]);
                                 } else {
                                     me.won = 0;
@@ -1394,10 +1396,10 @@ Game.Launch = function () {
                             if (version < 1.05) spl = UncompressLargeBin(spl);
                             else spl = unpack(spl);
                             Game.UpgradesOwned = 0;
-                            for (var i in Game.UpgradesById) {
-                                var me = Game.UpgradesById[i];
+                            for (i in Game.UpgradesById) {
+                                me = Game.UpgradesById[i];
                                 if (spl[i * 2]) {
-                                    var mestr = [spl[i * 2], spl[i * 2 + 1]];
+                                    mestr = [spl[i * 2], spl[i * 2 + 1]];
                                     me.unlocked = parseInt(mestr[0]);
                                     me.bought = parseInt(mestr[1]);
                                     if (me.bought && Game.CountsAsUpgradeOwned(me.pool)) Game.UpgradesOwned++;
@@ -1410,10 +1412,10 @@ Game.Launch = function () {
                             if (version < 1.05) spl = UncompressLargeBin(spl);
                             else spl = unpack(spl);
                             Game.AchievementsOwned = 0;
-                            for (var i in Game.AchievementsById) {
-                                var me = Game.AchievementsById[i];
+                            for (i in Game.AchievementsById) {
+                                me = Game.AchievementsById[i];
                                 if (spl[i]) {
-                                    var mestr = [spl[i]];
+                                    mestr = [spl[i]];
                                     me.won = parseInt(mestr[0]);
                                 } else {
                                     me.won = 0;
@@ -1425,10 +1427,10 @@ Game.Launch = function () {
                             if (version < 2.0046) spl = unpack2(spl).split('');
                             else spl = (spl).split('');
                             Game.UpgradesOwned = 0;
-                            for (var i in Game.UpgradesById) {
-                                var me = Game.UpgradesById[i];
+                            for (i in Game.UpgradesById) {
+                                me = Game.UpgradesById[i];
                                 if (spl[i * 2]) {
-                                    var mestr = [spl[i * 2], spl[i * 2 + 1]];
+                                    mestr = [spl[i * 2], spl[i * 2 + 1]];
                                     me.unlocked = parseInt(mestr[0]);
                                     me.bought = parseInt(mestr[1]);
                                     if (me.bought && Game.CountsAsUpgradeOwned(me.pool)) Game.UpgradesOwned++;
@@ -1441,10 +1443,10 @@ Game.Launch = function () {
                             if (version < 2.0046) spl = unpack2(spl).split('');
                             else spl = (spl).split('');
                             Game.AchievementsOwned = 0;
-                            for (var i in Game.AchievementsById) {
-                                var me = Game.AchievementsById[i];
+                            for (i in Game.AchievementsById) {
+                                me = Game.AchievementsById[i];
                                 if (spl[i]) {
-                                    var mestr = [spl[i]];
+                                    mestr = [spl[i]];
                                     me.won = parseInt(mestr[0]);
                                 } else {
                                     me.won = 0;
@@ -1454,18 +1456,18 @@ Game.Launch = function () {
                         }
 
                         Game.killBuffs();
-                        var buffsToLoad = [];
+                        let buffsToLoad = [];
                         spl = (str[8] || '').split(';');//buffs
-                        for (var i in spl) {
+                        for (i in spl) {
                             if (spl[i]) {
-                                var mestr = spl[i].toString().split(',');
+                                mestr = spl[i].toString().split(',');
                                 buffsToLoad.push(mestr);
                             }
                         }
 
 
-                        for (var i in Game.ObjectsById) {
-                            var me = Game.ObjectsById[i];
+                        for (i in Game.ObjectsById) {
+                            me = Game.ObjectsById[i];
                             if (me.buyFunction) me.buyFunction();
                             me.refresh();
                             if (me.id > 0) {
@@ -1475,10 +1477,10 @@ Game.Launch = function () {
 
                         if (version < 1.0503)//upgrades that used to be regular, but are now heavenly
                         {
-                            var me = Game.Upgrades['Persistent memory'];
+                            me = Game.Upgrades['Persistent memory'];
                             me.unlocked = 0;
                             me.bought = 0;
-                            var me = Game.Upgrades['Season switcher'];
+                            me = Game.Upgrades['Season switcher'];
                             me.unlocked = 0;
                             me.bought = 0;
                         }
@@ -1488,7 +1490,7 @@ Game.Launch = function () {
 
 
                         //advance timers
-                        var framesElapsed = Math.ceil(((Date.now() - Game.lastDate) / 1000) * Game.fps);
+                        let framesElapsed = Math.ceil(((Date.now() - Game.lastDate) / 1000) * Game.fps);
                         if (Game.pledgeT > 0) Game.pledgeT = Math.max(Game.pledgeT - framesElapsed, 1);
                         if (Game.seasonT > 0) Game.seasonT = Math.max(Game.seasonT - framesElapsed, 1);
                         if (Game.researchT > 0) Game.researchT = Math.max(Game.researchT - framesElapsed, 1);
@@ -1499,7 +1501,7 @@ Game.Launch = function () {
 
                         //recompute season trigger prices
                         if (Game.Has('Season switcher')) {
-                            for (var i in Game.seasons) {
+                            for (i in Game.seasons) {
                                 Game.Unlock(Game.seasons[i].trigger);
                             }
                         }
@@ -1527,8 +1529,8 @@ Game.Launch = function () {
                         }
                         if (version === 1.9)//are we importing from the 1.9 beta? remove all heavenly upgrades and refund heavenly chips
                         {
-                            for (var i in Game.UpgradesById) {
-                                var me = Game.UpgradesById[i];
+                            for (i in Game.UpgradesById) {
+                                me = Game.UpgradesById[i];
                                 if (me.bought && me.pool === 'prestige') {
                                     me.unlocked = 0;
                                     me.bought = 0;
@@ -1556,75 +1558,73 @@ Game.Launch = function () {
 
                         if (Math.random() < 1 / 10000) Game.TOYS = 1;//teehee!
 
-                        var timeOffline = (Date.now() - Game.lastDate) / 1000;
+                        let timeOffline = (Date.now() - Game.lastDate) / 1000;
 
-                        Game.loadLumps(timeOffline);
+                        Game.loadLumps();
 
                         //compute cookies earned while the game was closed
-                        if (Game.bakeryName === 'Mato') {
-                            Game.Notify('Welcome back Mato Kuroshira. You will be awarded with offline cookies just like you would on mobile, thanks to Xoda, your lord and saviour.', '', 6, 1);
-                            var maxTime = 60 * 60 * 24 * 1000000000;
-                            var percent = 100;
-                        } else {
 
-                            if (Game.mobile || Game.Has('Perfect idling') || Game.Has('Twin Gates of Transcendence')) {
+                            if (Game.mobile || Game.Has('Perfect idling') || Game.Has('Twin Gates of Transcendence') || Game.bakeryName === 'Mato') {
 
-                                if (Game.Has('Perfect idling')) {
-                                    var maxTime = 60 * 60 * 24 * 1000000000;
-                                    var percent = 100;
-                                } else {
-                                    var maxTime = 60 * 60;
-                                    if (Game.Has('Belphegor')) maxTime *= 2;
-                                    if (Game.Has('Mammon')) maxTime *= 2;
-                                    if (Game.Has('Abaddon')) maxTime *= 2;
-                                    if (Game.Has('Satan')) maxTime *= 2;
-                                    if (Game.Has('Asmodeus')) maxTime *= 2;
-                                    if (Game.Has('Beelzebub')) maxTime *= 2;
-                                    if (Game.Has('Lucifer')) maxTime *= 2;
+                                if (Game.Has('Perfect idling') || Game.bakeryName === 'Mato') {
+                                    maxTime = 60 * 60 * 24 * 1000000000;
+                                    percent = 100;
+                                    if (Game.bakeryName === 'Mato') {
+                                        //Another feature refactored to probably actually work, this feature did not appear to be functional before
+                                        Game.Notify('Welcome back Mato Kuroshira. You will be awarded with offline cookies just like you would on mobile, thanks to Xoda, your lord and saviour.', '', 6, 1);
+                                    } else {
+                                        maxTime = 60 * 60;
+                                        if (Game.Has('Belphegor')) maxTime *= 2;
+                                        if (Game.Has('Mammon')) maxTime *= 2;
+                                        if (Game.Has('Abaddon')) maxTime *= 2;
+                                        if (Game.Has('Satan')) maxTime *= 2;
+                                        if (Game.Has('Asmodeus')) maxTime *= 2;
+                                        if (Game.Has('Beelzebub')) maxTime *= 2;
+                                        if (Game.Has('Lucifer')) maxTime *= 2;
 
-                                    var percent = 5;
-                                    if (Game.Has('Angels')) percent += 10;
-                                    if (Game.Has('Archangels')) percent += 10;
-                                    if (Game.Has('Virtues')) percent += 10;
-                                    if (Game.Has('Dominions')) percent += 10;
-                                    if (Game.Has('Cherubim')) percent += 10;
-                                    if (Game.Has('Seraphim')) percent += 10;
-                                    if (Game.Has('God')) percent += 10;
+                                        percent = 5;
+                                        if (Game.Has('Angels')) percent += 10;
+                                        if (Game.Has('Archangels')) percent += 10;
+                                        if (Game.Has('Virtues')) percent += 10;
+                                        if (Game.Has('Dominions')) percent += 10;
+                                        if (Game.Has('Cherubim')) percent += 10;
+                                        if (Game.Has('Seraphim')) percent += 10;
+                                        if (Game.Has('God')) percent += 10;
 
-                                    if (Game.Has('Chimera')) {
-                                        maxTime += 60 * 60 * 24 * 2;
-                                        percent += 5;
+                                        if (Game.Has('Chimera')) {
+                                            maxTime += 60 * 60 * 24 * 2;
+                                            percent += 5;
+                                        }
+
+                                        if (Game.Has('Fern tea')) percent += 3;
+                                        if (Game.Has('Ichor syrup')) percent += 7;
                                     }
 
-                                    if (Game.Has('Fern tea')) percent += 3;
-                                    if (Game.Has('Ichor syrup')) percent += 7;
+                                    let timeOfflineOptimal = Math.min(timeOffline, maxTime);
+                                    let timeOfflineReduced = Math.max(0, timeOffline - timeOfflineOptimal);
+                                    let amount = (timeOfflineOptimal + timeOfflineReduced * 0.1) * Game.cookiesPs * (percent / 100);
+
+                                    if (amount > 0) {
+                                        if (Game.prefs.popups) Game.Popup('Earned ' + Beautify(amount) + ' Neuro' + (Math.floor(amount) === 1 ? '' : 's') + ' while you were away');
+                                        else Game.Notify('Welcome back!', 'You earned <b>' + Beautify(amount) + '</b> Neuro' + (Math.floor(amount) === 1 ? '' : 's') + ' while you were away.<br>(' + Game.sayTime(timeOfflineOptimal * Game.fps, -1) + ' at ' + Math.floor(percent) + '% CpS' + (timeOfflineReduced ? ', plus ' + Game.sayTime(timeOfflineReduced * Game.fps, -1) + ' at ' + (Math.floor(percent * 10) / 100) + '%' : '') + '.)', [Math.floor(Math.random() * 16), 11]);
+
+
+                                        //modtags
+                                        //this bit is the wonkiest code i've written yet. if you don't know exactly what you're doing, leave it be. i don't know why it works, but everything else fails.
+                                        Game.Notify('IMPORTANT', 'If you are not using Mozilla Firefox, you may encounter bugs.', 1, ([Math.floor(Math.random() * 6), 9]));
+
+
+                                        Game.Earn(amount);
+
+                                    }
+
+
                                 }
-
-                                var timeOfflineOptimal = Math.min(timeOffline, maxTime);
-                                var timeOfflineReduced = Math.max(0, timeOffline - timeOfflineOptimal);
-                                var amount = (timeOfflineOptimal + timeOfflineReduced * 0.1) * Game.cookiesPs * (percent / 100);
-
-                                if (amount > 0) {
-                                    if (Game.prefs.popups) Game.Popup('Earned ' + Beautify(amount) + ' Neuro' + (Math.floor(amount) === 1 ? '' : 's') + ' while you were away');
-                                    else Game.Notify('Welcome back!', 'You earned <b>' + Beautify(amount) + '</b> Neuro' + (Math.floor(amount) === 1 ? '' : 's') + ' while you were away.<br>(' + Game.sayTime(timeOfflineOptimal * Game.fps, -1) + ' at ' + Math.floor(percent) + '% CpS' + (timeOfflineReduced ? ', plus ' + Game.sayTime(timeOfflineReduced * Game.fps, -1) + ' at ' + (Math.floor(percent * 10) / 100) + '%' : '') + '.)', [Math.floor(Math.random() * 16), 11]);
-
-
-                                    //modtags
-                                    //this bit is the wonkiest code i've written yet. if you don't know exactly what you're doing, leave it be. i don't know why it works, but everything else fails.
-                                    Game.Notify('IMPORTANT', 'If you are not using Mozilla Firefox, you may encounter bugs.', 1, ([Math.floor(Math.random() * 6), 9]));
-
-
-                                    Game.Earn(amount);
-
-                                }
-
-
                             }
-                        }
                         //we load buffs after everything as we do not want them to interfer with offline CpS
-                        for (var i in buffsToLoad) {
-                            var mestr = buffsToLoad[i];
-                            var type = Game.buffTypes[parseInt(mestr[0])];
+                        for (i in buffsToLoad) {
+                            mestr = buffsToLoad[i];
+                            let type = Game.buffTypes[parseInt(mestr[0])];
                             Game.gainBuff(type.name, parseFloat(mestr[1]) / Game.fps, parseFloat(mestr[3] || 0), parseFloat(mestr[4] || 0), parseFloat(mestr[5] || 0)).time = parseFloat(mestr[2]);
                         }
 
@@ -1688,10 +1688,12 @@ Game.Launch = function () {
         /*=====================================================================================
 		RESET
 		=======================================================================================*/
-        Game.Reset = function (hard) {
+        Game.Reset = hard => {
+            let me;
+            let i;
             Game.T = 0;
 
-            var cookiesForfeited = Game.cookiesEarned;
+            let cookiesForfeited = Game.cookiesEarned;
             if (!hard) {
                 if (cookiesForfeited >= 1000000) Game.Win('Sacrifice');
                 if (cookiesForfeited >= 1000000000) Game.Win('Oblivion');
@@ -1760,8 +1762,8 @@ Game.Launch = function () {
             else Game.removeClass('lumpsOn');
             Game.gainedPrestige = 0;
 
-            for (var i in Game.ObjectsById) {
-                var me = Game.ObjectsById[i];
+            for (i in Game.ObjectsById) {
+                me = Game.ObjectsById[i];
                 me.amount = 0;
                 me.bought = 0;
                 me.free = 0;
@@ -1773,8 +1775,8 @@ Game.Launch = function () {
                 me.pics = [];
                 me.refresh();
             }
-            for (var i in Game.UpgradesById) {
-                var me = Game.UpgradesById[i];
+            for (i in Game.UpgradesById) {
+                me = Game.UpgradesById[i];
                 if (hard || me.pool !== 'prestige') me.bought = 0;
                 if (hard || (me.pool !== 'prestige' && !me.lasting)) {
                     if (!hard && Game.Has('Keepsakes') && Game.seasonDrops.indexOf(me.name) !== -1 && Math.random() < 1 / 5) {
@@ -1790,13 +1792,13 @@ Game.Launch = function () {
 
             if (!hard) {
                 if (Game.ascensionMode !== 1) {
-                    for (var i in Game.permanentUpgrades) {
+                    for (i in Game.permanentUpgrades) {
                         if (Game.permanentUpgrades[i] !== -1) {
                             Game.UpgradesById[Game.permanentUpgrades[i]].earn();
                         }
                     }
                     if (Game.Has('Season switcher')) {
-                        for (var i in Game.seasons) {
+                        for (i in Game.seasons) {
                             Game.Unlock(Game.seasons[i].trigger);
                         }
                     }
@@ -1826,8 +1828,8 @@ Game.Launch = function () {
             Game.storeBulkButton(-1);
 
             Game.LoadMinigames();
-            for (var i in Game.ObjectsById) {
-                var me = Game.ObjectsById[i];
+            for (i in Game.ObjectsById) {
+                me = Game.ObjectsById[i];
                 if (hard && me.minigame && me.minigame.launch) {
                     me.minigame.launch();
                     me.minigame.reset(true);
@@ -1842,7 +1844,7 @@ Game.Launch = function () {
 
             elementByID('logButton').classList.remove('hasUpdate');
 
-            for (var i in Game.customReset) {
+            for (i in Game.customReset) {
                 Game.customReset[i]();
             }
 
@@ -1857,18 +1859,20 @@ Game.Launch = function () {
                 else Game.Notify('Game reset', 'So long, Neuros.', [21, 6], 6);
             }
         }
-        Game.HardReset = function (bypass) {
+        Game.HardReset = bypass => {
+            let me;
             if (!bypass) {
                 Game.Prompt('<h3>Wipe save</h3><div class="block">Do you REALLY want to wipe your save?<br><small>You will lose your progress, your achievements, and your heavenly chips!</small></div>', [['Yes!', 'Game.ClosePrompt();Game.HardReset(1);'], 'No']);
             } else if (bypass === 1) {
                 Game.Prompt('<h3>Wipe save</h3><div class="block">Whoah now, are you really, <b><i>REALLY</i></b> sure you want to go through with this?<br><small>Don\'t say we didn\'t warn you!</small></div>', [['Do it!', 'Game.ClosePrompt();Game.HardReset(2);'], 'No']);
             } else {
-                for (var i in Game.AchievementsById) {
-                    var me = Game.AchievementsById[i];
+                let i;
+                for (i in Game.AchievementsById) {
+                    me = Game.AchievementsById[i];
                     me.won = 0;
                 }
-                for (var i in Game.ObjectsById) {
-                    var me = Game.ObjectsById[i];
+                for (i in Game.ObjectsById) {
+                    me = Game.ObjectsById[i];
                     me.level = 0;
                 }
 
@@ -1897,27 +1901,27 @@ Game.Launch = function () {
 
 
         Game.onCrate = 0;
-        Game.setOnCrate = function (what) {
+        Game.setOnCrate = what => {
             Game.onCrate = what;
         }
-        Game.crate = function (me, context, forceClickStr, id) {
+        Game.crate = (me, context, forceClickStr, id) => {
             //produce a crate with associated tooltip for an upgrade or achievement
             //me is an object representing the upgrade or achievement
             //context can be "store", "ascend", "stats" or undefined
             //forceClickStr changes what is done when the crate is clicked
             //id is the resulting div's desired id
 
-            var classes = 'crate';
-            var enabled = 0;
-            var noFrame = 0;
-            var attachment = 'top';
-            var neuromancy = 0;
+            let classes = 'crate';
+            let enabled = 0;
+            let noFrame = 0;
+            let attachment = 'top';
+            let neuromancy = 0;
             if (context === 'stats' && (Game.Has('Neuromancy') || (Game.sesame && me.pool === 'debug'))) neuromancy = 1;
-            var mysterious = 0;
-            var clickStr = '';
+            let mysterious = 0;
+            let clickStr = '';
 
             if (me.type === 'upgrade') {
-                var canBuy = (context === 'store' ? me.canBuy() : true);
+                let canBuy = (context === 'store' ? me.canBuy() : true);
                 if (context === 'stats' && me.bought === 0 && !Game.Has('Neuromancy') && (!Game.sesame || me.pool !== 'debug')) return '';
                 else if (context === 'stats' && (Game.Has('Neuromancy') || (Game.sesame && me.pool === 'debug'))) neuromancy = 1;
                 else if (context === 'store' && !canBuy) enabled = 0;
@@ -1954,7 +1958,7 @@ Game.Launch = function () {
             if (me.choicesFunction) classes += ' selector';
 
 
-            var icon = me.icon;
+            let icon = me.icon;
             if (mysterious) icon = [0, 7];
 
             if (me.iconFunction) icon = me.iconFunction();
@@ -1964,7 +1968,7 @@ Game.Launch = function () {
             if (enabled) classes += ' enabled';// else classes+=' disabled';
             if (noFrame) classes += ' noFrame';
 
-            var text = [];
+            let text = [];
             if (Game.sesame) {
                 if (Game.debuggedUpgradeCpS[me.name] || Game.debuggedUpgradeCpClick[me.name]) {
                     text.push('x' + Beautify(1 + Game.debuggedUpgradeCpS[me.name], 2));
@@ -1977,9 +1981,9 @@ Game.Launch = function () {
                     text.push('#fff');
                 }
             }
-            var textStr = '';
-            for (var i = 0; i < text.length; i += 2) {
-                textStr += '<div style="opacity:0.9;z-index:1000;padding:0px 2px;background:' + text[i + 1] + ';color:#000;font-size:10px;position:absolute;top:' + (i / 2 * 10) + 'px;left:0px;">' + text[i] + '</div>';
+            let textStr = '';
+            for (let i = 0; i < text.length; i += 2) {
+                textStr += '<div style="opacity:0.9;z-index:1000;padding:0 2px;background:' + text[i + 1] + ';color:#000;font-size:10px;position:absolute;top:' + (i / 2 * 10) + 'px;left:0;">' + text[i] + '</div>';
             }
 
             return '<div' +
@@ -1999,11 +2003,12 @@ Game.Launch = function () {
                 (me.choicesFunction ? '<div class="selectorCorner"></div>' : '') +
                 '</div>';
         }
-        Game.crateTooltip = function (me, context) {
-            var tags = [];
+        Game.crateTooltip = (me, context) => {
+            let it;
+            let tags = [];
             let mysterious = 0;
-            var neuromancy = 0;
-            var price = '';
+            let neuromancy = 0;
+            let price = '';
             if (context === 'stats' && (Game.Has('Neuromancy') || (Game.sesame && me.pool === 'debug'))) neuromancy = 1;
 
             if (me.type === 'upgrade') {
@@ -2030,8 +2035,8 @@ Game.Launch = function () {
                 if (neuromancy && me.bought === 0) tags.push('Click to learn!', '#00c462');
                 else if (neuromancy && me.bought > 0) tags.push('Click to unlearn!', '#00c462');
 
-                var canBuy = (context === 'store' ? me.canBuy() : true);
-                var cost = me.getPrice();
+                const canBuy = (context === 'store' ? me.canBuy() : true);
+                let cost = me.getPrice();
                 if (me.priceLumps > 0) cost = me.priceLumps;
 
                 if (me.priceLumps === 0 && cost === 0) price = '';
@@ -2055,19 +2060,19 @@ Game.Launch = function () {
                 else if (neuromancy && me.won > 0) tags.push('Click to lose!', '#00c462');
             }
 
-            var tagsStr = '';
-            for (var i = 0; i < tags.length; i += 2) {
+            let tagsStr = '';
+            for (let i = 0; i < tags.length; i += 2) {
                 if (i % 2 === 0) tagsStr += ' <div class="tag" style="color:' + (tags[i + 1] === 0 ? '#fff' : tags[i + 1]) + ';">[' + tags[i] + ']</div>';
             }
             tagsStr = tagsStr.substring(1);
 
-            var icon = me.icon;
+            let icon = me.icon;
             if (mysterious) icon = [0, 7];
 
             if (me.iconFunction) icon = me.iconFunction();
 
 
-            var tip = '';
+            let tip = '';
             if (context === 'store') {
                 if (me.pool !== 'toggle' && me.pool !== 'tech') {
                     if (Game.Has('Inspired checklist')) {
@@ -2081,12 +2086,12 @@ Game.Launch = function () {
                 else if (me.pool === 'tech') tip = 'Click to research.';
             }
 
-            var desc = me.desc;
+            let desc = me.desc;
             if (me.descFunc) desc = me.descFunc();
             if (me.bought && context === 'store' && me.displayFuncWhenOwned) desc = me.displayFuncWhenOwned() + '<div class="line"></div>' + desc;
             if (me.unlockAt) {
                 if (me.unlockAt.require) {
-                    var it = Game.Upgrades[me.unlockAt.require];
+                    it = Game.Upgrades[me.unlockAt.require];
                     desc = '<div style="font-size:80%;text-align:center;">From <div class="icon" style="vertical-align:middle;display:inline-block;' + (it.icon[2] ? 'background-image:url(' + it.icon[2] + ');' : '') + 'background-position:' + (-it.icon[0] * 48) + 'px ' + (-it.icon[1] * 48) + 'px;transform:scale(0.5);margin:-16px;"></div> ' + it.name + '</div><div class="line"></div>' + desc;
                 }
                 /*else if (me.unlockAt.season)
@@ -2095,7 +2100,6 @@ Game.Launch = function () {
 					desc='<div style="font-size:80%;text-align:center;">From <div class="icon" style="vertical-align:middle;display:inline-block;'+(Game.Upgrades[it.trigger].icon[2]?'background-image:url('+Game.Upgrades[it.trigger].icon[2]+');':'')+'background-position:'+(-Game.Upgrades[it.trigger].icon[0]*48)+'px '+(-Game.Upgrades[it.trigger].icon[1]*48)+'px;transform:scale(0.5);margin:-16px;"></div> '+it.name+'</div><div class="line"></div>'+desc;
 				}*/
                 else if (me.unlockAt.text) {
-                    var it = Game.Upgrades[me.unlockAt.require];
                     desc = '<div style="font-size:80%;text-align:center;">From <b>' + text + '</b></div><div class="line"></div>' + desc;
                 }
             }
@@ -2110,11 +2114,11 @@ Game.Launch = function () {
                 (Game.sesame ? ('<div style="font-size:9px;">Id : ' + me.id + ' | Order : ' + Math.floor(me.order) + (me.tier ? ' | Tier : ' + me.tier : '') + '</div>') : '');
         }
 
-        Game.costDetails = function (cost) {
+        Game.costDetails = cost => {
             if (!Game.Has('Genius accounting')) return '';
             if (!cost) return '';
-            var priceInfo = '';
-            var cps = Game.cookiesPs * (1 - Game.cpsSucked);
+            let priceInfo = '';
+            const cps = Game.cookiesPs * (1 - Game.cpsSucked);
             if (cost > Game.cookies) priceInfo += 'in ' + Game.sayTime(((cost - Game.cookies) / cps + 1) * Game.fps) + '<br>';
             priceInfo += Game.sayTime((cost / cps + 1) * Game.fps) + ' worth<br>';
             priceInfo += Beautify((cost / Game.cookies) * 100, 1) + '% of gym<br>';
@@ -2127,22 +2131,18 @@ Game.Launch = function () {
 		=======================================================================================*/
 
         Game.HCfactor = 3;
-        Game.HowMuchPrestige = function (cookies)//how much prestige [cookies] should land you
-        {
-            return Math.pow(cookies / 1000000000000, 1 / Game.HCfactor);
-        }
-        Game.HowManyCookiesReset = function (chips)//how many cookies [chips] are worth
-        {
+        Game.HowMuchPrestige = cookies => Math.pow(cookies / 1000000000000, 1 / Game.HCfactor)
+        Game.HowManyCookiesReset = chips => {
             //this must be the inverse of the above function (ie. if cookies=chips^2, chips=cookies^(1/2) )
             return Math.pow(chips, Game.HCfactor) * 1000000000000;
         }
         Game.gainedPrestige = 0;
-        Game.EarnHeavenlyChips = function (cookiesForfeited) {
+        Game.EarnHeavenlyChips = cookiesForfeited => {
             //recalculate prestige and chips owned
-            var prestige = Math.floor(Game.HowMuchPrestige(Game.cookiesReset + cookiesForfeited));
+            const prestige = Math.floor(Game.HowMuchPrestige(Game.cookiesReset + cookiesForfeited));
             if (prestige > Game.prestige)//did we gain prestige levels?
             {
-                var prestigeDifference = prestige - Game.prestige;
+                const prestigeDifference = prestige - Game.prestige;
                 Game.gainedPrestige = prestigeDifference;
                 Game.heavenlyChips += prestigeDifference;
                 Game.prestige = prestige;
@@ -2151,8 +2151,8 @@ Game.Launch = function () {
             }
         }
 
-        Game.GetHeavenlyMultiplier = function () {
-            var heavenlyMult = 0;
+        Game.GetHeavenlyMultiplier = () => {
+            let heavenlyMult = 0;
             if (Game.Has('Heavenly chip secret')) heavenlyMult += 0.05;
             if (Game.Has('Heavenly Neuro stand')) heavenlyMult += 0.20;
             if (Game.Has('Heavenly bakery')) heavenlyMult += 0.25;
@@ -2163,7 +2163,7 @@ Game.Launch = function () {
             if (Game.Has('Lucky number')) heavenlyMult *= 1.01;
             if (Game.Has('Lucky payout')) heavenlyMult *= 1.01;
             if (Game.hasGod) {
-                var godLvl = Game.hasGod('creation');
+                let godLvl = Game.hasGod('creation');
                 if (godLvl === 1) heavenlyMult *= 0.7;
                 else if (godLvl === 2) heavenlyMult *= 0.8;
                 else if (godLvl === 3) heavenlyMult *= 0.9;
@@ -2186,21 +2186,21 @@ Game.Launch = function () {
         Game.ascendMeterLevel = 100000000000000000000000000000;
 
         Game.nextAscensionMode = 0;
-        Game.UpdateAscensionModePrompt = function () {
-            var icon = Game.ascensionModes[Game.nextAscensionMode].icon;
-            var name = Game.ascensionModes[Game.nextAscensionMode].name;
+        Game.UpdateAscensionModePrompt = () => {
+            const icon = Game.ascensionModes[Game.nextAscensionMode].icon;
+            const name = Game.ascensionModes[Game.nextAscensionMode].name;
             elementByID('ascendModeButton').innerHTML =
                 '<div class="crate noFrame enabled" ' + Game.clickStr + '="Game.PickAscensionMode();" ' + Game.getTooltip(
                     '<div style="min-width:200px;text-align:center;font-size:11px;">Challenge mode for the next run :<br><b>' + name + '</b><div class="line"></div>Challenge modes apply special modifiers to your next ascension.<br>Click to change.</div>'
                     , 'bottom-right') + ' style="opacity:1;float:none;display:block;background-position:' + (-icon[0] * 48) + 'px ' + (-icon[1] * 48) + 'px;"></div>';
         }
-        Game.PickAscensionMode = function () {
+        Game.PickAscensionMode = () => {
             PlaySound('snd/tick.mp3');
             Game.tooltip.hide();
 
-            var str = '';
-            for (var i in Game.ascensionModes) {
-                var icon = Game.ascensionModes[i].icon;
+            let str = '';
+            for (let i in Game.ascensionModes) {
+                let icon = Game.ascensionModes[i].icon;
                 str += '<div class="crate enabled' + (i === Game.nextAscensionMode ? ' highlighted' : '') + '" id="challengeModeSelector' + i + '" style="opacity:1;float:none;display:inline-block;background-position:' + (-icon[0] * 48) + 'px ' + (-icon[1] * 48) + 'px;" ' + Game.clickStr + '="Game.nextAscensionMode=' + i + ';Game.PickAscensionMode();PlaySound(\'snd/tick.mp3\');Game.choiceSelectorOn=-1;" onMouseOut="elementByID(\'challengeSelectedName\').innerHTML=Game.ascensionModes[Game.nextAscensionMode].name;elementByID(\'challengeSelectedDesc\').innerHTML=Game.ascensionModes[Game.nextAscensionMode].desc;" onMouseOver="elementByID(\'challengeSelectedName\').innerHTML=Game.ascensionModes[' + i + '].name;elementByID(\'challengeSelectedDesc\').innerHTML=Game.ascensionModes[' + i + '].desc;"' +
                     '></div>';
             }
@@ -2209,17 +2209,17 @@ Game.Launch = function () {
                 , [['Confirm', 'Game.UpdateAscensionModePrompt();Game.ClosePrompt();']], 0, 'widePrompt');
         }
 
-        Game.UpdateLegacyPrompt = function () {
+        Game.UpdateLegacyPrompt = () => {
             if (!elementByID('legacyPromptData')) return 0;
-            var date = new Date();
+            let date = new Date();
             date.setTime(Date.now() - Game.startDate);
-            var timeInSeconds = date.getTime() / 1000;
-            var startDate = Game.sayTime(timeInSeconds * Game.fps, -1);
+            let timeInSeconds = date.getTime() / 1000;
+            let startDate = Game.sayTime(timeInSeconds * Game.fps, -1);
 
-            var ascendNowToGet = Math.floor(Game.HowMuchPrestige(Game.cookiesReset + Game.cookiesEarned) - Game.HowMuchPrestige(Game.cookiesReset));
-            var cookiesToNext = Math.floor(Game.HowManyCookiesReset(Game.HowMuchPrestige(Game.cookiesReset + Game.cookiesEarned) + 1) - Game.cookiesReset - Game.cookiesEarned);
+            let ascendNowToGet = Math.floor(Game.HowMuchPrestige(Game.cookiesReset + Game.cookiesEarned) - Game.HowMuchPrestige(Game.cookiesReset));
+            let cookiesToNext = Math.floor(Game.HowManyCookiesReset(Game.HowMuchPrestige(Game.cookiesReset + Game.cookiesEarned) + 1) - Game.cookiesReset - Game.cookiesEarned);
             elementByID('legacyPromptData').innerHTML = '' +
-                '<div class="icon" style="pointer-event:none;transform:scale(2);opacity:0.25;position:absolute;right:-8px;bottom:-8px;background-position:' + (-19 * 48) + 'px ' + (-7 * 48) + 'px;"></div>' +
+                '<div class="icon" style="transform:scale(2);opacity:0.25;position:absolute;right:-8px;bottom:-8px;background-position:' + (-19 * 48) + 'px ' + (-7 * 48) + 'px;"></div>' +
                 '<div class="listing"><b>Run duration :</b> ' + (startDate === '' ? 'tiny' : (startDate)) + '</div>' +
                 //'<div class="listing">Earned : '+Beautify(Game.cookiesEarned)+', Reset : '+Beautify(Game.cookiesReset)+'</div>'+
                 '<div class="listing"><b>Prestige level :</b> ' + Beautify(Game.prestige) + '</div>' +
@@ -2240,7 +2240,7 @@ Game.Launch = function () {
                 , 'bottom-right') + '><h3 id="ascendHCs"></h3></div>' +
             '<a id="ascendButton" class="option framed large red" ' + Game.getTooltip(
                 '<div style="min-width:200px;text-align:center;font-size:11px;">Click this once you\'ve bought<br>everything you need!</div>'
-                , 'bottom-right') + ' style="font-size:16px;margin-top:0px;"><span class="fancyText" style="font-size:20px;">Reincarnate</span></a>' +
+                , 'bottom-right') + ' style="font-size:16px;margin-top:0;"><span class="fancyText" style="font-size:20px;">Reincarnate</span></a>' +
             '<div id="ascendModeButton" style="position:absolute;right:34px;bottom:25px;display:none;"></div>' +
             '<input type="text" style="display:block;" id="upgradePositions"/></div>' +
 
@@ -2248,7 +2248,7 @@ Game.Launch = function () {
 
         Game.UpdateAscensionModePrompt();
 
-        AddEvent(elementByID('ascendButton'), 'click', function () {
+        AddEvent(elementByID('ascendButton'), 'click', () => {
             PlaySound('snd/tick.mp3');
             Game.Reincarnate();
         });
@@ -2261,7 +2261,7 @@ Game.Launch = function () {
         Game.AscendTimer = 0;//how far we are into the ascend animation
         Game.AscendDuration = Game.fps * 5;//how long the ascend animation is
         Game.AscendBreakpoint = Game.AscendDuration * 0.5;//at which point the cookie explodes during the ascend animation
-        Game.UpdateAscendIntro = function () {
+        Game.UpdateAscendIntro = () => {
             if (Game.AscendTimer === 1) PlaySound('snd/charging.mp3');
             if (Game.AscendTimer === Math.floor(Game.AscendBreakpoint)) PlaySound('snd/thud.mp3');
             Game.AscendTimer++;
@@ -2282,8 +2282,8 @@ Game.Launch = function () {
             }
         }
         Game.ReincarnateTimer = 0;//how far we are into the reincarnation animation
-        Game.ReincarnateDuration = Game.fps * 1;//how long the reincarnation animation is
-        Game.UpdateReincarnateIntro = function () {
+        Game.ReincarnateDuration = Game.fps;//how long the reincarnation animation is
+        Game.UpdateReincarnateIntro = () => {
             if (Game.ReincarnateTimer === 1) PlaySound('snd/pop' + Math.floor(Math.random() * 3 + 1) + '.mp3', 0.75);
             Game.ReincarnateTimer++;
             if (Game.ReincarnateTimer > Game.ReincarnateDuration)//end animation and launch regular game
@@ -2292,7 +2292,7 @@ Game.Launch = function () {
                 Game.removeClass('reincarnating');
             }
         }
-        Game.Reincarnate = function (bypass) {
+        Game.Reincarnate = bypass => {
             if (!bypass) Game.Prompt('<h3>Reincarnate</h3><div class="block">Are you ready to return to the mortal world?</div>', [['Yes', 'Game.ClosePrompt();Game.Reincarnate(1);'], 'No']);
             else {
                 Game.ascendUpgradesl.innerHTML = '';
@@ -2315,7 +2315,7 @@ Game.Launch = function () {
                 Game.BigCookieSize = 0;
             }
         }
-        Game.GiveUpAscend = function (bypass) {
+        Game.GiveUpAscend = bypass => {
             if (!bypass) Game.Prompt('<h3>Give up</h3><div class="block">Are you sure? You\'ll have to start this run over and won\'t gain any heavenly chips!</div>', [['Yes', 'Game.ClosePrompt();Game.GiveUpAscend(1);'], 'No']);
             else {
                 if (Game.prefs.popups) Game.Popup('Game reset');
@@ -2323,7 +2323,7 @@ Game.Launch = function () {
                 Game.Reset();
             }
         }
-        Game.Ascend = function (bypass) {
+        Game.Ascend = bypass => {
             if (!bypass) Game.Prompt('<h3>Ascend</h3><div class="block">Do you REALLY want to ascend?<div class="line"></div>You will lose your progress and start over from scratch.<div class="line"></div>All your Neuros will be converted into prestige and heavenly chips.<div class="line"></div>You will keep your achievements' + (Game.canLumps() ? ', building levels and sugar lumps' : '') + '.</div>', [['Yes!', 'Game.ClosePrompt();Game.Ascend(1);'], 'No']);
             else {
                 if (Game.prefs.popups) Game.Popup('Ascending');
@@ -2359,7 +2359,9 @@ Game.Launch = function () {
         Game.AscendDragging = 0;
         Game.AscendGridSnap = 24;
         Game.heavenlyBounds = {left: 0, right: 0, top: 0, bottom: 0};
-        Game.UpdateAscend = function () {
+        Game.UpdateAscend = () => {
+            let me;
+            let i;
             if (Game.keys[37]) Game.AscendOffXT += 16 * (1 / Game.AscendZoomT);
             if (Game.keys[38]) Game.AscendOffYT += 16 * (1 / Game.AscendZoomT);
             if (Game.keys[39]) Game.AscendOffXT -= 16 * (1 / Game.AscendZoomT);
@@ -2375,22 +2377,18 @@ Game.Launch = function () {
             if (Math.abs(Game.AscendZoomT - Game.AscendZoom) < 0.005) Game.AscendZoom = Game.AscendZoomT;
 
             if (Game.DebuggingPrestige) {
-                for (var i in Game.PrestigeUpgrades) {
-                    var me = Game.PrestigeUpgrades[i];
-                    AddEvent(elementByID('heavenlyUpgrade' + me.id), 'mousedown', function (me) {
-                        return function () {
-                            if (!Game.DebuggingPrestige) return;
-                            Game.SelectedHeavenlyUpgrade = me;
+                for (i in Game.PrestigeUpgrades) {
+                    me = Game.PrestigeUpgrades[i];
+                    AddEvent(elementByID('heavenlyUpgrade' + me.id), 'mousedown', (me => () => {
+                        if (!Game.DebuggingPrestige) return;
+                        Game.SelectedHeavenlyUpgrade = me;
+                    })(me));
+                    AddEvent(elementByID('heavenlyUpgrade' + me.id), 'mouseup', (me => () => {
+                        if (Game.SelectedHeavenlyUpgrade === me) {
+                            Game.SelectedHeavenlyUpgrade = 0;
+                            Game.BuildAscendTree();
                         }
-                    }(me));
-                    AddEvent(elementByID('heavenlyUpgrade' + me.id), 'mouseup', function (me) {
-                        return function () {
-                            if (Game.SelectedHeavenlyUpgrade === me) {
-                                Game.SelectedHeavenlyUpgrade = 0;
-                                Game.BuildAscendTree();
-                            }
-                        }
-                    }(me));
+                    })(me));
                 }
             }
 
@@ -2405,25 +2403,25 @@ Game.Launch = function () {
                     if (Game.SelectedHeavenlyUpgrade) {
                         Game.tooltip.hide();
                         //drag upgrades around
-                        var me = Game.SelectedHeavenlyUpgrade;
+                        me = Game.SelectedHeavenlyUpgrade;
                         me.posX += (Game.mouseX - Game.AscendDragX) * (1 / Game.AscendZoomT);
                         me.posY += (Game.mouseY - Game.AscendDragY) * (1 / Game.AscendZoomT);
-                        var posX = me.posX;//Math.round(me.posX/Game.AscendGridSnap)*Game.AscendGridSnap;
-                        var posY = me.posY;//Math.round(me.posY/Game.AscendGridSnap)*Game.AscendGridSnap;
+                        let posX = me.posX;//Math.round(me.posX/Game.AscendGridSnap)*Game.AscendGridSnap;
+                        let posY = me.posY;//Math.round(me.posY/Game.AscendGridSnap)*Game.AscendGridSnap;
                         elementByID('heavenlyUpgrade' + me.id).style.left = Math.floor(posX) + 'px';
                         elementByID('heavenlyUpgrade' + me.id).style.top = Math.floor(posY) + 'px';
-                        for (var ii in me.parents) {
-                            var origX = 0;
-                            var origY = 0;
-                            var targX = me.posX + 28;
-                            var targY = me.posY + 28;
+                        for (let ii in me.parents) {
+                            let origX = 0;
+                            let origY = 0;
+                            let targX = me.posX + 28;
+                            let targY = me.posY + 28;
                             if (me.parents[ii] !== -1) {
                                 origX = me.parents[ii].posX + 28;
                                 origY = me.parents[ii].posY + 28;
                             }
-                            var rot = -(Math.atan((targY - origY) / (origX - targX)) / Math.PI) * 180;
+                            let rot = -(Math.atan((targY - origY) / (origX - targX)) / Math.PI) * 180;
                             if (targX <= origX) rot += 180;
-                            var dist = Math.floor(Math.sqrt((targX - origX) * (targX - origX) + (targY - origY) * (targY - origY)));
+                            let dist = Math.floor(Math.sqrt((targX - origX) * (targX - origX) + (targY - origY) * (targY - origY)));
                             //l('heavenlyLink'+me.id+'-'+ii).style='width:'+dist+'px;-webkit-transform:rotate('+rot+'deg);-moz-transform:rotate('+rot+'deg);-ms-transform:rotate('+rot+'deg);-o-transform:rotate('+rot+'deg);transform:rotate('+rot+'deg);left:'+(origX)+'px;top:'+(origY)+'px;';
                             elementByID('heavenlyLink' + me.id + '-' + ii).style = 'width:' + dist + 'px;transform:rotate(' + rot + 'deg);left:' + (origX) + 'px;top:' + (origY) + 'px;';
                         }
@@ -2483,59 +2481,62 @@ Game.Launch = function () {
             Game.heavenlyChipsDisplayed += (Game.heavenlyChips - Game.heavenlyChipsDisplayed) * 0.4;
 
             if (Game.DebuggingPrestige && Game.T % 10 === 0) {
-                var str = '';
-                for (var i in Game.PrestigeUpgrades) {
-                    var me = Game.PrestigeUpgrades[i];
+                let str = '';
+                for (i in Game.PrestigeUpgrades) {
+                    me = Game.PrestigeUpgrades[i];
                     str += me.id + ':[' + Math.floor(me.posX) + ',' + Math.floor(me.posY) + '],';
                 }
                 elementByID('upgradePositions').value = 'Game.UpgradePositions={' + str + '};';
             }
             //if (Game.T%5==0) Game.BuildAscendTree();
         }
-        Game.AscendRefocus = function () {
+        Game.AscendRefocus = () => {
             Game.AscendOffX = 0;
             Game.AscendOffY = 0;
             Game.ascendl.className = '';
         }
 
         Game.SelectedHeavenlyUpgrade = 0;
-        Game.PurchaseHeavenlyUpgrade = function (what) {
+        Game.PurchaseHeavenlyUpgrade = what => {
             //if (Game.Has('Neuromancy')) Game.UpgradesById[what].toggle(); else
             if (Game.UpgradesById[what].buy()) {
                 if (elementByID('heavenlyUpgrade' + what)) {
-                    var rect = elementByID('heavenlyUpgrade' + what).getBoundingClientRect();
+                    const rect = elementByID('heavenlyUpgrade' + what).getBoundingClientRect();
                     Game.SparkleAt((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2 - 24);
                 }
                 //Game.BuildAscendTree();
             }
         }
-        Game.BuildAscendTree = function () {
-            var str = '';
+        Game.BuildAscendTree = () => {
+            let ii;
+            let me;
+            let i;
+            let str = '';
             Game.heavenlyBounds = {left: 0, right: 0, top: 0, bottom: 0};
 
             if (Game.DebuggingPrestige) elementByID('upgradePositions').style.display = 'block'; else elementByID('upgradePositions').style.display = 'none';
 
-            for (var i in Game.PrestigeUpgrades) {
-                var me = Game.PrestigeUpgrades[i];
+            for (i in Game.PrestigeUpgrades) {
+                me = Game.PrestigeUpgrades[i];
                 me.canBePurchased = 1;
                 if (!me.bought && !Game.DebuggingPrestige) {
                     if (me.showIf && !me.showIf()) me.canBePurchased = 0;
                     else {
-                        for (var ii in me.parents) {
+                        for (ii in me.parents) {
                             if (me.parents[ii] !== -1 && !me.parents[ii].bought) me.canBePurchased = 0;
                         }
                     }
                 }
             }
             str += '<div class="crateBox" style="filter:none;-webkit-filter:none;">';//chrome is still bad at these
-            for (var i in Game.PrestigeUpgrades) {
-                var me = Game.PrestigeUpgrades[i];
+            for (i in Game.PrestigeUpgrades) {
+                me = Game.PrestigeUpgrades[i];
 
-                var ghosted = 0;
+                let ghosted = 0;
                 if (me.canBePurchased || Game.Has('Neuromancy')) {
                     str += Game.crate(me, 'ascend', 'Game.PurchaseHeavenlyUpgrade(' + me.id + ');', 'heavenlyUpgrade' + me.id);
                 } else {
-                    for (var ii in me.parents) {
+                    for (ii in me.parents) {
                         if (me.parents[ii] !== -1 && me.parents[ii].canBePurchased) ghosted = 1;
                     }
                     if (me.showIf && !me.showIf()) ghosted = 0;
@@ -2550,20 +2551,20 @@ Game.Launch = function () {
                     if (me.posY < Game.heavenlyBounds.top) Game.heavenlyBounds.top = me.posY;
                     if (me.posY > Game.heavenlyBounds.bottom) Game.heavenlyBounds.bottom = me.posY;
                 }
-                for (var ii in me.parents)//create pulsing links
+                for (ii in me.parents)//create pulsing links
                 {
                     if (me.parents[ii] !== -1 && (me.canBePurchased || ghosted)) {
-                        var origX = 0;
-                        var origY = 0;
-                        var targX = me.posX + 28;
-                        var targY = me.posY + 28;
+                        let origX = 0;
+                        let origY = 0;
+                        let targX = me.posX + 28;
+                        let targY = me.posY + 28;
                         if (me.parents[ii] !== -1) {
                             origX = me.parents[ii].posX + 28;
                             origY = me.parents[ii].posY + 28;
                         }
-                        var rot = -(Math.atan((targY - origY) / (origX - targX)) / Math.PI) * 180;
+                        let rot = -(Math.atan((targY - origY) / (origX - targX)) / Math.PI) * 180;
                         if (targX <= origX) rot += 180;
-                        var dist = Math.floor(Math.sqrt((targX - origX) * (targX - origX) + (targY - origY) * (targY - origY)));
+                        let dist = Math.floor(Math.sqrt((targX - origX) * (targX - origX) + (targY - origY) * (targY - origY)));
                         str += '<div class="parentLink" id="heavenlyLink' + me.id + '-' + ii + '" style="' + (ghosted ? 'opacity:0.1;' : '') + 'width:' + dist + 'px;-webkit-transform:rotate(' + rot + 'deg);-moz-transform:rotate(' + rot + 'deg);-ms-transform:rotate(' + rot + 'deg);-o-transform:rotate(' + rot + 'deg);transform:rotate(' + rot + 'deg);left:' + (origX) + 'px;top:' + (origY) + 'px;"></div>';
                     }
                 }
@@ -2587,19 +2588,19 @@ Game.Launch = function () {
         Game.lumpCurrentType = 0;
         elementByID('comments').innerHTML = elementByID('comments').innerHTML +
             '<div id="lumps" onclick="Game.clickLump();" ' + Game.getDynamicTooltip('Game.lumpTooltip', 'bottom') + '><div id="lumpsIcon" class="usesIcon"></div><div id="lumpsIcon2" class="usesIcon"></div><div id="lumpsAmount">0</div></div>';
-        Game.lumpTooltip = function () {
-            var str = '<div style="padding:8px;width:400px;font-size:11px;text-align:center;">' +
+        Game.lumpTooltip = () => {
+            let str = '<div style="padding:8px;width:400px;font-size:11px;text-align:center;">' +
                 'You have <span class="price lump">' + Beautify(Game.lumps) + ' sugar lump' + (Game.lumps === 1 ? '' : 's') + '</span>.' +
                 '<div class="line"></div>' +
                 'A <b>sugar lump</b> is coalescing here, attracted by your accomplishments.';
 
-            var age = Date.now() - Game.lumpT;
+            let age = Date.now() - Game.lumpT;
             str += '<div class="line"></div>';
             if (age < Game.lumpMatureAge) str += 'This sugar lump is still growing and will take <b>' + Game.sayTime(((Game.lumpMatureAge - age) / 1000 + 1) * Game.fps, -1) + '</b> to reach maturity.';
             else if (age < Game.lumpRipeAge) str += 'This sugar lump is mature and will be ripe in <b>' + Game.sayTime(((Game.lumpRipeAge - age) / 1000 + 1) * Game.fps, -1) + '</b>.<br>You may <b>click it to harvest it now</b>, but there is a <b>50% chance you won\'t get anything</b>.';
             else if (age < Game.lumpOverripeAge) str += '<b>This sugar lump is ripe! Click it to harvest it.</b><br>If you do nothing, it will auto-harvest in <b>' + Game.sayTime(((Game.lumpOverripeAge - age) / 1000 + 1) * Game.fps, -1) + '</b>.';
 
-            var phase = (age / Game.lumpOverripeAge) * 7;
+            let phase = (age / Game.lumpOverripeAge) * 7;
             if (phase >= 3) {
                 if (Game.lumpCurrentType !== 0) str += '<div class="line"></div>';
                 if (Game.lumpCurrentType === 1) str += 'This sugar lump grew to be <b>bifurcated</b>; harvesting it has a 50% chance of yielding two lumps.';
@@ -2617,8 +2618,8 @@ Game.Launch = function () {
             str += '</div>';
             return str;
         }
-        Game.computeLumpTimes = function () {
-            var hour = 1000 * 60 * 60;
+        Game.computeLumpTimes = () => {
+            const hour = 1000 * 60 * 60;
             Game.lumpMatureAge = hour * 20;
             Game.lumpRipeAge = hour * 23;
             if (Game.Has('Stevia Caelestis')) Game.lumpRipeAge -= hour;
@@ -2626,7 +2627,7 @@ Game.Launch = function () {
             if (Game.Has('Ichor syrup')) Game.lumpMatureAge -= 1000 * 60 * 7;
             if (Game.Has('Sugar aging process')) Game.lumpRipeAge -= 6000 * Math.min(600, Game.Objects['Grandma'].amount);//capped at 600 grandmas
             if (Game.hasGod && Game.BuildingsOwned % 10 === 0) {
-                var godLvl = Game.hasGod('order');
+                let godLvl = Game.hasGod('order');
                 if (godLvl === 1) Game.lumpRipeAge -= hour;
                 else if (godLvl === 2) Game.lumpRipeAge -= (hour / 3) * 2;
                 else if (godLvl === 3) Game.lumpRipeAge -= (hour / 3);
@@ -2642,15 +2643,15 @@ Game.Launch = function () {
                 Game.lumpOverripeAge /= 2000;
             }
         }
-        Game.loadLumps = function (time) {
+        Game.loadLumps = () => {
             Game.computeLumpTimes();
             //Game.computeLumpType();
             if (!Game.canLumps()) Game.removeClass('lumpsOn');
             else {
                 if (Game.ascensionMode !== 1) Game.addClass('lumpsOn');
                 Game.lumpT = Math.min(Date.now(), Game.lumpT);
-                var age = Math.max(Date.now() - Game.lumpT, 0);
-                var amount = Math.floor(age / Game.lumpOverripeAge);//how many lumps did we harvest since we closed the game?
+                let age = Math.max(Date.now() - Game.lumpT, 0);
+                let amount = Math.floor(age / Game.lumpOverripeAge);//how many lumps did we harvest since we closed the game?
                 if (amount >= 1) {
                     Game.harvestLumps(1, true);
                     Game.lumpCurrentType = 0;//all offline lumps after the first one have a normal type
@@ -2662,7 +2663,7 @@ Game.Launch = function () {
                 }
             }
         }
-        Game.gainLumps = function (total) {
+        Game.gainLumps = total => {
             if (Game.lumpsTotal === -1) {
                 Game.lumpsTotal = 0;
                 Game.lumps = 0;
@@ -2674,12 +2675,12 @@ Game.Launch = function () {
             if (Game.lumpsTotal >= 30) Game.Win('Sugar rush');
             if (Game.lumpsTotal >= 365) Game.Win('Year\'s worth of cavities');
         }
-        Game.clickLump = function () {
+        Game.clickLump = () => {
             if (!Game.canLumps()) return;
-            var age = Date.now() - Game.lumpT;
+            let age = Date.now() - Game.lumpT;
             if (age < Game.lumpMatureAge) {
             } else if (age < Game.lumpRipeAge) {
-                var amount = chooseRandomElement([0, 1]);
+                let amount = chooseRandomElement([0, 1]);
                 if (amount !== 0) Game.Win('Hand-picked');
                 Game.harvestLumps(amount);
                 Game.computeLumpType();
@@ -2688,10 +2689,10 @@ Game.Launch = function () {
                 Game.computeLumpType();
             }
         }
-        Game.harvestLumps = function (amount, silent) {
+        Game.harvestLumps = (amount, silent) => {
             if (!Game.canLumps()) return;
             Game.lumpT = Date.now();
-            var total = amount;
+            let total = amount;
             if (Game.lumpCurrentType === 1 && Game.Has('Sucralosia Inutilis') && Math.random() < 0.05) total *= 2;
             else if (Game.lumpCurrentType === 1) total *= chooseRandomElement([1, 2]);
             else if (Game.lumpCurrentType === 2) {
@@ -2715,7 +2716,7 @@ Game.Launch = function () {
             else if (Game.lumpCurrentType === 4) Game.Win('Maillard reaction');
 
             if (!silent) {
-                var rect = elementByID('lumpsIcon2').getBoundingClientRect();
+                let rect = elementByID('lumpsIcon2').getBoundingClientRect();
                 Game.SparkleAt((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2 - 24);
                 if (total > 0) Game.Popup('<small>+' + Beautify(total) + ' sugar lump' + (total === 1 ? '' : 's') + '</small>', (rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2 - 48);
                 else Game.Popup('<small>Botched harvest!</small>', (rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2 - 48);
@@ -2723,12 +2724,12 @@ Game.Launch = function () {
             }
             Game.computeLumpTimes();
         }
-        Game.computeLumpType = function () {
+        Game.computeLumpType = () => {
             Math.seededRandom(Game.seed + '/' + Game.lumpT);
-            var types = [0];
-            var loop = 1;
+            let types = [0];
+            let loop = 1;
             if (Game.hasAura('Dragon\'s Curve')) loop = 2;
-            for (var i = 0; i < loop; i++) {
+            for (let i = 0; i < loop; i++) {
                 if (Math.random() < (Game.Has('Sucralosia Inutilis') ? 0.15 : 0.1)) types.push(1);//bifurcated
                 if (Math.random() < 3 / 1000) types.push(2);//golden
                 if (Math.random() < 0.1 * Game.elderWrath) types.push(3);//meaty
@@ -2738,32 +2739,28 @@ Game.Launch = function () {
             Math.seededRandom();
         }
 
-        Game.canLumps = function ()//grammatically pleasing function name
-        {
-            if (Game.lumpsTotal > -1 || (Game.ascensionMode !== 1 && (Game.cookiesEarned + Game.cookiesReset) >= 1000000000)) return true;
-            return false;
-        }
+        Game.canLumps = () => Game.lumpsTotal > -1 || (Game.ascensionMode !== 1 && (Game.cookiesEarned + Game.cookiesReset) >= 1000000000)
 
-        Game.getLumpRefillMax = function () {
+        Game.getLumpRefillMax = () => {
             return 1000 * 60 * 15;//15 minutes
         }
-        Game.getLumpRefillRemaining = function () {
-            return Game.getLumpRefillMax() - (Date.now() - Game.lumpRefill);
-        }
-        Game.canRefillLump = function () {
-            return ((Date.now() - Game.lumpRefill) >= Game.getLumpRefillMax());
-        }
-        Game.refillLump = function (n, func) {
+
+        Game.getLumpRefillRemaining = () => Game.getLumpRefillMax() - (Date.now() - Game.lumpRefill)
+
+        Game.canRefillLump = () => ((Date.now() - Game.lumpRefill) >= Game.getLumpRefillMax())
+
+        Game.refillLump = (n, func) => {
             if (Game.lumps >= n && Game.canRefillLump()) {
-                Game.spendLump(n, 'refill', function () {
+                Game.spendLump(n, 'refill', () => {
                     if (!Game.sesame) Game.lumpRefill = Date.now();
                     func();
                 })();
             }
         }
-        Game.spendLump = function (n, str, func) {
+
+        Game.spendLump = (n, str, func) => {
             //ask if we want to spend N lumps
-            return function () {
+            return () => {
                 if (Game.lumps < n) return false;
                 if (Game.prefs.askLumps) {
                     PlaySound('snd/tick.mp3');
@@ -2778,7 +2775,7 @@ Game.Launch = function () {
             }
         }
 
-        Game.doLumps = function () {
+        Game.doLumps = () => {
             if (!Game.canLumps()) {
                 Game.removeClass('lumpsOn');
                 return;
@@ -2793,18 +2790,18 @@ Game.Launch = function () {
 
                 Game.Notify('Sugar lumps!', 'Because you\'ve earned a <b>billion Neuros</b> in total, you are now attracting <b>sugar lumps</b>. They coalesce quietly near the top of your screen, under the Stats button.<br>You will be able to harvest them when they\'re ripe, after which you may spend them on all sorts of things!', [23, 14]);
             }
-            var age = Date.now() - Game.lumpT;
+            let age = Date.now() - Game.lumpT;
             if (age > Game.lumpOverripeAge) {
                 age = 0;
                 Game.harvestLumps(1);
                 Game.computeLumpType();
             }
 
-            var phase = Math.min(6, Math.floor((age / Game.lumpOverripeAge) * 7));
-            var phase2 = Math.min(6, Math.floor((age / Game.lumpOverripeAge) * 7) + 1);
-            var row = 14;
-            var row2 = 14;
-            var type = Game.lumpCurrentType;
+            const phase = Math.min(6, Math.floor((age / Game.lumpOverripeAge) * 7));
+            const phase2 = Math.min(6, Math.floor((age / Game.lumpOverripeAge) * 7) + 1);
+            let row = 14;
+            let row2 = 14;
+            const type = Game.lumpCurrentType;
             if (type === 1)//double
             {
                 //if (phase>=6) row=15;
@@ -2822,36 +2819,37 @@ Game.Launch = function () {
                 if (phase >= 4) row = 27;
                 if (phase2 >= 4) row2 = 27;
             }
-            var icon = [23 + Math.min(phase, 5), row];
-            var icon2 = [23 + phase2, row2];
-            var opacity = Math.min(6, (age / Game.lumpOverripeAge) * 7) % 1;
+            let icon = [23 + Math.min(phase, 5), row];
+            let icon2 = [23 + phase2, row2];
+            let opacity = Math.min(6, (age / Game.lumpOverripeAge) * 7) % 1;
             if (phase >= 6) {
                 opacity = 1;
             }
             elementByID('lumpsIcon').style.backgroundPosition = (-icon[0] * 48) + 'px ' + (-icon[1] * 48) + 'px';
             elementByID('lumpsIcon2').style.backgroundPosition = (-icon2[0] * 48) + 'px ' + (-icon2[1] * 48) + 'px';
             elementByID('lumpsIcon2').style.opacity = opacity;
-            elementByID('lumpsAmount').innerHTML = g(Game.lumps);
+            elementByID('lumpsAmount').innerHTML = Beautify(Game.lumps);
         }
 
         /*=====================================================================================
 		COOKIE ECONOMICS
 		=======================================================================================*/
-        Game.Earn = function (howmuch) {
+        Game.Earn = howmuch => {
             Game.cookies += howmuch;
             Game.cookiesEarned += howmuch;
         }
-        Game.Spend = function (howmuch) {
+        Game.Spend = howmuch => {
             Game.cookies -= howmuch;
         }
-        Game.Dissolve = function (howmuch) {
+        Game.Dissolve = howmuch => {
             Game.cookies -= howmuch;
             Game.cookiesEarned -= howmuch;
             Game.cookies = Math.max(0, Game.cookies);
             Game.cookiesEarned = Math.max(0, Game.cookiesEarned);
         }
-        Game.mouseCps = function () {
-            var add = 0;
+        Game.mouseCps = () => {
+            let i;
+            let add = 0;
             if (Game.Has('Thousand fingers')) add += 0.1;
             if (Game.Has('Million fingers')) add += 0.5;
             if (Game.Has('Billion fingers')) add += 5;
@@ -2861,8 +2859,8 @@ Game.Launch = function () {
             if (Game.Has('Sextillion fingers')) add += 50000;
             if (Game.Has('Septillion fingers')) add += 500000;
             if (Game.Has('Octillion fingers')) add += 5000000;
-            var num = 0;
-            for (var i in Game.Objects) {
+            let num = 0;
+            for (i in Game.Objects) {
                 num += Game.Objects[i].amount;
             }
             num -= Game.Objects['Cursor'].amount;
@@ -2879,9 +2877,9 @@ Game.Launch = function () {
             if (Game.Has('Armythril mouse')) add += Game.cookiesPs * 0.01;
             if (Game.Has('Technobsidian mouse')) add += Game.cookiesPs * 0.01;
             if (Game.Has('Plasmarble mouse')) add += Game.cookiesPs * 0.01;
-            var mult = 1;
+            let mult = 1;
 
-            for (var i in Game.customMouseCps) {
+            for (i in Game.customMouseCps) {
                 mult += Game.customMouseCps[i]();
             }
 
@@ -2892,23 +2890,23 @@ Game.Launch = function () {
             mult *= Game.eff('click');
 
             if (Game.hasGod) {
-                var godLvl = Game.hasGod('labor');
+                let godLvl = Game.hasGod('labor');
                 if (godLvl === 1) mult *= 1.15;
                 else if (godLvl === 2) mult *= 1.1;
                 else if (godLvl === 3) mult *= 1.05;
             }
 
-            for (var i in Game.buffs) {
+            for (i in Game.buffs) {
                 if (typeof Game.buffs[i].multClick != 'undefined') mult *= Game.buffs[i].multClick;
             }
 
             if (Game.hasAura('Dragon Cursor')) mult *= 1.05;
 
-            for (var i in Game.customMouseCpsMult) {
+            for (i in Game.customMouseCpsMult) {
                 mult *= Game.customMouseCpsMult[i]();
             }
 
-            var out = mult * Game.ComputeCps(1, Game.Has('Reinforced index finger') + Game.Has('Carpal tunnel prevention cream') + Game.Has('Ambidextrous'), add);
+            let out = mult * Game.ComputeCps(1, Game.Has('Reinforced index finger') + Game.Has('Carpal tunnel prevention cream') + Game.Has('Ambidextrous'), add);
 
             if (Game.hasBuff('Cursed finger')) out = Game.buffs['Cursed finger'].power;
             return out;
@@ -2924,7 +2922,7 @@ Game.Launch = function () {
         Game.BigCookieSizeD = 0;
         Game.BigCookieSizeT = 1;
         Game.cookieClickSound = Math.floor(Math.random() * 7) + 1;
-        Game.playCookieClickSound = function () {
+        Game.playCookieClickSound = () => {
             if (typeof Game.cookieClickSound !== 'number' || isNaN(Game.cookieClickSound)) {
                 Game.cookieClickSound = Math.floor(Math.random() * 7) + 1; // Reset to a valid value
             }
@@ -2933,8 +2931,8 @@ Game.Launch = function () {
             Game.cookieClickSound += Math.floor(Math.random() * 4) + 1;
             if (Game.cookieClickSound > 7) Game.cookieClickSound -= 7;
         }
-        Game.ClickCookie = function (e, amount) {
-            var now = Date.now();
+        Game.ClickCookie = (e, amountParam) => {
+            const now = Date.now();
             if (e) e.preventDefault();
             if (Game.OnAscend || Game.AscendTimer > 0) {
             } else if (now - Game.lastClick < 1000 / 250) {
@@ -2944,7 +2942,7 @@ Game.Launch = function () {
                     if (Game.autoclickerDetected >= Game.fps * 5) Game.Win('Uncanny clicker');
                 }
                 Game.loseShimmeringVeil('click');
-                var amount = amount ? amount : Game.computedMouseCps;
+                let amount = amountParam ? amountParam : Game.computedMouseCps;
                 Game.Earn(amount);
                 Game.handmadeCookies += amount;
                 if (Game.prefs.particles) {
@@ -2953,7 +2951,7 @@ Game.Launch = function () {
                 }
                 if (Game.prefs.numbers) Game.particleAdd(Game.mouseX + Math.random() * 8 - 4, Game.mouseY - 8 + Math.random() * 8 - 4, 0, -2, 1, 4, 2, '', '+' + Beautify(amount, 1));
 
-                for (var i in Game.customCookieClicks) {
+                for (let i in Game.customCookieClicks) {
                     Game.customCookieClicks[i]();
                 }
 
@@ -2968,10 +2966,10 @@ Game.Launch = function () {
         Game.mouseX2 = 0;
         Game.mouseY2 = 0;
         Game.mouseMoved = 0;
-        Game.GetMouseCoords = function (e) {
-            var posx = 0;
-            var posy = 0;
-            if (!e) var e = window.event;
+        Game.GetMouseCoords = e => {
+            let posx = 0;
+            let posy = 0;
+            if (!e) e = window.event;
             if (e.pageX || e.pageY) {
                 posx = e.pageX;
                 posy = e.pageY;
@@ -2979,8 +2977,8 @@ Game.Launch = function () {
                 posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
                 posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
             }
-            var x = 0;
-            var y = 32;
+            const x = 0;
+            const y = 32;
             /*
 			var el=l('sectionLeft');
 			while(el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop))
@@ -2996,7 +2994,7 @@ Game.Launch = function () {
             Game.mouseMoved = 1;
             Game.lastActivity = Game.time;
         }
-        var bigCookie = elementByID('bigCookie');
+        const bigCookie = elementByID('bigCookie');
         Game.Click = 0;
         Game.lastClickedEl = 0;
         Game.clickFrom = 0;
@@ -3004,41 +3002,41 @@ Game.Launch = function () {
         Game.mouseDown = 0;
         if (!Game.touchEvents) {
             AddEvent(bigCookie, 'click', Game.ClickCookie);
-            AddEvent(bigCookie, 'mousedown', function (event) {
+            AddEvent(bigCookie, 'mousedown', event => {
                 Game.BigCookieState = 1;
                 if (Game.prefs.cookiesound) {
                     Game.playCookieClickSound();
                 }
                 if (event) event.preventDefault();
             });
-            AddEvent(bigCookie, 'mouseup', function (event) {
+            AddEvent(bigCookie, 'mouseup', event => {
                 Game.BigCookieState = 2;
                 if (event) event.preventDefault();
             });
-            AddEvent(bigCookie, 'mouseout', function (event) {
+            AddEvent(bigCookie, 'mouseout', event => {
                 Game.BigCookieState = 0;
             });
-            AddEvent(bigCookie, 'mouseover', function (event) {
+            AddEvent(bigCookie, 'mouseover', event => {
                 Game.BigCookieState = 2;
             });
             AddEvent(document, 'mousemove', Game.GetMouseCoords);
-            AddEvent(document, 'mousedown', function (event) {
+            AddEvent(document, 'mousedown', event => {
                 Game.lastActivity = Game.time;
                 Game.mouseDown = 1;
                 Game.clickFrom = event.target;
             });
-            AddEvent(document, 'mouseup', function (event) {
+            AddEvent(document, 'mouseup', event => {
                 Game.lastActivity = Game.time;
                 Game.mouseDown = 0;
                 Game.clickFrom = 0;
             });
-            AddEvent(document, 'click', function (event) {
+            AddEvent(document, 'click', event => {
                 Game.lastActivity = Game.time;
                 Game.Click = 1;
                 Game.lastClickedEl = event.target;
                 Game.clickFrom = 0;
             });
-            Game.handleScroll = function (e) {
+            Game.handleScroll = e => {
                 if (!e) e = event;
                 Game.Scroll = (e.detail < 0 || e.wheelDelta > 0) ? 1 : -1;
                 Game.lastActivity = Game.time;
@@ -3048,32 +3046,32 @@ Game.Launch = function () {
         } else {
             //touch events
             AddEvent(bigCookie, 'touchend', Game.ClickCookie);
-            AddEvent(bigCookie, 'touchstart', function (event) {
+            AddEvent(bigCookie, 'touchstart', event => {
                 Game.BigCookieState = 1;
                 if (event) event.preventDefault();
             });
-            AddEvent(bigCookie, 'touchend', function (event) {
+            AddEvent(bigCookie, 'touchend', event => {
                 Game.BigCookieState = 0;
                 if (event) event.preventDefault();
             });
             //AddEvent(document,'touchmove',Game.GetMouseCoords);
             AddEvent(document, 'mousemove', Game.GetMouseCoords);
-            AddEvent(document, 'touchstart', function (event) {
+            AddEvent(document, 'touchstart', event => {
                 Game.lastActivity = Game.time;
                 Game.mouseDown = 1;
             });
-            AddEvent(document, 'touchend', function (event) {
+            AddEvent(document, 'touchend', event => {
                 Game.lastActivity = Game.time;
                 Game.mouseDown = 0;
             });
-            AddEvent(document, 'touchend', function (event) {
+            AddEvent(document, 'touchend', event => {
                 Game.lastActivity = Game.time;
                 Game.Click = 1;
             });
         }
 
         Game.keys = [];
-        AddEvent(window, 'keyup', function (e) {
+        AddEvent(window, 'keyup', e => {
             Game.lastActivity = Game.time;
             if (e.keyCode === 27) {
                 Game.ClosePrompt();
@@ -3082,7 +3080,7 @@ Game.Launch = function () {
             else if (e.keyCode === 13) Game.ConfirmPrompt();//enter confirms prompt
             Game.keys[e.keyCode] = 0;
         });
-        AddEvent(window, 'keydown', function (e) {
+        AddEvent(window, 'keydown', e => {
             if (!Game.OnAscend && Game.AscendTimer === 0) {
                 if (e.ctrlKey && e.keyCode === 83) {
                     Game.toSave = true;
@@ -3097,7 +3095,7 @@ Game.Launch = function () {
             Game.keys[e.keyCode] = 1;
         });
 
-        AddEvent(window, 'visibilitychange', function (e) {
+        AddEvent(window, 'visibilitychange', e => {
             Game.keys = [];//reset all key pressed on visibility change (should help prevent ctrl still being down after ctrl-tab)
         });
 
@@ -3111,19 +3109,22 @@ Game.Launch = function () {
         Game.cookiesMultByType = {};
         //display bars with http://codepen.io/anon/pen/waGyEJ
         Game.effs = {};
-        Game.eff = function (name, def) {
+        Game.eff = (name, def) => {
             if (typeof Game.effs[name] === 'undefined') return (typeof def === 'undefined' ? 1 : def); else return Game.effs[name];
         };
 
-        Game.CalculateGains = function () {
+        Game.CalculateGains = () => {
+            let godLvl;
+            let me;
+            let i;
             Game.cookiesPs = 0;
-            var mult = 1;
+            let mult = 1;
             //add up effect bonuses from building minigames
-            var effs = {};
-            for (var i in Game.Objects) {
+            let effs = {};
+            for (i in Game.Objects) {
                 if (Game.Objects[i].minigameLoaded && Game.Objects[i].minigame.effs) {
-                    var myEffs = Game.Objects[i].minigame.effs;
-                    for (var ii in myEffs) {
+                    let myEffs = Game.Objects[i].minigame.effs;
+                    for (let ii in myEffs) {
                         if (effs[ii]) effs[ii] *= myEffs[ii];
                         else effs[ii] = myEffs[ii];
                     }
@@ -3137,9 +3138,9 @@ Game.Launch = function () {
 
             if (Game.Has('Heralds') && Game.ascensionMode !== 1) mult *= 1 + 0.01 * Game.heralds;
 
-            var cookieMult = 0;
-            for (var i in Game.cookieUpgrades) {
-                var me = Game.cookieUpgrades[i];
+            let cookieMult = 0;
+            for (i in Game.cookieUpgrades) {
+                me = Game.cookieUpgrades[i];
                 if (Game.Has(me.name)) {
                     mult *= (1 + (typeof (me.power) == 'function' ? me.power(me) : me.power) * 0.01);
                 }
@@ -3158,29 +3159,29 @@ Game.Launch = function () {
             if (Game.Has('An itchy sweater')) mult *= 1.01;
             if (Game.Has('Santa\'s dominion')) mult *= 1.2;
 
-            var buildMult = 1;
+            let buildMult = 1;
             if (Game.hasGod) {
-                var godLvl = Game.hasGod('asceticism');
+                godLvl = Game.hasGod('asceticism');
                 if (godLvl === 1) mult *= 1.15;
                 else if (godLvl === 2) mult *= 1.1;
                 else if (godLvl === 3) mult *= 1.05;
 
-                var godLvl = Game.hasGod('ages');
+                godLvl = Game.hasGod('ages');
                 if (godLvl === 1) mult *= 1 + 0.15 * Math.sin((Date.now() / 1000 / (60 * 60 * 3)) * Math.PI * 2);
                 else if (godLvl === 2) mult *= 1 + 0.15 * Math.sin((Date.now() / 1000 / (60 * 60 * 12)) * Math.PI * 2);
                 else if (godLvl === 3) mult *= 1 + 0.15 * Math.sin((Date.now() / 1000 / (60 * 60 * 24)) * Math.PI * 2);
 
-                var godLvl = Game.hasGod('decadence');
+                godLvl = Game.hasGod('decadence');
                 if (godLvl === 1) buildMult *= 0.93;
                 else if (godLvl === 2) buildMult *= 0.95;
                 else if (godLvl === 3) buildMult *= 0.98;
 
-                var godLvl = Game.hasGod('industry');
+                godLvl = Game.hasGod('industry');
                 if (godLvl === 1) buildMult *= 1.1;
                 else if (godLvl === 2) buildMult *= 1.06;
                 else if (godLvl === 3) buildMult *= 1.03;
 
-                var godLvl = Game.hasGod('labor');
+                godLvl = Game.hasGod('labor');
                 if (godLvl === 1) buildMult *= 0.97;
                 else if (godLvl === 2) buildMult *= 0.98;
                 else if (godLvl === 3) buildMult *= 0.99;
@@ -3188,8 +3189,8 @@ Game.Launch = function () {
 
             if (Game.Has('Santa\'s legacy')) mult *= 1 + (Game.santaLevel + 1) * 0.03;
 
-            for (var i in Game.Objects) {
-                var me = Game.Objects[i];
+            for (i in Game.Objects) {
+                me = Game.Objects[i];
                 me.storedCps = (typeof (me.cps) == 'function' ? me.cps(me) : me.cps);
                 if (Game.ascensionMode !== 1) me.storedCps *= (1 + me.level * 0.01) * buildMult;
                 me.storedTotalCps = me.amount * me.storedCps;
@@ -3202,23 +3203,23 @@ Game.Launch = function () {
                 Game.cookiesPsByType['"egg"'] = 9;
             }//"egg"
 
-            for (var i in Game.customCps) {
+            for (i in Game.customCps) {
                 mult *= Game.customCps[i]();
             }
 
             Game.milkProgress = Game.AchievementsOwned / 25;
-            var milkMult = 1;
+            let milkMult = 1;
             if (Game.Has('Santa\'s milk and cookies')) milkMult *= 1.05;
             if (Game.hasAura('Breath of Milk')) milkMult *= 1.05;
             if (Game.hasGod) {
-                var godLvl = Game.hasGod('mother');
+                godLvl = Game.hasGod('mother');
                 if (godLvl === 1) milkMult *= 1.1;
                 else if (godLvl === 2) milkMult *= 1.05;
                 else if (godLvl === 3) milkMult *= 1.03;
             }
             milkMult *= Game.eff('milk');
 
-            var catMult = 1;
+            let catMult = 1;
 
             if (Game.Has('Kitten helpers')) catMult *= (1 + Game.milkProgress * 0.1 * milkMult);
             if (Game.Has('Kitten workers')) catMult *= (1 + Game.milkProgress * 0.125 * milkMult);
@@ -3237,7 +3238,7 @@ Game.Launch = function () {
             Game.cookiesMultByType['kittens'] = catMult;
             mult *= catMult;
 
-            var eggMult = 1;
+            let eggMult = 1;
             if (Game.Has('Chicken egg')) eggMult *= 1.01;
             if (Game.Has('Duck egg')) eggMult *= 1.01;
             if (Game.Has('Turkey egg')) eggMult *= 1.01;
@@ -3252,7 +3253,7 @@ Game.Launch = function () {
             if (Game.Has('Ant larva')) eggMult *= 1.01;
             if (Game.Has('Century egg')) {
                 //the boost increases a little every day, with diminishing returns up to +10% on the 100th day
-                var day = Math.floor((Date.now() - Game.startDate) / 1000 / 10) * 10 / 60 / 60 / 24;
+                let day = Math.floor((Date.now() - Game.startDate) / 1000 / 10) * 10 / 60 / 60 / 24;
                 day = Math.min(day, 100);
                 eggMult *= 1 + (1 - Math.pow(1 - day / 100, 3)) * 0.1;
             }
@@ -3265,8 +3266,8 @@ Game.Launch = function () {
             if (Game.hasAura('Radiant Appetite')) mult *= 2;
 
             if (Game.hasAura('Dragon\'s Fortune')) {
-                var n = Game.shimmerTypes['golden'].n;
-                for (var i = 0; i < n; i++) {
+                let n = Game.shimmerTypes['golden'].n;
+                for (i = 0; i < n; i++) {
                     mult *= 2.23;
                 }
                 //old behavior
@@ -3276,8 +3277,8 @@ Game.Launch = function () {
 				mult*=1+(0.07)*buffs;*/
             }
 
-            var rawCookiesPs = Game.cookiesPs * mult;
-            for (var i in Game.CpsAchievements) {
+            let rawCookiesPs = Game.cookiesPs * mult;
+            for (i in Game.CpsAchievements) {
                 if (rawCookiesPs >= Game.CpsAchievements[i].threshold) Game.Win(Game.CpsAchievements[i].name);
             }
 
@@ -3285,13 +3286,13 @@ Game.Launch = function () {
             if (name === 'orteil') mult *= 0.99;
             else if (name === 'ortiel') mult *= 0.98;//or so help me
 
-            var sucking = 0;
-            for (var i in Game.wrinklers) {
+            let sucking = 0;
+            for (i in Game.wrinklers) {
                 if (Game.wrinklers[i].phase === 2) {
                     sucking++;
                 }
             }
-            var suckRate = 1 / 20;//each wrinkler eats a twentieth of your CpS
+            let suckRate = 1 / 20;//each wrinkler eats a twentieth of your CpS
             suckRate *= Game.eff('wrinklerEat');
 
             Game.cpsSucked = sucking * suckRate;
@@ -3300,24 +3301,24 @@ Game.Launch = function () {
             if (Game.Has('Elder Covenant')) mult *= 0.95;
 
             if (Game.Has('Golden switch [off]')) {
-                var goldenSwitchMult = 1.5;
+                let goldenSwitchMult = 1.5;
                 if (Game.Has('Residual luck')) {
-                    var upgrades = Game.goldenCookieUpgrades;
-                    for (var i in upgrades) {
+                    let upgrades = Game.goldenCookieUpgrades;
+                    for (i in upgrades) {
                         if (Game.Has(upgrades[i])) goldenSwitchMult += 0.1;
                     }
                 }
                 mult *= goldenSwitchMult;
             }
             if (Game.Has('Shimmering veil [off]')) {
-                var veilMult = 0.5;
+                let veilMult = 0.5;
                 if (Game.Has('Reinforced membrane')) veilMult += 0.1;
                 mult *= 1 + veilMult;
             }
             if (Game.Has('Magic shenanigans')) mult *= 1000;
             if (Game.Has('Occult obstruction')) mult *= 0;
 
-            for (var i in Game.customCpsMult) {
+            for (i in Game.customCpsMult) {
                 mult *= Game.customCpsMult[i]();
             }
 
@@ -3325,7 +3326,7 @@ Game.Launch = function () {
             //cps without golden cookie effects
             Game.unbuffedCps = Game.cookiesPs * mult;
 
-            for (var i in Game.buffs) {
+            for (i in Game.buffs) {
                 if (typeof Game.buffs[i].multCpS != 'undefined') mult *= Game.buffs[i].multCpS;
             }
 
@@ -3341,8 +3342,8 @@ Game.Launch = function () {
             Game.recalculateGains = 0;
         }
 
-        Game.dropRateMult = function () {
-            var rate = 1;
+        Game.dropRateMult = () => {
+            let rate = 1;
             if (Game.Has('Green yeast digestives')) rate *= 1.03;
             rate *= Game.eff('itemDrops');
             if (Game.hasAura('Mind Over Matter')) rate *= 1.25;
@@ -3362,17 +3363,13 @@ Game.Launch = function () {
             this.l = document.createElement('div');
             this.l.className = 'shimmer';
             if (!Game.touchEvents) {
-                AddEvent(this.l, 'click', function (what) {
-                    return function (event) {
-                        what.pop(event);
-                    };
-                }(this));
+                AddEvent(this.l, 'click', (what => event => {
+                    what.pop(event);
+                })(this));
             } else {
-                AddEvent(this.l, 'touchend', function (what) {
-                    return function (event) {
-                        what.pop(event);
-                    };
-                }(this));
+                AddEvent(this.l, 'touchend', (what => event => {
+                    what.pop(event);
+                })(this));
             }//touch events
 
             this.x = 0;
@@ -3411,7 +3408,7 @@ Game.Launch = function () {
         {
             if (Game.shimmerTypes[this.type].spawnsOnTimer && this.spawnLead) {
                 //if this was the spawn lead for this shimmer type, set the shimmer type's "spawned" to 0 and restart its spawn timer
-                var type = Game.shimmerTypes[this.type];
+                let type = Game.shimmerTypes[this.type];
                 type.time = 0;
                 type.spawned = 0;
                 type.minTime = type.getMinTime(this);
@@ -3426,15 +3423,16 @@ Game.Launch = function () {
         }
 
 
-        Game.updateShimmers = function ()//run shimmer functions, kill overtimed shimmers and spawn new ones
-        {
-            for (var i in Game.shimmers) {
+        Game.updateShimmers = () => {
+            let newShimmer;
+            let i;
+            for (i in Game.shimmers) {
                 Game.shimmers[i].update();
             }
 
             //cookie storm!
             if (Game.hasBuff('Neuro storm') && Math.random() < 0.5) {
-                var newShimmer = new Game.shimmer('golden', 0, 1);
+                newShimmer = new Game.shimmer('golden', 0, 1);
                 newShimmer.dur = Math.ceil(Math.random() * 4 + 1);
                 newShimmer.life = Math.ceil(Game.fps * newShimmer.dur);
                 newShimmer.force = 'cookie storm drop';
@@ -3442,17 +3440,19 @@ Game.Launch = function () {
             }
 
             //spawn shimmers
-            for (var i in Game.shimmerTypes) {
-                var me = Game.shimmerTypes[i];
+            for (i in Game.shimmerTypes) {
+                let me = Game.shimmerTypes[i];
                 if (me.spawnsOnTimer && me.spawnConditions())//only run on shimmer types that work on a timer
                 {
                     if (!me.spawned)//no shimmer spawned for this type? check the timer and try to spawn one
                     {
                         me.time++;
                         if (Math.random() < Math.pow(Math.max(0, (me.time - me.minTime) / (me.maxTime - me.minTime)), 5)) {
-                            var newShimmer = new Game.shimmer(i);
+                            newShimmer = new Game.shimmer(i);
                             newShimmer.spawnLead = 1;
-                            if (Game.Has('Distilled essence of redoubled luck') && Math.random() < 0.01) var newShimmer = new Game.shimmer(i);
+                            if (Game.Has('Distilled essence of redoubled luck') && Math.random() < 0.01) {
+                                newShimmer = new Game.shimmer(i);
+                            }
                             me.spawned = 1;
                         }
                     }
@@ -3461,11 +3461,12 @@ Game.Launch = function () {
         }
         Game.killShimmers = function ()//stop and delete all shimmers (used on resetting etc)
         {
-            for (var i = Game.shimmers.length - 1; i >= 0; i--) {
+            let i;
+            for (i = Game.shimmers.length - 1; i >= 0; i--) {
                 Game.shimmers[i].die();
             }
-            for (var i in Game.shimmerTypes) {
-                var me = Game.shimmerTypes[i];
+            for (i in Game.shimmerTypes) {
+                let me = Game.shimmerTypes[i];
                 if (me.reset) me.reset();
                 me.n = 0;
                 if (me.spawnsOnTimer) {
@@ -3489,9 +3490,9 @@ Game.Launch = function () {
                     if (!this.spawned && Game.chimeType === 1 && Game.ascensionMode !== 1) PlaySound('snd/chime.mp3');
 
                     //set image
-                    var bgPic = 'img/goldCookie.png';
-                    var picX = 0;
-                    var picY = 0;
+                    let bgPic = 'img/goldCookie.png';
+                    let picX = 0;
+                    let picY = 0;
 
 
                     if ((!me.forceObj || !me.forceObj.noWrath) && ((me.forceObj && me.forceObj.wrath) || (Game.elderWrath === 1 && Math.random() < 1 / 3) || (Game.elderWrath === 2 && Math.random() < 2 / 3) || (Game.elderWrath === 3) || (Game.hasGod && Game.hasGod('scorn')))) {
@@ -3529,7 +3530,7 @@ Game.Launch = function () {
                     me.life = 1;//the cookie's current progression through its lifespan (in frames)
                     me.dur = 13;//duration; the cookie's lifespan in seconds before it despawns
 
-                    var dur = 13;
+                    let dur = 13;
                     if (Game.Has('Lucky day')) dur *= 2;
                     if (Game.Has('Serendipity')) dur *= 2;
                     if (Game.Has('Decisive fate')) dur *= 1.05;
@@ -3546,7 +3547,7 @@ Game.Launch = function () {
                     me.sizeMult = 1;
                 },
                 updateFunc: function (me) {
-                    var curve = 1 - Math.pow((me.life / (Game.fps * me.dur)) * 2 - 1, 4);
+                    const curve = 1 - Math.pow((me.life / (Game.fps * me.dur)) * 2 - 1, 4);
                     me.l.style.opacity = curve;
                     //this line makes each golden cookie pulse in a unique way
                     if (Game.prefs.fancy) me.l.style.transform = 'rotate(' + (Math.sin(me.id * 0.69) * 24 + Math.sin(Game.T * (0.35 + Math.sin(me.id * 0.97) * 0.15) + me.id/*+Math.sin(Game.T*0.07)*2+2*/) * (3 + Math.sin(me.id * 0.36) * 2)) + 'deg) scale(' + (me.sizeMult * (1 + Math.sin(me.id * 0.53) * 0.2) * curve * (1 + (0.06 + Math.sin(me.id * 0.41) * 0.05) * (Math.sin(Game.T * (0.25 + Math.sin(me.id * 0.73) * 0.15) + me.id)))) + ')';
@@ -3557,7 +3558,8 @@ Game.Launch = function () {
                     }
                 },
                 popFunc: function (me) {
-                    //get achievs and stats
+                    let moni;
+//get achievs and stats
                     if (me.spawnLead) {
                         Game.goldenClicks++;
                         Game.goldenClicksLocal++;
@@ -3582,7 +3584,7 @@ Game.Launch = function () {
                     }
 
                     //select an effect
-                    var list = [];
+                    let list = [];
                     if (me.wrath > 0) list.push('clot', 'multiply cookies', 'ruin cookies');
                     else list.push('frenzy', 'multiply cookies');
                     if (me.wrath > 0 && Game.hasGod && Game.hasGod('scorn')) list.push('clot', 'ruin cookies', 'clot', 'ruin cookies');
@@ -3603,7 +3605,7 @@ Game.Launch = function () {
 
                     if (this.last !== '' && Math.random() < 0.8 && list.indexOf(this.last) !== -1) list.splice(list.indexOf(this.last), 1);//80% chance to force a different one
                     if (Math.random() < 0.0001) list.push('blab');
-                    var choice = chooseRandomElement(list);
+                    let choice = chooseRandomElement(list);
 
                     if (this.chain > 0) choice = 'chain Neuro';
                     if (me.force !== '') {
@@ -3617,7 +3619,7 @@ Game.Launch = function () {
 
                     //create buff for effect
                     //buff duration multiplier
-                    var effectDurMod = 1;
+                    let effectDurMod = 1;
                     if (Game.Has('Get lucky')) effectDurMod *= 2;
                     if (Game.Has('Lasting fortune')) effectDurMod *= 1.1;
                     if (Game.Has('Lucky digit')) effectDurMod *= 1.01;
@@ -3629,35 +3631,35 @@ Game.Launch = function () {
                     else effectDurMod *= Game.eff('wrathCookieEffDur');
 
                     if (Game.hasGod) {
-                        var godLvl = Game.hasGod('decadence');
+                        let godLvl = Game.hasGod('decadence');
                         if (godLvl === 1) effectDurMod *= 1.07;
                         else if (godLvl === 2) effectDurMod *= 1.05;
                         else if (godLvl === 3) effectDurMod *= 1.02;
                     }
 
                     //effect multiplier (from lucky etc)
-                    var mult = 1;
+                    let mult = 1;
                     if (me.wrath > 0 && Game.hasAura('Unholy Dominion')) mult *= 1.1;
                     else if (me.wrath === 0 && Game.hasAura('Ancestral Metamorphosis')) mult *= 1.1;
                     if (Game.Has('Green yeast digestives')) mult *= 1.01;
                     if (!me.wrath) mult *= Game.eff('goldenCookieGain');
                     else mult *= Game.eff('wrathCookieGain');
 
-                    var popup = '';
-                    var buff = 0;
+                    let popup = '';
+                    let buff = 0;
 
                     if (choice === 'building special') {
-                        var time = Math.ceil(30 * effectDurMod);
-                        var list = [];
-                        for (var i in Game.Objects) {
+                        let time = Math.ceil(30 * effectDurMod);
+                        list = [];
+                        for (let i in Game.Objects) {
                             if (Game.Objects[i].amount >= 10) list.push(Game.Objects[i].id);
                         }
                         if (list.length === 0) {
                             choice = 'frenzy';
                         }//default to frenzy if no proper building
                         else {
-                            var obj = chooseRandomElement(list);
-                            var pow = Game.ObjectsById[obj].amount / 10 + 1;
+                            let obj = chooseRandomElement(list);
+                            let pow = Game.ObjectsById[obj].amount / 10 + 1;
                             if (me.wrath && Math.random() < 0.3) {
                                 buff = Game.gainBuff('building debuff', time, pow, obj);
                             } else {
@@ -3676,11 +3678,11 @@ Game.Launch = function () {
                     } else if (choice === 'everything must go') {
                         buff = Game.gainBuff('everything must go', Math.ceil(8 * effectDurMod), 5);
                     } else if (choice === 'multiply cookies') {
-                        var moni = mult * Math.min(Game.cookies * 0.15, Game.cookiesPs * 60 * 15) + 13;//add 15% to cookies owned (+13), or 15 minutes of cookie production - whichever is lowest
+                        moni = mult * Math.min(Game.cookies * 0.15, Game.cookiesPs * 60 * 15) + 13;//add 15% to cookies owned (+13), or 15 minutes of cookie production - whichever is lowest
                         Game.Earn(moni);
                         popup = 'Lucky!<div style="font-size:65%;">+' + Beautify(moni) + ' cookies!</div>';
                     } else if (choice === 'ruin cookies') {
-                        var moni = Math.min(Game.cookies * 0.05, Game.cookiesPs * 60 * 10) + 13;//lose 5% of cookies owned (-13), or 10 minutes of cookie production - whichever is lowest
+                        moni = Math.min(Game.cookies * 0.05, Game.cookiesPs * 60 * 10) + 13;//lose 5% of cookies owned (-13), or 10 minutes of cookie production - whichever is lowest
                         moni = Math.min(Game.cookies, moni);
                         Game.Spend(moni);
                         popup = 'Ruin!<div style="font-size:65%;">Lost ' + Beautify(moni) + ' cookies!</div>';
@@ -3699,14 +3701,14 @@ Game.Launch = function () {
                         //fix by Icehawk78
                         if (this.chain === 0) this.totalFromChain = 0;
                         this.chain++;
-                        var digit = me.wrath ? 6 : 7;
+                        let digit = me.wrath ? 6 : 7;
                         if (this.chain === 1) this.chain += Math.max(0, Math.ceil(Math.log(Game.cookies) / Math.LN10) - 10);
 
-                        var maxPayout = Math.min(Game.cookiesPs * 60 * 60 * 6, Game.cookies * 0.5) * mult;
-                        var moni = Math.max(digit, Math.min(Math.floor(1 / 9 * Math.pow(10, this.chain) * digit * mult), maxPayout));
-                        var nextMoni = Math.max(digit, Math.min(Math.floor(1 / 9 * Math.pow(10, this.chain + 1) * digit * mult), maxPayout));
+                        let maxPayout = Math.min(Game.cookiesPs * 60 * 60 * 6, Game.cookies * 0.5) * mult;
+                        moni = Math.max(digit, Math.min(Math.floor(1 / 9 * Math.pow(10, this.chain) * digit * mult), maxPayout));
+                        let nextMoni = Math.max(digit, Math.min(Math.floor(1 / 9 * Math.pow(10, this.chain + 1) * digit * mult), maxPayout));
                         this.totalFromChain += moni;
-                        var moniStr = Beautify(moni);
+                        let moniStr = Beautify(moni);
 
                         //break the chain if we're above 5 digits AND it's more than 50% of our gym, it grants more than 6 hours of our CpS, or just a 1% chance each digit (update : removed digit limit)
                         if (Math.random() < 0.01 || nextMoni >= maxPayout) {
@@ -3719,12 +3721,12 @@ Game.Launch = function () {
                     } else if (choice === 'Neuro storm') {
                         buff = Game.gainBuff('Neuro storm', Math.ceil(7 * effectDurMod), 7);
                     } else if (choice === 'cookie storm drop') {
-                        var moni = Math.max(mult * (Game.cookiesPs * 60 * Math.floor(Math.random() * 7 + 1)), Math.floor(Math.random() * 7 + 1));//either 1-7 cookies or 1-7 minutes of cookie production, whichever is highest
+                        moni = Math.max(mult * (Game.cookiesPs * 60 * Math.floor(Math.random() * 7 + 1)), Math.floor(Math.random() * 7 + 1));//either 1-7 cookies or 1-7 minutes of cookie production, whichever is highest
                         Game.Earn(moni);
                         popup = '<div style="font-size:75%;">+' + Beautify(moni) + ' cookies!</div>';
                     } else if (choice === 'blab')//sorry (it's really rare)
                     {
-                        var str = chooseRandomElement([
+                        popup = chooseRandomElement([
                             'Neuro crumbliness x3 for 60 seconds!',
                             'Chocolatiness x7 for 77 seconds!',
                             'Dough elasticity halved for 66 seconds!',
@@ -3740,7 +3742,6 @@ Game.Launch = function () {
                             'They know.',
                             'Oops. This was just a chocolate Neuro with shiny aluminium foil.'
                         ]);
-                        popup = str;
                     }
 
                     if (popup === '' && buff && buff.name && buff.desc) popup = buff.name + '<div style="font-size:65%;">' + buff.desc + '</div>';
@@ -3766,7 +3767,7 @@ Game.Launch = function () {
                 },
                 spawnsOnTimer: true,
                 spawnConditions: function () {
-                    if (!Game.Has('Golden switch [off]')) return true; else return false;
+                    return !Game.Has('Golden switch [off]');
                 },
                 spawned: 0,
                 time: 0,
@@ -3787,17 +3788,17 @@ Game.Launch = function () {
                     if (!me.wrath) m *= 1 / Game.eff('goldenCookieFreq');
                     else m *= 1 / Game.eff('wrathCookieFreq');
                     if (Game.hasGod) {
-                        var godLvl = Game.hasGod('industry');
+                        let godLvl = Game.hasGod('industry');
                         if (godLvl === 1) m *= 1.1;
                         else if (godLvl === 2) m *= 1.06;
                         else if (godLvl === 3) m *= 1.03;
-                        var godLvl = Game.hasGod('mother');
+                        godLvl = Game.hasGod('mother');
                         if (godLvl === 1) m *= 1.15;
                         else if (godLvl === 2) m *= 1.1;
                         else if (godLvl === 3) m *= 1.05;
 
                         if (Game.season !== '') {
-                            var godLvl = Game.hasGod('seasons');
+                            godLvl = Game.hasGod('seasons');
                             if (Game.season !== 'fools') {
                                 if (godLvl === 1) m *= 0.97;
                                 else if (godLvl === 2) m *= 0.98;
@@ -3813,14 +3814,17 @@ Game.Launch = function () {
                     if (Game.Has('Gold hoard')) m = 0.01;
                     return Math.ceil(Game.fps * 60 * m);
                 },
+
                 getMinTime: function (me) {
-                    var m = 5;
+                    let m = 5;
                     return this.getTimeMod(me, m);
                 },
+
                 getMaxTime: function (me) {
-                    var m = 15;
+                    let m = 15;
                     return this.getTimeMod(me, m);
                 },
+
                 last: '',
             },
             'reindeer': {
@@ -3843,7 +3847,7 @@ Game.Launch = function () {
                     me.life = 1;//the reindeer's current progression through its lifespan (in frames)
                     me.dur = 4;//duration; the cookie's lifespan in seconds before it despawns
 
-                    var dur = 4;
+                    let dur = 4;
                     if (Game.Has('Weighted sleighs')) dur *= 2;
                     dur *= Game.eff('reindeerDur');
                     me.dur = dur;
@@ -3851,8 +3855,7 @@ Game.Launch = function () {
                     me.sizeMult = 1;
                 },
                 updateFunc: function (me) {
-                    var curve = 1 - Math.pow((me.life / (Game.fps * me.dur)) * 2 - 1, 12);
-                    me.l.style.opacity = curve;
+                    me.l.style.opacity = (1 - Math.pow((me.life / (Game.fps * me.dur)) * 2 - 1, 12)).toString();
                     me.l.style.transform = 'translate(' + (me.x + (Game.bounds.right - Game.bounds.left) * (1 - me.life / (Game.fps * me.dur))) + 'px,' + (me.y - Math.abs(Math.sin(me.life * 0.1)) * 128) + 'px) rotate(' + (Math.sin(me.life * 0.2 + 0.3) * 10) + 'deg) scale(' + (me.sizeMult * (1 + Math.sin(me.id * 0.53) * 0.1)) + ')';
                     me.life--;
                     if (me.life <= 0) {
@@ -3866,22 +3869,22 @@ Game.Launch = function () {
                         Game.reindeerClicked++;
                     }
 
-                    var val = Game.cookiesPs * 60;
+                    let val = Game.cookiesPs * 60;
                     if (Game.hasBuff('Elder frenzy')) val *= 0.5;//very sorry
                     if (Game.hasBuff('Frenzy')) val *= 0.75;//I sincerely apologize
-                    var moni = Math.max(25, val);//1 minute of cookie production, or 25 cookies - whichever is highest
+                    let moni = Math.max(25, val);//1 minute of cookie production, or 25 cookies - whichever is highest
                     if (Game.Has('Ho ho ho-flavored frosting')) moni *= 2;
                     moni *= Game.eff('reindeerGain');
                     Game.Earn(moni);
                     if (Game.hasBuff('Elder frenzy')) Game.Win('Eldeer');
 
-                    var cookie = '';
-                    var failRate = 0.8;
+                    let cookie = '';
+                    let failRate = 0.8;
                     if (Game.HasAchiev('Let it snow')) failRate = 0.6;
                     failRate *= 1 / Game.dropRateMult();
                     if (Game.Has('Starsnow')) failRate *= 0.95;
                     if (Game.hasGod) {
-                        var godLvl = Game.hasGod('seasons');
+                        let godLvl = Game.hasGod('seasons');
                         if (godLvl === 1) failRate *= 0.9;
                         else if (godLvl === 2) failRate *= 0.95;
                         else if (godLvl === 3) failRate *= 0.97;
@@ -3894,7 +3897,7 @@ Game.Launch = function () {
                         } else cookie = '';
                     }
 
-                    var popup = '';
+                    let popup;
 
                     if (Game.prefs.popups) Game.Popup('You found ' + chooseRandomElement(['Dasher', 'Dancer', 'Prancer', 'Vixen', 'Comet', 'Cupid', 'Donner', 'Blitzen', 'Rudolph']) + '!<br>The reindeer gives you ' + Beautify(moni) + ' Neuros.' + (cookie === '' ? '' : '<br>You are also rewarded with ' + cookie + '!'));
                     else Game.Notify('You found ' + chooseRandomElement(['Dasher', 'Dancer', 'Prancer', 'Vixen', 'Comet', 'Cupid', 'Donner', 'Blitzen', 'Rudolph']) + '!', 'The reindeer gives you ' + Beautify(moni) + ' Neuros.' + (cookie === '' ? '' : '<br>You are also rewarded with ' + cookie + '!'), [12, 9], 6);
@@ -3911,7 +3914,7 @@ Game.Launch = function () {
                 },
                 spawnsOnTimer: true,
                 spawnConditions: function () {
-                    if (Game.season === 'christmas') return true; else return false;
+                    return Game.season === 'christmas';
                 },
                 spawned: 0,
                 time: 0,
@@ -3921,7 +3924,7 @@ Game.Launch = function () {
                     if (Game.Has('Reindeer baking grounds')) m /= 2;
                     if (Game.Has('Starsnow')) m *= 0.95;
                     if (Game.hasGod) {
-                        var godLvl = Game.hasGod('seasons');
+                        let godLvl = Game.hasGod('seasons');
                         if (godLvl === 1) m *= 0.9;
                         else if (godLvl === 2) m *= 0.95;
                         else if (godLvl === 3) m *= 0.97;
@@ -3931,11 +3934,11 @@ Game.Launch = function () {
                     return Math.ceil(Game.fps * 60 * m);
                 },
                 getMinTime: function (me) {
-                    var m = 3;
+                    const m = 3;
                     return this.getTimeMod(me, m);
                 },
                 getMaxTime: function (me) {
-                    var m = 6;
+                    const m = 6;
                     return this.getTimeMod(me, m);
                 },
             }
@@ -4000,7 +4003,7 @@ Game.Launch = function () {
             };
         }
 
-        Game.particlesUpdate = function () {
+        Game.particlesUpdate = () => {
             for (i = 0; i < Game.particles.length; i++) {
                 let me = Game.particles[i];
                 if (me.life !== -1) {
@@ -4015,7 +4018,7 @@ Game.Launch = function () {
                 }
             }
         }
-        Game.particleAdd = function (x, y, xd, yd, size, dur, z, pic, text) {
+        Game.particleAdd = (x, y, xd, yd, size, dur, z, pic, text) => {
             //Game.particleAdd(pos X,pos Y,speed X,speed Y,size (multiplier),duration (seconds),layer,picture,text);
             //pick the first free (or the oldest) particle to replace it
             if (1 || Game.prefs.particles) {
@@ -4068,7 +4071,7 @@ Game.Launch = function () {
             }
             return {};
         }
-        Game.particlesDraw = function (z) {
+        Game.particlesDraw = z => {
             let ctx = Game.LeftBackground;
             ctx.fillStyle = '#fff';
             ctx.font = '20px Merriweather';
@@ -4111,19 +4114,19 @@ Game.Launch = function () {
         //text particles (popups etc)
         Game.textParticles = [];
         Game.textParticlesY = 0;
-        var str = '';
+        let str = '';
         for (i = 0; i < 20; i++) {
             Game.textParticles[i] = {x: 0, y: 0, life: -1, text: ''};
             str += '<div id="particle' + i + '" class="particle title"></div>';
         }
         elementByID('particles').innerHTML = str;
-        Game.textParticlesUpdate = function () {
-            for (var i in Game.textParticles) {
-                var me = Game.textParticles[i];
+        Game.textParticlesUpdate = () => {
+            for (let i in Game.textParticles) {
+                let me = Game.textParticles[i];
                 if (me.life !== -1) {
                     me.life++;
                     if (me.life >= Game.fps * 4) {
-                        var el = me.l;
+                        let el = me.l;
                         me.life = -1;
                         el.style.opacity = 0;
                         el.style.display = 'none';
@@ -4131,11 +4134,14 @@ Game.Launch = function () {
                 }
             }
         }
-        Game.textParticlesAdd = function (text, el, posX, posY) {
-            //pick the first free (or the oldest) particle to replace it
-            var highest = 0;
-            var highestI = 0;
-            for (var i in Game.textParticles) {
+        Game.textParticlesAdd = (text, el, posX, posY) => {
+            let y;
+            let x;
+            let i;
+//pick the first free (or the oldest) particle to replace it
+            let highest = 0;
+            let highestI = 0;
+            for (i in Game.textParticles) {
                 if (Game.textParticles[i].life === -1) {
                     highestI = i;
                     break;
@@ -4145,19 +4151,19 @@ Game.Launch = function () {
                     highestI = i;
                 }
             }
-            var i = highestI;
-            var noStack = 0;
+            i = highestI;
+            let noStack = 0;
             if (typeof posX !== 'undefined' && typeof posY !== 'undefined') {
                 x = posX;
                 y = posY;
                 noStack = 1;
             } else {
-                var x = (Math.random() - 0.5) * 40;
-                var y = 0;//+(Math.random()-0.5)*40;
+                x = (Math.random() - 0.5) * 40;
+                y = 0;//+(Math.random()-0.5)*40;
                 if (!el) {
-                    var rect = Game.bounds;
-                    var x = Math.floor((rect.left + rect.right) / 2);
-                    var y = Math.floor((rect.bottom)) - (Game.mobile * 64);
+                    let rect = Game.bounds;
+                    x = Math.floor((rect.left + rect.right) / 2);
+                    y = Math.floor((rect.bottom)) - (Game.mobile * 64);
                     x += (Math.random() - 0.5) * 40;
                     y += 0;//(Math.random()-0.5)*40;
                 }
@@ -4168,7 +4174,7 @@ Game.Launch = function () {
             x = Math.min(Game.bounds.right - 200, x);
             y = Math.max(Game.bounds.top + 32, y);
 
-            var me = Game.textParticles[i];
+            let me = Game.textParticles[i];
             if (!me.l) me.l = elementByID('particle' + i);
             me.life = 0;
             me.x = x;
@@ -4177,7 +4183,7 @@ Game.Launch = function () {
             me.l.innerHTML = text;
             me.l.style.left = Math.floor(Game.textParticles[i].x - 200) + 'px';
             me.l.style.bottom = Math.floor(-Game.textParticles[i].y) + 'px';
-            for (var ii in Game.textParticles) {
+            for (let ii in Game.textParticles) {
                 if (ii !== i) (Game.textParticles[ii].l || elementByID('particle' + ii)).style.zIndex = 100000000;
             }
             me.l.style.zIndex = 100000001;
@@ -4188,7 +4194,7 @@ Game.Launch = function () {
             if (!noStack) Game.textParticlesY += 60;
         }
         Game.popups = 1;
-        Game.Popup = function (text, x, y) {
+        Game.Popup = (text, x, y) => {
             if (Game.popups) Game.textParticlesAdd(text, 0, x, y);
         }
 
@@ -4196,7 +4202,7 @@ Game.Launch = function () {
         Game.sparkles = elementByID('sparkles');
         Game.sparklesT = 0;
         Game.sparklesFrames = 16;
-        Game.SparkleAt = function (x, y) {
+        Game.SparkleAt = (x, y) => {
             if (Game.blendModesOn) {
                 Game.sparklesT = Game.sparklesFrames + 1;
                 Game.sparkles.style.backgroundPosition = '0px 0px';
@@ -4205,8 +4211,8 @@ Game.Launch = function () {
                 Game.sparkles.style.display = 'block';
             }
         }
-        Game.SparkleOn = function (el) {
-            var rect = el.getBoundingClientRect();
+        Game.SparkleOn = el => {
+            let rect = el.getBoundingClientRect();
             Game.SparkleAt((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2 - 24);
         }
 
@@ -4223,7 +4229,6 @@ Game.Launch = function () {
             this.desc = desc || '';
             this.pic = pic || '';
             this.id = Game.noteId;
-            this.date = Date.now();
             this.quick = quick || 0;
             this.life = (this.quick || 1) * Game.fps;
             this.l = 0;
@@ -4236,25 +4241,27 @@ Game.Launch = function () {
             //if (Game.Notes.length>50) Game.Notes.shift();
             Game.UpdateNotes();
         }
-        Game.CloseNote = function (id) {
-            var me = Game.NotesById[id];
+        Game.CloseNote = id => {
+            let me = Game.NotesById[id];
             Game.Notes.splice(Game.Notes.indexOf(me), 1);
             //Game.NotesById.splice(Game.NotesById.indexOf(me),1);
             Game.NotesById[id] = null;
             Game.UpdateNotes();
         }
-        Game.CloseNotes = function () {
+        Game.CloseNotes = () => {
             Game.Notes = [];
             Game.NotesById = [];
             Game.UpdateNotes();
         }
-        Game.UpdateNotes = function () {
-            var str = '';
-            var remaining = Game.Notes.length;
-            for (var i in Game.Notes) {
+        Game.UpdateNotes = () => {
+            let me;
+            let i;
+            let str = '';
+            let remaining = Game.Notes.length;
+            for (i in Game.Notes) {
                 if (i < 5) {
-                    var me = Game.Notes[i];
-                    var pic = '';
+                    me = Game.Notes[i];
+                    let pic = '';
                     if (me.pic !== '') pic = '<div class="icon" style="' + (me.pic[2] ? 'background-image:url(' + me.pic[2] + ');' : '') + 'background-position:' + (-me.pic[0] * 48) + 'px ' + (-me.pic[1] * 48) + 'px;"></div>';
                     str = '<div id="note-' + me.id + '" class="framed note ' + (me.pic !== '' ? 'haspic' : 'nopic') + ' ' + (me.desc !== '' ? 'hasdesc' : 'nodesc') + '"><div class="close" onclick="PlaySound(\'snd/tick.mp3\');Game.CloseNote(' + me.id + ');">x</div>' + pic + '<div class="text"><h3>' + me.title + '</h3>' + (me.desc !== '' ? '<div class="line"></div><h5>' + me.desc + '</h5>' : '') + '</div></div>' + str;
                     remaining--;
@@ -4265,27 +4272,27 @@ Game.Launch = function () {
                 str += '<div class="framed close sidenote" onclick="PlaySound(\'snd/tick.mp3\');Game.CloseNotes();">x</div>';
             }
             Game.noteL.innerHTML = str;
-            for (var i in Game.Notes) {
+            for (i in Game.Notes) {
                 me.l = 0;
                 if (i < 5) {
-                    var me = Game.Notes[i];
+                    me = Game.Notes[i];
                     me.l = elementByID('note-' + me.id);
                 }
             }
         }
-        Game.NotesLogic = function () {
-            for (var i in Game.Notes) {
+        Game.NotesLogic = () => {
+            for (let i in Game.Notes) {
                 if (Game.Notes[i].quick > 0) {
-                    var me = Game.Notes[i];
+                    let me = Game.Notes[i];
                     me.life--;
                     if (me.life <= 0) Game.CloseNote(me.id);
                 }
             }
         }
-        Game.NotesDraw = function () {
-            for (var i in Game.Notes) {
+        Game.NotesDraw = () => {
+            for (let i in Game.Notes) {
                 if (Game.Notes[i].quick > 0) {
-                    var me = Game.Notes[i];
+                    let me = Game.Notes[i];
                     if (me.l) {
                         if (me.life < 10) {
                             me.l.style.opacity = (me.life / 10);
@@ -4294,7 +4301,7 @@ Game.Launch = function () {
                 }
             }
         }
-        Game.Notify = function (title, desc, pic, quick, noLog) {
+        Game.Notify = (title, desc, pic, quick, noLog) => {
             if (Game.prefs.notifs) {
                 quick = Math.min(6, quick);
                 if (!quick) quick = 6;
@@ -4309,7 +4316,7 @@ Game.Launch = function () {
 		PROMPT
 		=======================================================================================*/
         Game.darkenL = elementByID('darken');
-        AddEvent(Game.darkenL, 'click', function () {
+        AddEvent(Game.darkenL, 'click', () => {
             Game.Click = 0;
             Game.ClosePrompt();
         });
@@ -4319,17 +4326,17 @@ Game.Launch = function () {
         Game.promptConfirm = '';
         Game.promptOn = 0;
         Game.promptUpdateFunc = 0;
-        Game.UpdatePrompt = function () {
+        Game.UpdatePrompt = () => {
             if (Game.promptUpdateFunc) Game.promptUpdateFunc();
             Game.promptAnchorL.style.top = Math.floor((Game.windowH - Game.promptWrapL.offsetHeight) / 2 - 16) + 'px';
         }
-        Game.Prompt = function (content, options, updateFunc, style) {
+        Game.Prompt = (content, options, updateFunc, style) => {
             if (updateFunc) Game.promptUpdateFunc = updateFunc;
             if (style) Game.promptWrapL.className = 'framed ' + style; else Game.promptWrapL.className = 'framed';
-            var str = '';
+            let str = '';
             str += content;
-            var opts = '';
-            for (var i in options) {
+            let opts = '';
+            for (let i in options) {
                 if (options[i] === 'br')//just a linebreak
                 {
                     opts += '<br>';
@@ -4346,13 +4353,26 @@ Game.Launch = function () {
             Game.promptOn = 1;
             Game.UpdatePrompt();
         }
-        Game.ClosePrompt = function () {
+        Game.ClosePrompt = () => {
             Game.promptAnchorL.style.display = 'none';
             Game.darkenL.style.display = 'none';
             Game.promptOn = 0;
             Game.promptUpdateFunc = 0;
         }
-        Game.ConfirmPrompt = function () {
+
+        function FireEvent(el, etype)
+        {
+            if (el.fireEvent)
+            {el.fireEvent('on'+etype);}
+            else
+            {
+                let evObj=document.createEvent('Events');
+                evObj.initEvent(etype,true,false);
+                el.dispatchEvent(evObj);
+            }
+        }
+
+        Game.ConfirmPrompt = () => {
             if (Game.promptOn && elementByID('promptOption0') && elementByID('promptOption0').style.display !== 'none') FireEvent(elementByID('promptOption0'), 'click');
         }
 
@@ -4360,28 +4380,28 @@ Game.Launch = function () {
 		MENUS
 		=======================================================================================*/
         Game.cssClasses = [];
-        Game.addClass = function (what) {
+        Game.addClass = what => {
             if (Game.cssClasses.indexOf(what) === -1) Game.cssClasses.push(what);
             Game.updateClasses();
         }
-        Game.removeClass = function (what) {
-            var i = Game.cssClasses.indexOf(what);
+        Game.removeClass = what => {
+            const i = Game.cssClasses.indexOf(what);
             if (i !== -1) {
                 Game.cssClasses.splice(i, 1);
             }
             Game.updateClasses();
         }
-        Game.updateClasses = function () {
+        Game.updateClasses = () => {
             Game.l.className = Game.cssClasses.join(' ');
         }
 
-        Game.WriteButton = function (prefName, button, on, off, callback, invert) {
-            var invert = invert ? 1 : 0;
+        Game.WriteButton = (prefName, button, on, off, callback, invertParam) => {
+            let invert = invertParam ? 1 : 0;
             if (!callback) callback = '';
             callback += 'PlaySound(\'snd/tick.mp3\');';
             return '<a class="option' + ((Game.prefs[prefName] ^ invert) ? '' : ' off') + '" id="' + button + '" ' + Game.clickStr + '="Game.Toggle(\'' + prefName + '\',\'' + button + '\',\'' + on + '\',\'' + off + '\',\'' + invert + '\');' + callback + '">' + (Game.prefs[prefName] ? on : off) + '</a>';
         }
-        Game.Toggle = function (prefName, button, on, off, invert) {
+        Game.Toggle = (prefName, button, on, off, invert) => {
             if (Game.prefs[prefName]) {
                 elementByID(button).innerHTML = off;
                 Game.prefs[prefName] = 0;
@@ -4392,30 +4412,30 @@ Game.Launch = function () {
             elementByID(button).className = 'option' + ((Game.prefs[prefName] ^ invert) ? '' : ' off');
 
         }
-        Game.ToggleFancy = function () {
+        Game.ToggleFancy = () => {
             if (Game.prefs.fancy) Game.removeClass('noFancy');
             else if (!Game.prefs.fancy) Game.addClass('noFancy');
         }
-        Game.ToggleFilters = function () {
+        Game.ToggleFilters = () => {
             if (Game.prefs.filters) Game.removeClass('noFilters');
             else if (!Game.prefs.filters) Game.addClass('noFilters');
         }
-        Game.ToggleExtraButtons = function () {
+        Game.ToggleExtraButtons = () => {
             if (!Game.prefs.extraButtons) Game.removeClass('extraButtons');
             else if (Game.prefs.extraButtons) Game.addClass('extraButtons');
-            for (var i in Game.Objects) {
+            for (let i in Game.Objects) {
                 Game.Objects[i].mute(0);
             }
         }
 
-        Game.WriteSlider = function (slider, leftText, rightText, startValueFunction, callback) {
+        Game.WriteSlider = (slider, leftText, rightText, startValueFunction, callback) => {
             if (!callback) callback = '';
             return '<div class="sliderBox"><div style="float:left;">' + leftText + '</div><div style="float:right;" id="' + slider + 'RightText">' + rightText.replace('[$]', startValueFunction()) + '</div><input class="slider" style="clear:both;" type="range" min="0" max="100" step="1" value="' + startValueFunction() + '" onchange="' + callback + '" oninput="' + callback + '" onmouseup="PlaySound(\'snd/tick.mp3\');" id="' + slider + '"/></div>';
         }
 
         Game.onPanel = 'Left';
         Game.addClass('focus' + Game.onPanel);
-        Game.ShowPanel = function (what) {
+        Game.ShowPanel = what => {
             if (!what) what = '';
             if (Game.onPanel !== what) {
                 Game.removeClass('focus' + Game.onPanel);
@@ -4425,7 +4445,7 @@ Game.Launch = function () {
         }
 
         Game.onMenu = '';
-        Game.ShowMenu = function (what) {
+        Game.ShowMenu = what => {
             if (!what || what === '') what = Game.onMenu;
             if (Game.onMenu === '' && what !== '') Game.addClass('onMenu');
             else if (Game.onMenu !== '' && what !== Game.onMenu) Game.addClass('onMenu');
@@ -4446,26 +4466,26 @@ Game.Launch = function () {
             Game.UpdateMenu();
 
             if (what === '') {
-                for (var i in Game.Objects) {
-                    var me = Game.Objects[i];
+                for (let i in Game.Objects) {
+                    let me = Game.Objects[i];
                     if (me.minigame && me.minigame.onResize) me.minigame.onResize();
                 }
             }
         }
-        Game.sayTime = function (time, detail) {
+        Game.sayTime = (time, detailParam) => {
             //time is a value where one second is equal to Game.fps (30).
             //detail skips days when >1, hours when >2, minutes when >3 and seconds when >4.
             //if detail is -1, output something like "3 hours, 9 minutes, 48 seconds"
             if (time <= 0) return '';
-            var str = '';
-            var detail = detail || 0;
+            let str;
+            let detail = detailParam || 0;
             time = Math.floor(time);
             if (detail === -1) {
                 //var months=0;
-                var days = 0;
-                var hours = 0;
-                var minutes = 0;
-                var seconds = 0;
+                let days = 0;
+                let hours = 0;
+                let minutes = 0;
+                let seconds = 0;
                 //if (time>=Game.fps*60*60*24*30) months=(Math.floor(time/(Game.fps*60*60*24*30)));
                 if (time >= Game.fps * 60 * 60 * 24) days = (Math.floor(time / (Game.fps * 60 * 60 * 24)));
                 if (time >= Game.fps * 60 * 60) hours = (Math.floor(time / (Game.fps * 60 * 60)));
@@ -4485,7 +4505,7 @@ Game.Launch = function () {
                 if (hours) {
                     seconds = 0;
                 }
-                var bits = [];
+                const bits = [];
                 //if (months>0) bits.push(Beautify(months)+' month'+(days==1?'':'s'));
                 if (days > 0) bits.push(Beautify(days) + ' day' + (days === 1 ? '' : 's'));
                 if (hours > 0) bits.push(Beautify(hours) + ' hour' + (hours === 1 ? '' : 's'));
@@ -4510,20 +4530,20 @@ Game.Launch = function () {
             return str;
         }
 
-        Game.tinyCookie = function () {
+        Game.tinyCookie = () => {
             if (!Game.HasAchiev('Tiny cookie')) {
                 return '<div class="tinyCookie" ' + Game.clickStr + '="Game.ClickTinyCookie();"></div>';
             }
             return '';
         }
-        Game.ClickTinyCookie = function () {
+        Game.ClickTinyCookie = () => {
             if (!Game.HasAchiev('Tiny cookie')) {
                 PlaySound('snd/tick.mp3');
                 Game.Win('Tiny cookie');
             }
         }
 
-        Game.setVolume = function (what) {
+        Game.setVolume = what => {
             Game.volume = what;
             /*for (var i in Sounds)
 			{
@@ -4531,8 +4551,9 @@ Game.Launch = function () {
 			}*/
         }
 
-        Game.UpdateMenu = function () {
-            var str = '';
+        Game.UpdateMenu = () => {
+            let me;
+            let str = '';
             if (Game.onMenu !== '') {
                 str += '<div class="close menuClose" ' + Game.clickStr + '="Game.ShowMenu();">x</div>';
                 //str+='<div style="position:absolute;top:8px;right:8px;cursor:pointer;font-size:16px;" '+Game.clickStr+'="Game.ShowMenu();">X</div>';
@@ -4543,14 +4564,12 @@ Game.Launch = function () {
                     '<div class="title">General</div>' +
                     '<div class="listing"><a class="option" ' + Game.clickStr + '="Game.toSave=true;PlaySound(\'snd/tick.mp3\');">Save</a><label>Save manually (the game autosaves every 60 seconds; shortcut : ctrl+S)</label></div>' +
                     '<div class="listing"><a class="option" ' + Game.clickStr + '="Game.ExportSave();PlaySound(\'snd/tick.mp3\');">Export save</a><a class="option" ' + Game.clickStr + '="Game.ImportSave();PlaySound(\'snd/tick.mp3\');">Import save</a><label>You can use this to backup your save or to transfer it to another computer (shortcut for import : ctrl+O)</label></div>' +
-                    '<div class="listing"><a class="option" ' + Game.clickStr + '="Game.FileSave();PlaySound(\'snd/tick.mp3\');">Save to file</a><a class="option" style="position:relative;"><input id="FileLoadInput" type="file" style="cursor:pointer;opacity:0;position:absolute;left:0px;top:0px;width:100%;height:100%;" onchange="Game.FileLoad(event);" ' + Game.clickStr + '="PlaySound(\'snd/tick.mp3\');"/>Load from file</a><label>Use this to keep backups on your computer</label></div>' +
+                    '<div class="listing"><a class="option" ' + Game.clickStr + '="Game.FileSave();PlaySound(\'snd/tick.mp3\');">Save to file</a><a class="option" style="position:relative;"><input id="FileLoadInput" type="file" style="cursor:pointer;opacity:0;position:absolute;left:0;top:0;width:100%;height:100%;" onchange="Game.FileLoad(event);" ' + Game.clickStr + '="PlaySound(\'snd/tick.mp3\');"/>Load from file</a><label>Use this to keep backups on your computer</label></div>' +
 
                     '<div class="listing"><a class="option warning" ' + Game.clickStr + '="Game.HardReset();PlaySound(\'snd/tick.mp3\');">Wipe save</a><label>Delete all your progress, including your achievements</label></div>' +
                     '<div class="title">Settings</div>' +
                     '<div class="listing">' +
-                    Game.WriteSlider('volumeSlider', 'Volume', '[$]%', function () {
-                        return Game.volume;
-                    }, 'Game.setVolume(Math.round(l(\'volumeSlider\').value));l(\'volumeSliderRightText\').innerHTML=Game.volume+\'%\';') + '<br>' +
+                    Game.WriteSlider('volumeSlider', 'Volume', '[$]%', () => Game.volume, 'Game.setVolume(Math.round(l(\'volumeSlider\').value));l(\'volumeSliderRightText\').innerHTML=Game.volume+\'%\';') + '<br>' +
                     Game.WriteButton('fancy', 'fancyButton', 'Fancy graphics ON', 'Fancy graphics OFF', 'Game.ToggleFancy();') + '<label>(visual improvements; disabling may improve performance)</label><br>' +
                     Game.WriteButton('filters', 'filtersButton', 'CSS filters ON', 'CSS filters OFF', 'Game.ToggleFilters();') + '<label>(cutting-edge visual improvements; disabling may improve performance)</label><br>' +
                     Game.WriteButton('particles', 'particlesButton', 'Particles ON', 'Particles OFF') + '<label>(cookies falling down, etc; disabling may improve performance)</label><br>' +
@@ -4587,31 +4606,31 @@ Game.Launch = function () {
                 str += replaceAll('[bakeryName]', Game.bakeryName, Game.updateLog);
             } else if (Game.onMenu === 'stats') {
                 let i;
-                var buildingsOwned = 0;
+                let buildingsOwned;
                 buildingsOwned = Game.BuildingsOwned;
-                var upgrades = '';
-                var cookieUpgrades = '';
-                var hiddenUpgrades = '';
-                var prestigeUpgrades = '';
-                var upgradesTotal = 0;
-                var upgradesOwned = 0;
-                var prestigeUpgradesTotal = 0;
-                var prestigeUpgradesOwned = 0;
+                let upgrades = '';
+                let cookieUpgrades = '';
+                let hiddenUpgrades = '';
+                let prestigeUpgrades = '';
+                let upgradesTotal = 0;
+                let upgradesOwned = 0;
+                let prestigeUpgradesTotal = 0;
+                let prestigeUpgradesOwned = 0;
 
-                var list = [];
+                let list = [];
                 for (i in Game.Upgrades)//sort the upgrades
                 {
                     list.push(Game.Upgrades[i]);
                 }
-                var sortMap = function (a, b) {
+                function sortMap(a, b) {
                     if (a.order > b.order) return 1;
                     else if (a.order < b.order) return -1;
                     else return 0;
                 }
                 list.sort(sortMap);
                 for (i in list) {
-                    var str2 = '';
-                    var me = list[i];
+                    let str2 = '';
+                    me = list[i];
 
                     str2 += Game.crate(me, 'stats');
 
@@ -4628,29 +4647,24 @@ Game.Launch = function () {
                     } else if (me.pool === 'cookie') cookieUpgrades += str2;
                     else if (me.pool !== 'toggle' && me.pool !== 'unused') upgrades += str2;
                 }
-                var achievements = [];
-                var achievementsOwned = 0;
-                var achievementsOwnedOther = 0;
-                var achievementsTotal = 0;
+                let achievements = [];
+                let achievementsOwned = 0;
+                let achievementsOwnedOther = 0;
+                let achievementsTotal = 0;
 
-                var list = [];
+                list = [];
                 for (i in Game.Achievements)//sort the achievements
                 {
                     list.push(Game.Achievements[i]);
-                }
-                var sortMap = function (a, b) {
-                    if (a.order > b.order) return 1;
-                    else if (a.order < b.order) return -1;
-                    else return 0;
                 }
                 list.sort(sortMap);
 
 
                 for (i in list) {
-                    var me = list[i];
+                    me = list[i];
                     //if (me.pool=='normal' || me.won>0) achievementsTotal++;
                     if (Game.CountsAsAchievementOwned(me.pool)) achievementsTotal++;
-                    var pool = me.pool;
+                    let pool = me.pool;
                     if (!achievements[pool]) achievements[pool] = '';
                     achievements[pool] += Game.crate(me, 'stats');
 
@@ -4660,8 +4674,8 @@ Game.Launch = function () {
                     }
                 }
 
-                var achievementsStr = '';
-                var pools = {
+                let achievementsStr = '';
+                const pools = {
                     'dungeon': '<b>Dungeon achievements</b> <small>(Not technically achievable yet.)</small>',
                     'shadow': '<b>Shadow achievements</b> <small>(These are feats that are either unfair or difficult to attain. They do not give milk.)</small>'
                 };
@@ -4693,13 +4707,13 @@ Game.Launch = function () {
                     }
                     santaStr += '<div style="clear:both;"></div>';
                 }
-                var dragonStr = '';
+                let dragonStr = '';
                 frames = 9;
-                var mainLevels = [0, 4, 8, 21, 22, 23];
+                const mainLevels = [0, 4, 8, 21, 22, 23];
                 if (Game.Has('A crumbly egg')) {
                     for (i = 0; i <= mainLevels.length; i++) {
                         if (Game.dragonLevel >= mainLevels[i]) {
-                            var level = Game.dragonLevels[mainLevels[i]];
+                            let level = Game.dragonLevels[mainLevels[i]];
                             dragonStr += '<div ' + Game.getTooltip(
                                 //'<div style="width:96px;height:96px;margin:4px auto;background:url(img/dragon.png?v='+Game.version+') '+(-level.pic*96)+'px 0px;"></div><div class="line"></div><div style="min-width:200px;text-align:center;margin-bottom:6px;">'+level.name+'</div>'
                                 '<div class="prompt" style="text-align:center;padding-bottom:6px;white-space:nowrap;margin:0 32px;"><div style="width:96px;height:96px;margin:4px auto;background:url(/img/dragon.png?v=' + Game.version + ') ' + (-level.pic * 96) + 'px 0px;filter:drop-shadow(0px 3px 2px #000);-webkit-filter:drop-shadow(0px 3px 2px #000);"></div><div class="line"></div><h3>' + level.name + '</h3></div>'
@@ -4708,35 +4722,35 @@ Game.Launch = function () {
                     }
                     dragonStr += '<div style="clear:both;"></div>';
                 }
-                var ascensionModeStr = '';
-                var icon = Game.ascensionModes[Game.ascensionMode].icon;
+                let ascensionModeStr = '';
+                let icon = Game.ascensionModes[Game.ascensionMode].icon;
                 if (Game.resets > 0) ascensionModeStr = '<span style="cursor:pointer;" ' + Game.getTooltip(
                     '<div style="min-width:200px;text-align:center;font-size:11px;">' + Game.ascensionModes[Game.ascensionMode].desc + '</div>'
                     , 'top') + '><div class="icon" style="display:inline-block;float:none;transform:scale(0.5);margin:-24px -16px -19px -8px;' + (icon[2] ? 'background-image:url(' + icon[2] + ');' : '') + 'background-position:' + (-icon[0] * 48) + 'px ' + (-icon[1] * 48) + 'px;"></div>' + Game.ascensionModes[Game.ascensionMode].name + '</span>';
 
-                var milkName = Game.Milk.name;
+                let milkName = Game.Milk.name;
 
-                var researchStr = Game.sayTime(Game.researchT, -1);
-                var pledgeStr = Game.sayTime(Game.pledgeT, -1);
-                var wrathStr = '';
+                let researchStr = Game.sayTime(Game.researchT, -1);
+                let pledgeStr = Game.sayTime(Game.pledgeT, -1);
+                let wrathStr = '';
                 if (Game.elderWrath === 1) wrathStr = 'awoken';
                 else if (Game.elderWrath === 2) wrathStr = 'displeased';
                 else if (Game.elderWrath === 3) wrathStr = 'angered';
                 else if (Game.elderWrath === 0 && Game.pledges > 0) wrathStr = 'appeased';
 
-                var date = new Date();
+                const date = new Date();
                 date.setTime(Date.now() - Game.startDate);
-                var timeInSeconds = date.getTime() / 1000;
-                var startDate = Game.sayTime(timeInSeconds * Game.fps, -1);
+                let timeInSeconds = date.getTime() / 1000;
+                let startDate = Game.sayTime(timeInSeconds * Game.fps, -1);
                 date.setTime(Date.now() - Game.fullDate);
-                var fullDate = Game.sayTime(date.getTime() / 1000 * Game.fps, -1);
+                let fullDate = Game.sayTime(date.getTime() / 1000 * Game.fps, -1);
                 if (!Game.fullDate || !fullDate || fullDate.length < 1) fullDate = 'a long while';
                 /*date.setTime(new Date().getTime()-Game.lastDate);
 				var lastDate=Game.sayTime(date.getTime()/1000*Game.fps,2);*/
 
-                var heavenlyMult = Game.GetHeavenlyMultiplier();
+                const heavenlyMult = Game.GetHeavenlyMultiplier();
 
-                var seasonStr = Game.sayTime(Game.seasonT, -1);
+                const seasonStr = Game.sayTime(Game.seasonT, -1);
 
                 str += '<div class="section">Statistics</div>' +
                     '<div class="subsection">' +
@@ -4818,16 +4832,16 @@ Game.Launch = function () {
 			});*/
         }
 
-        AddEvent(elementByID('prefsButton'), 'click', function () {
+        AddEvent(elementByID('prefsButton'), 'click', () => {
             Game.ShowMenu('prefs');
         });
-        AddEvent(elementByID('statsButton'), 'click', function () {
+        AddEvent(elementByID('statsButton'), 'click', () => {
             Game.ShowMenu('stats');
         });
-        AddEvent(elementByID('logButton'), 'click', function () {
+        AddEvent(elementByID('logButton'), 'click', () => {
             Game.ShowMenu('log');
         });
-        AddEvent(elementByID('legacyButton'), 'click', function () {
+        AddEvent(elementByID('legacyButton'), 'click', () => {
             PlaySound('snd/tick.mp3');
             Game.Ascend();
         });
@@ -4836,36 +4850,36 @@ Game.Launch = function () {
 
         Game.lastPanel = '';
         if (Game.touchEvents) {
-            AddEvent(elementByID('focusLeft'), 'touchend', function () {
+            AddEvent(elementByID('focusLeft'), 'touchend', () => {
                 Game.ShowMenu('');
                 Game.ShowPanel('Left');
             });
-            AddEvent(elementByID('focusMiddle'), 'touchend', function () {
+            AddEvent(elementByID('focusMiddle'), 'touchend', () => {
                 Game.ShowMenu('');
                 Game.ShowPanel('Middle');
             });
-            AddEvent(elementByID('focusRight'), 'touchend', function () {
+            AddEvent(elementByID('focusRight'), 'touchend', () => {
                 Game.ShowMenu('');
                 Game.ShowPanel('Right');
             });
-            AddEvent(elementByID('focusMenu'), 'touchend', function () {
+            AddEvent(elementByID('focusMenu'), 'touchend', () => {
                 Game.ShowMenu('main');
                 Game.ShowPanel('Menu');
             });
         } else {
-            AddEvent(elementByID('focusLeft'), 'click', function () {
+            AddEvent(elementByID('focusLeft'), 'click', () => {
                 Game.ShowMenu('');
                 Game.ShowPanel('Left');
             });
-            AddEvent(elementByID('focusMiddle'), 'click', function () {
+            AddEvent(elementByID('focusMiddle'), 'click', () => {
                 Game.ShowMenu('');
                 Game.ShowPanel('Middle');
             });
-            AddEvent(elementByID('focusRight'), 'click', function () {
+            AddEvent(elementByID('focusRight'), 'click', () => {
                 Game.ShowMenu('');
                 Game.ShowPanel('Right');
             });
-            AddEvent(elementByID('focusMenu'), 'click', function () {
+            AddEvent(elementByID('focusMenu'), 'click', () => {
                 Game.ShowMenu('main');
                 Game.ShowPanel('Menu');
             });
@@ -4879,15 +4893,15 @@ Game.Launch = function () {
         Game.TickerAge = 0;
         Game.TickerN = 0;
         Game.TickerClicks = 0;
-        Game.UpdateTicker = function () {
+        Game.UpdateTicker = () => {
             Game.TickerAge--;
             if (Game.TickerAge <= 0 || Game.Ticker === '') Game.getNewTicker();
         }
-        Game.getNewTicker = function () {
-            var list = [];
+        Game.getNewTicker = () => {
+            let list = [];
 
             if (Game.TickerN % 2 === 0 || Game.cookiesEarned >= 10100000000) {
-                var animals = ['newts', 'penguins', 'scorpions', 'axolotls', 'puffins', 'porpoises', 'blowfish', 'horses', 'crayfish', 'slugs', 'humpback whales', 'nurse sharks', 'giant squids', 'polar bears', 'fruit bats', 'frogs', 'sea squirts', 'velvet worms', 'mole rats', 'paramecia', 'nematodes', 'tardigrades', 'giraffes', 'monkfish', 'wolfmen', 'goblins', 'hippies'];
+                const animals = ['newts', 'penguins', 'scorpions', 'axolotls', 'puffins', 'porpoises', 'blowfish', 'horses', 'crayfish', 'slugs', 'humpback whales', 'nurse sharks', 'giant squids', 'polar bears', 'fruit bats', 'frogs', 'sea squirts', 'velvet worms', 'mole rats', 'paramecia', 'nematodes', 'tardigrades', 'giraffes', 'monkfish', 'wolfmen', 'goblins', 'hippies'];
 
                 if (Math.random() < 0.75 || Game.cookiesEarned < 10000) {
                     if (Game.Objects['Grandma'].amount > 0) list.push(chooseRandomElement([
@@ -5381,9 +5395,9 @@ Game.Launch = function () {
                 else if (Game.cookiesEarned < 10100000000) list.push('You look back at your career. It\'s been a fascinating journey, building your baking empire from the ground up.');//only show this for 100 millions
             }
 
-            for (var i in Game.customTickers) {
-                var arr = Game.customTickers[i]();
-                for (var ii in arr) list.push(arr[ii]);
+            for (let i in Game.customTickers) {
+                let arr = Game.customTickers[i]();
+                for (let ii in arr) list.push(arr[ii]);
             }
 
             Game.TickerAge = Game.fps * 10;
@@ -5396,7 +5410,7 @@ Game.Launch = function () {
         Game.tickerBelowL = elementByID('commentsTextBelow');
         Game.tickerCompactL = elementByID('compactCommentsText');
         Game.TickerDraw = function () {
-            var str = '';
+            let str = '';
             if (Game.Ticker !== '') str = Game.Ticker;
             Game.tickerBelowL.innerHTML = Game.tickerL.innerHTML;
             Game.tickerL.innerHTML = str;
@@ -5409,7 +5423,7 @@ Game.Launch = function () {
             void Game.tickerL.offsetWidth;
             Game.tickerL.className = 'commentsText risingUp';
         }
-        AddEvent(Game.tickerL, 'click', function (event) {
+        AddEvent(Game.tickerL, 'click', event => {
             Game.Ticker = '';
             Game.TickerClicks++;
             if (Game.TickerClicks === 50) {
@@ -5418,7 +5432,7 @@ Game.Launch = function () {
         });
 
         Game.Log = [];
-        Game.AddToLog = function (what) {
+        Game.AddToLog = what => {
             Game.Log.unshift(what);
             if (Game.Log.length > 100) Game.Log.pop();
         }
@@ -5441,6 +5455,7 @@ Game.Launch = function () {
         Game.ObjectsN = 0;
         Game.BuildingsOwned = 0;
         Game.Object = function (name, commonName, desc, icon, iconColumn, art, price, cps, buyFunction) {
+            let str;
             this.id = Game.ObjectsN;
             this.name = name;
             this.displayName = this.name;
@@ -5468,19 +5483,18 @@ Game.Launch = function () {
                 this.baseCps = Math.ceil((Math.pow(this.n * 1, this.n * 0.5 + 2)) * 10) / 10;//0.45 used to be 0.5
                 //this.baseCps=Math.ceil((Math.pow(this.n*1,this.n*0.45+2.10))*10)/10;
                 //clamp 14,467,199 to 14,000,000 (there's probably a more elegant way to do that)
-                var digits = Math.pow(10, (Math.ceil(Math.log(Math.ceil(this.baseCps)) / Math.LN10))) / 100;
+                let digits = Math.pow(10, (Math.ceil(Math.log(Math.ceil(this.baseCps)) / Math.LN10))) / 100;
                 this.baseCps = Math.round(this.baseCps / digits) * digits;
 
                 this.basePrice = (this.n * 1 + 9 + (this.n < 5 ? 0 : Math.pow(this.n - 5, 1.75) * 5)) * Math.pow(10, this.n);
                 //this.basePrice=(this.n*2.5+7.5)*Math.pow(10,this.n);
-                var digits = Math.pow(10, (Math.ceil(Math.log(Math.ceil(this.basePrice)) / Math.LN10))) / 100;
+                digits = Math.pow(10, (Math.ceil(Math.log(Math.ceil(this.basePrice)) / Math.LN10))) / 100;
                 this.basePrice = Math.round(this.basePrice / digits) * digits;
                 this.price = this.basePrice;
                 this.bulkPrice = this.price;
             }
 
             this.totalCookies = 0;
-            this.storedCps = 0;
             this.storedTotalCps = 0;
             this.icon = icon;
             this.iconColumn = iconColumn;
@@ -5530,14 +5544,14 @@ Game.Launch = function () {
             }
 
             this.getPrice = function (n) {
-                var price = this.basePrice * Math.pow(Game.priceIncrease, Math.max(0, this.amount - this.free));
+                let price = this.basePrice * Math.pow(Game.priceIncrease, Math.max(0, this.amount - this.free));
                 price = Game.modifyBuildingPrice(this, price);
                 return Math.ceil(price);
             }
             this.getSumPrice = function (amount)//return how much it would cost to buy [amount] more of this building
             {
-                var price = 0;
-                for (var i = Math.max(0, this.amount); i < Math.max(0, (this.amount) + amount); i++) {
+                let price = 0;
+                for (let i = Math.max(0, this.amount); i < Math.max(0, (this.amount) + amount); i++) {
                     price += this.basePrice * Math.pow(Game.priceIncrease, Math.max(0, i - this.free));
                 }
                 price = Game.modifyBuildingPrice(this, price);
@@ -5545,32 +5559,32 @@ Game.Launch = function () {
             }
             this.getReverseSumPrice = function (amount)//return how much you'd get from selling [amount] of this building
             {
-                var price = 0;
-                for (var i = Math.max(0, (this.amount) - amount); i < Math.max(0, this.amount); i++) {
+                let price = 0;
+                for (let i = Math.max(0, (this.amount) - amount); i < Math.max(0, this.amount); i++) {
                     price += this.basePrice * Math.pow(Game.priceIncrease, Math.max(0, i - this.free));
                 }
                 price = Game.modifyBuildingPrice(this, price);
                 price *= this.getSellMultiplier();
                 return Math.ceil(price);
             }
-            this.getSellMultiplier = function () {
-                var giveBack = 0.25;
+            this.getSellMultiplier = () => {
+                let giveBack = 0.25;
                 if (Game.hasAura('Earth Shatterer')) giveBack = 0.5;
                 return giveBack;
             }
 
             this.buy = function (amount) {
                 if (Game.buyMode === -1) {
-                    this.sell(Game.buyBulk, 1);
+                    this.sell(Game.buyBulk);
                     return 0;
                 }
-                var success = 0;
-                var moni = 0;
-                var bought = 0;
+                let success = 0;
+                let moni = 0;
+                let bought = 0;
                 if (!amount) amount = Game.buyBulk;
                 if (amount === -1) amount = 1000;
-                for (var i = 0; i < amount; i++) {
-                    var price = this.getPrice();
+                for (let i = 0; i < amount; i++) {
+                    let price = this.getPrice();
                     if (Game.cookies >= price) {
                         bought++;
                         moni += price;
@@ -5587,20 +5601,20 @@ Game.Launch = function () {
                     }
                 }
                 if (success) {
-                    PlaySound('snd/buy' + chooseRandomElement([1, 2, 3, 4]) + '.mp3', 0.75);
+                    PlaySound('/snd/buy' + chooseRandomElement([1, 2, 3, 4]) + '.mp3', 0.75);
                     this.refresh();
                 }
                 //if (moni>0 && amount>1) Game.Notify(this.name,'Bought <b>'+bought+'</b> for '+Beautify(moni)+' cookies','',2);
             }
-            this.sell = function (amount, bypass) {
-                var success = 0;
-                var moni = 0;
-                var sold = 0;
+            this.sell = function (amount) {
+                let success = 0;
+                let moni = 0;
+                let sold = 0;
                 if (amount === -1) amount = this.amount;
                 if (!amount) amount = Game.buyBulk;
-                for (var i = 0; i < amount; i++) {
-                    var price = this.getPrice();
-                    var giveBack = this.getSellMultiplier();
+                for (let i = 0; i < amount; i++) {
+                    let price = this.getPrice();
+                    const giveBack = this.getSellMultiplier();
                     price = Math.floor(price * giveBack);
                     if (this.amount > 0) {
                         sold++;
@@ -5618,8 +5632,8 @@ Game.Launch = function () {
                     }
                 }
                 if (success && Game.hasGod) {
-                    var godLvl = Game.hasGod('ruin');
-                    var old = Game.hasBuff('Devastation');
+                    let godLvl = Game.hasGod('ruin');
+                    let old = Game.hasBuff('Devastation');
                     if (old) {
                         if (godLvl === 1) old.multClick += sold * 0.01;
                         else if (godLvl === 2) old.multClick += sold * 0.005;
@@ -5631,20 +5645,20 @@ Game.Launch = function () {
                     }
                 }
                 if (success) {
-                    PlaySound('snd/sell' + chooseRandomElement([1, 2, 3, 4]) + '.mp3', 0.75);
+                    PlaySound('/snd/sell' + chooseRandomElement([1, 2, 3, 4]) + '.mp3', 0.75);
                     this.refresh();
                 }
                 //if (moni>0) Game.Notify(this.name,'Sold <b>'+sold+'</b> for '+Beautify(moni)+' cookies','',2);
             }
             this.sacrifice = function (amount)//sell without getting back any money
             {
-                var success = 0;
+                let success = 0;
                 //var moni=0;
-                var sold = 0;
+                let sold = 0;
                 if (amount === -1) amount = this.amount;
                 if (!amount) amount = 1;
-                for (var i = 0; i < amount; i++) {
-                    var price = this.getPrice();
+                for (let i = 0; i < amount; i++) {
+                    let price = this.getPrice();
                     price = Math.floor(price * 0.5);
                     if (this.amount > 0) {
                         sold++;
@@ -5668,7 +5682,7 @@ Game.Launch = function () {
             }
             this.buyFree = function (amount)//unlike getFree, this still increases the price
             {
-                for (var i = 0; i < amount; i++) {
+                for (let i = 0; i < amount; i++) {
                     if (Game.cookies >= price) {
                         this.amount++;
                         this.bought++;
@@ -5688,16 +5702,14 @@ Game.Launch = function () {
                 Game.BuildingsOwned += amount;
                 this.refresh();
             }
-            this.getFreeRanks = function (amount)//this building's price behaves as if you had X less of it
-            {
-                this.free += amount;
-                this.refresh();
-            }
 
             this.tooltip = function () {
-                var me = this;
-                var desc = me.desc;
-                var name = me.name;
+                let boost;
+                let other;
+                let i;
+                let me = this;
+                let desc = me.desc;
+                let name = me.name;
                 if (Game.season === 'fools') {
                     if (!Game.foolObjects[me.name]) {
                         name = Game.foolObjects['Unknown'].name;
@@ -5707,7 +5719,7 @@ Game.Launch = function () {
                         desc = Game.foolObjects[me.name].desc;
                     }
                 }
-                var icon = [me.iconColumn, 0];
+                let icon = [me.iconColumn, 0];
                 if (me.locked) {
                     name = '???';
                     desc = '';
@@ -5715,45 +5727,45 @@ Game.Launch = function () {
                 }
                 //if (l('rowInfo'+me.id) && Game.drawT%10==0) l('rowInfoContent'+me.id).innerHTML='&bull; '+me.amount+' '+(me.amount==1?me.single:me.plural)+'<br>&bull; producing '+Beautify(me.storedTotalCps,1)+' '+(me.storedTotalCps==1?'cookie':'cookies')+' per second<br>&bull; total : '+Beautify(me.totalCookies)+' '+(Math.floor(me.totalCookies)==1?'cookie':'cookies')+' '+me.actionName;
 
-                var canBuy = false;
-                var price = me.bulkPrice;
+                let canBuy = false;
+                let price = me.bulkPrice;
                 if ((Game.buyMode === 1 && Game.cookies >= price) || (Game.buyMode === -1 && me.amount > 0)) canBuy = true;
 
-                var synergiesStr = '';
+                let synergiesStr = '';
                 //note : might not be entirely accurate, math may need checking
                 if (me.amount > 0) {
-                    var synergiesWith = {};
-                    var synergyBoost = 0;
+                    let synergiesWith = {};
+                    let synergyBoost = 0;
 
                     if (me.name === 'Grandma') {
-                        for (var i in Game.GrandmaSynergies) {
+                        for (i in Game.GrandmaSynergies) {
                             if (Game.Has(Game.GrandmaSynergies[i])) {
-                                var other = Game.Upgrades[Game.GrandmaSynergies[i]].buildingTie;
-                                var mult = me.amount * 0.01 * (1 / (other.id - 1));
-                                var boost = (other.storedTotalCps * Game.globalCpsMult) - (other.storedTotalCps * Game.globalCpsMult) / (1 + mult);
+                                other = Game.Upgrades[Game.GrandmaSynergies[i]].buildingTie;
+                                let mult = me.amount * 0.01 * (1 / (other.id - 1));
+                                boost = (other.storedTotalCps * Game.globalCpsMult) - (other.storedTotalCps * Game.globalCpsMult) / (1 + mult);
                                 synergyBoost += boost;
                                 if (!synergiesWith[other.plural]) synergiesWith[other.plural] = 0;
                                 synergiesWith[other.plural] += mult;
                             }
                         }
                     } else if (me.name === 'Portal' && Game.Has('Elder Pact')) {
-                        var other = Game.Objects['Grandma'];
-                        var boost = (me.amount * 0.05 * other.amount) * Game.globalCpsMult;
+                        other = Game.Objects['Grandma'];
+                        boost = (me.amount * 0.05 * other.amount) * Game.globalCpsMult;
                         synergyBoost += boost;
                         if (!synergiesWith[other.plural]) synergiesWith[other.plural] = 0;
                         synergiesWith[other.plural] += boost / (other.storedTotalCps * Game.globalCpsMult);
                     }
 
-                    for (var i in me.synergies) {
-                        var it = me.synergies[i];
+                    for (i in me.synergies) {
+                        let it = me.synergies[i];
                         if (Game.Has(it.name)) {
-                            var weight = 0.05;
-                            var other = it.buildingTie1;
+                            let weight = 0.05;
+                            other = it.buildingTie1;
                             if (me === it.buildingTie1) {
                                 weight = 0.001;
                                 other = it.buildingTie2;
                             }
-                            var boost = (other.storedTotalCps * Game.globalCpsMult) - (other.storedTotalCps * Game.globalCpsMult) / (1 + me.amount * weight);
+                            boost = (other.storedTotalCps * Game.globalCpsMult) - (other.storedTotalCps * Game.globalCpsMult) / (1 + me.amount * weight);
                             synergyBoost += boost;
                             if (!synergiesWith[other.plural]) synergiesWith[other.plural] = 0;
                             synergiesWith[other.plural] += me.amount * weight;
@@ -5761,12 +5773,10 @@ Game.Launch = function () {
                         }
                     }
                     if (synergyBoost > 0) {
-                        for (var i in synergiesWith) {
+                        for (i in synergiesWith) {
                             if (synergiesStr !== '') synergiesStr += ', ';
                             synergiesStr += i + ' +' + Beautify(synergiesWith[i] * 100, 1) + '%';
                         }
-                        //synergiesStr='...along with <b>'+Beautify(synergyBoost,1)+'</b> cookies through synergies with other buildings ('+synergiesStr+'; <b>'+Beautify((synergyBoost/Game.cookiesPs)*100,1)+'%</b> of total CpS)';
-                        //synergiesStr='...also boosting some other buildings, accounting for <b>'+Beautify(synergyBoost,1)+'</b> cookies per second (a combined <b>'+Beautify((synergyBoost/Game.cookiesPs)*100,1)+'%</b> of total CpS) : '+synergiesStr+'';
                         synergiesStr = '...also boosting some other buildings : ' + synergiesStr + ' - all combined, these boosts account for <b>' + Beautify(synergyBoost, 1) + '</b> Neuros per second (<b>' + Beautify((synergyBoost / Game.cookiesPs) * 100, 1) + '%</b> of total CpS)';
                     }
                 }
@@ -5782,40 +5792,26 @@ Game.Launch = function () {
                     ) : '') +
                     '</div>';
             }
+
             this.levelTooltip = function () {
-                var me = this;
+                let me = this;
                 return '<div style="width:280px;padding:8px;"><b>Level ' + Beautify(me.level) + ' ' + me.plural + '</b><div class="line"></div>' + (me.level === 1 ? me.extraName : me.extraPlural).replace('[X]', Beautify(me.level)) + ' granting <b>+' + Beautify(me.level) + '% ' + me.name + ' CpS</b>.<div class="line"></div>Click to level up for <span class="price lump' + (Game.lumps >= me.level + 1 ? '' : ' disabled') + '">' + Beautify(me.level + 1) + ' sugar lump' + (me.level === 0 ? '' : 's') + '</span>.' + ((me.level === 0 && me.minigameUrl) ? '<div class="line"></div><b>Levelling up this building unlocks a minigame.</b>' : '') + '</div>';
             }
-            /*this.levelUp=function()
-			{
-				var me=this;
-				if (Game.lumps<me.level+1) return 0;
-				Game.lumps-=me.level+1;
-				me.level+=1;
-				if (me.level>=10 && me.levelAchiev10) Game.Win(me.levelAchiev10.name);
-				PlaySound('snd/upgrade.mp3',0.6);
-				Game.LoadMinigames();
-				me.refresh();
-				if (l('productLevel'+me.id)){var rect=l('productLevel'+me.id).getBoundingClientRect();Game.SparkleAt((rect.left+rect.right)/2,(rect.top+rect.bottom)/2-24);}
-				Game.recalculateGains=1;
-				if (me.minigame && me.minigame.onLevel) me.minigame.onLevel(me.level);
-			}*/
-            this.levelUp = function (me) {
-                return function () {
-                    Game.spendLump(me.level + 1, 'level up your ' + me.plural, function () {
-                        me.level += 1;
-                        if (me.level >= 10 && me.levelAchiev10) Game.Win(me.levelAchiev10.name);
-                        PlaySound('snd/upgrade.mp3', 0.6);
-                        Game.LoadMinigames();
-                        me.refresh();
-                        if (elementByID('productLevel' + me.id)) {
-                            var rect = elementByID('productLevel' + me.id).getBoundingClientRect();
-                            Game.SparkleAt((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2 - 24);
-                        }
-                        if (me.minigame && me.minigame.onLevel) me.minigame.onLevel(me.level);
-                    })();
-                };
-            }(this);
+
+            this.levelUp = (me => () => {
+                Game.spendLump(me.level + 1, 'level up your ' + me.plural, function () {
+                    me.level += 1;
+                    if (me.level >= 10 && me.levelAchiev10) Game.Win(me.levelAchiev10.name);
+                    PlaySound('snd/upgrade.mp3', 0.6);
+                    Game.LoadMinigames();
+                    me.refresh();
+                    if (elementByID('productLevel' + me.id)) {
+                        let rect = elementByID('productLevel' + me.id).getBoundingClientRect();
+                        Game.SparkleAt((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2 - 24);
+                    }
+                    if (me.minigame && me.minigame.onLevel) me.minigame.onLevel(me.level);
+                })();
+            })(this);
 
             this.refresh = function ()//show/hide the building display based on its amount, and redraw it
             {
@@ -5837,31 +5833,29 @@ Game.Launch = function () {
                 //else this.pics=[];
             }
             this.rebuild = function () {
-                var me = this;
+                let me = this;
                 //var classes='product';
-                var price = me.bulkPrice;
+                let price = me.bulkPrice;
                 /*if (Game.cookiesEarned>=me.basePrice || me.bought>0) {classes+=' unlocked';me.locked=0;} else {classes+=' locked';me.locked=1;}
 				if (Game.cookies>=price) classes+=' enabled'; else classes+=' disabled';
 				if (me.l.className.indexOf('toggledOff')!=-1) classes+=' toggledOff';
 				*/
-                var icon = [0, me.icon];
-                var iconOff = [1, me.icon];
+                let icon = [0, me.icon];
+                let iconOff = [1, me.icon];
                 if (me.iconFunc) icon = me.iconFunc();
 
-                var desc = me.desc;
-                var name = me.name;
-                var displayName = me.displayName;
+                let desc = me.desc;
+                let name = me.name;
+                let displayName = me.displayName;
                 if (Game.season === 'fools') {
                     if (!Game.foolObjects[me.name]) {
                         icon = [2, 0];
                         iconOff = [3, 0];
                         name = Game.foolObjects['Unknown'].name;
-                        desc = Game.foolObjects['Unknown'].desc;
                     } else {
                         icon = [2, me.icon];
                         iconOff = [3, me.icon];
                         name = Game.foolObjects[me.name].name;
-                        desc = Game.foolObjects[me.name].desc;
                     }
                     displayName = name;
                     if (name.length > 16) displayName = '<span style="font-size:75%;">' + name + '</span>';
@@ -5900,18 +5894,18 @@ Game.Launch = function () {
                 }
             };
 
-            this.draw = function () {
+            this.draw = () => {
             };
 
             if (this.id === 0) {
-                var str = '<div class="productButtons">';
+                str = '<div class="productButtons">';
                 str += '<div id="productLevel' + this.id + '" class="productButton productLevel lumpsOnly" onclick="Game.ObjectsById[' + this.id + '].levelUp()" ' + Game.getDynamicTooltip('Game.ObjectsById[' + this.id + '].levelTooltip', 'this') + '></div>';
                 str += '<div id="productMinigameButton' + this.id + '" class="productButton productMinigameButton lumpsOnly" onclick="Game.ObjectsById[' + this.id + '].switchMinigame(-1);PlaySound(Game.ObjectsById[' + this.id + '].onMinigame?\'snd/clickOn.mp3\':\'snd/clickOff.mp3\');"></div>';
                 str += '</div>';
                 elementByID('sectionLeftExtra').innerHTML = elementByID('sectionLeftExtra').innerHTML + str;
             } else//draw it
             {
-                var str = '<div class="row" id="row' + this.id + '"><div class="separatorBottom"></div>';
+                str = '<div class="row" id="row' + this.id + '"><div class="separatorBottom"></div>';
                 str += '<div class="productButtons">';
                 str += '<div id="productLevel' + this.id + '" class="productButton productLevel lumpsOnly" onclick="Game.ObjectsById[' + this.id + '].levelUp()" ' + Game.getDynamicTooltip('Game.ObjectsById[' + this.id + '].levelTooltip', 'this') + '></div>';
                 str += '<div id="productMinigameButton' + this.id + '" class="productButton productMinigameButton lumpsOnly" onclick="Game.ObjectsById[' + this.id + '].switchMinigame(-1);PlaySound(Game.ObjectsById[' + this.id + '].onMinigame?\'snd/clickOn.mp3\':\'snd/clickOff.mp3\');"></div>';
@@ -5927,17 +5921,18 @@ Game.Launch = function () {
 
                 this.toResize = true;
                 this.redraw = function () {
-                    var me = this;
+                    let me = this;
                     me.pics = [];
                 }
                 this.draw = function () {
+                    let selected;
                     if (this.amount <= 0) return false;
                     if (this.toResize) {
                         this.canvas.width = this.canvas.clientWidth;
                         this.canvas.height = this.canvas.clientHeight;
                         this.toResize = false;
                     }
-                    var ctx = this.ctx;
+                    let ctx = this.ctx;
                     //clear
                     //ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
                     ctx.globalAlpha = 1;
@@ -5951,15 +5946,15 @@ Game.Launch = function () {
                     //y : vertical offset (+32)
                     //rows : if >1, arrange the pictures in rows containing this many pictures
 
-                    var pic = this.art.pic;
-                    var bg = this.art.bg;
-                    var xV = this.art.xV || 0;
-                    var yV = this.art.yV || 0;
-                    var w = this.art.w || 48;
-                    var h = this.art.h || 48;
-                    var offX = this.art.x || 0;
-                    var offY = this.art.y || 0;
-                    var rows = this.art.rows || 1;
+                    let pic = this.art.pic;
+                    let bg = this.art.bg;
+                    let xV = this.art.xV || 0;
+                    let yV = this.art.yV || 0;
+                    let w = this.art.w || 48;
+                    let h = this.art.h || 48;
+                    let offX = this.art.x || 0;
+                    let offY = this.art.y || 0;
+                    let rows = this.art.rows || 1;
 
                     if (typeof (bg) == 'string') ctx.fillPattern(Pic(this.art.bg), 0, 0, this.canvas.width, this.canvas.height, 128, 128);
                     else bg(this, ctx);
@@ -5972,14 +5967,14 @@ Game.Launch = function () {
 					}
 					ctx.globalAlpha=1;
 					*/
-                    var maxI = Math.floor(this.canvas.width / (w / rows) + 1);
-                    var iT = Math.min(this.amount, maxI);
-                    var i = this.pics.length;
+                    let maxI = Math.floor(this.canvas.width / (w / rows) + 1);
+                    let iT = Math.min(this.amount, maxI);
+                    let i = this.pics.length;
 
 
-                    var x = 0;
-                    var y = 0;
-                    var added = 0;
+                    let x = 0;
+                    let y = 0;
+                    let added = 0;
                     if (i !== iT) {
                         //for (var iter=0;iter<3;iter++)
                         //{
@@ -5994,7 +5989,7 @@ Game.Launch = function () {
                                 x = i * w + Math.floor((Math.random() - 0.5) * xV) + offX;
                                 y = 32 + Math.floor((Math.random() - 0.5) * yV) + offY;
                             }
-                            var usedPic = (typeof (pic) == 'string' ? pic : pic(this, i));
+                            let usedPic = (typeof (pic) == 'string' ? pic : pic(this, i));
                             this.pics.push({x: Math.floor(x), y: Math.floor(y), z: y, pic: usedPic, id: i});
                             i++;
                             added++;
@@ -6011,38 +6006,38 @@ Game.Launch = function () {
                         this.pics.sort(Game.sortSprites);
                     }
 
-                    var len = this.pics.length;
+                    let len = this.pics.length;
 
                     if (this.mouseOn) {
-                        var selected = -1;
+                        selected = -1;
                         //mouse detection only fits grandma sprites for now
-                        var marginW = -18;
-                        var marginH = -10;
-                        for (var i = 0; i < len; i++) {
-                            var pic = this.pics[i];
+                        const marginW = -18;
+                        const marginH = -10;
+                        for (i = 0; i < len; i++) {
+                            pic = this.pics[i];
                             if (this.mousePos[0] >= pic.x - marginW && this.mousePos[0] < pic.x + 64 + marginW && this.mousePos[1] >= pic.y - marginH && this.mousePos[1] < pic.y + 64 + marginH) selected = i;
                         }
                     }
 
                     Math.seededRandom();
 
-                    for (var i = 0; i < len; i++) {
-                        var pic = this.pics[i];
+                    for (i = 0; i < len; i++) {
+                        pic = this.pics[i];
                         if (selected === i && this.name === 'Grandma') {
                             ctx.font = '14px Merriweather';
                             ctx.textAlign = 'center';
                             Math.seededRandom(Game.seed + ' ' + pic.id/*+' '+pic.id*/);//(Game.seed+' '+pic.id+' '+pic.x+' '+pic.y);
-                            var years = ((Date.now() - new Date(2013, 7, 8)) / (1000 * 60 * 60 * 24 * 365)) + Math.random();//the grandmas age with the game
-                            var name = chooseRandomElement(Game.grandmaNames);
-                            var custom = false;
+                            let years = ((Date.now() - new Date(2013, 7, 8)) / (1000 * 60 * 60 * 24 * 365)) + Math.random();//the grandmas age with the game
+                            let name = chooseRandomElement(Game.grandmaNames);
+                            let custom = false;
                             if (Game.prefs.customGrandmas && Game.customGrandmaNames.length > 0 && Math.random() < 0.2) {
                                 name = chooseRandomElement(Game.customGrandmaNames);
                                 custom = true;
                             }
-                            var text = name + ', age ' + Beautify(Math.floor(70 + Math.random() * 30 + years + this.level));
-                            var width = ctx.measureText(text).width + 12;
-                            var x = Math.max(0, Math.min(pic.x + 32 - width / 2 + Math.random() * 32 - 16, this.canvas.width - width));
-                            var y = 4 + Math.random() * 8 - 4;
+                            let text = name + ', age ' + Beautify(Math.floor(70 + Math.random() * 30 + years + this.level));
+                            let width = ctx.measureText(text).width + 12;
+                            x = Math.max(0, Math.min(pic.x + 32 - width / 2 + Math.random() * 32 - 16, this.canvas.width - width));
+                            y = 4 + Math.random() * 8 - 4;
                             Math.seededRandom();
                             ctx.fillStyle = '#000';
                             ctx.strokeStyle = '#000';
@@ -6083,29 +6078,28 @@ Game.Launch = function () {
             return this;
         }
 
-        Game.DrawBuildings = function ()//draw building displays with canvas
-        {
+        Game.DrawBuildings = () => {
             if (Game.drawT % 3 === 0) {
-                for (var i in Game.Objects) {
-                    var me = Game.Objects[i];
+                for (let i in Game.Objects) {
+                    let me = Game.Objects[i];
                     if (me.id > 0 && !me.onMinigame && !me.muted) me.draw();
                     else me.pics = [];
                 }
             }
         }
 
-        Game.sortSprites = function (a, b) {
+        Game.sortSprites = (a, b) => {
             if (a.z > b.z) return 1;
             else if (a.z < b.z) return -1;
             else return 0;
         }
-        Game.sortSpritesById = function (a, b) {
+        Game.sortSpritesById = (a, b) => {
             if (a.id > b.id) return 1;
             else if (a.id < b.id) return -1;
             else return 0;
         }
 
-        Game.modifyBuildingPrice = function (building, price) {
+        Game.modifyBuildingPrice = (building, price) => {
             if (Game.Has('Season savings')) price *= 0.99;
             if (Game.Has('Santa\'s dominion')) price *= 0.99;
             if (Game.Has('Faberge egg')) price *= 0.99;
@@ -6116,7 +6110,7 @@ Game.Launch = function () {
             if (Game.hasBuff('Nasty goblins')) price *= 1.02;
             price *= Game.eff('buildingCost');
             if (Game.hasGod) {
-                var godLvl = Game.hasGod('creation');
+                let godLvl = Game.hasGod('creation');
                 if (godLvl === 1) price *= 0.93;
                 else if (godLvl === 2) price *= 0.95;
                 else if (godLvl === 3) price *= 0.98;
@@ -6124,7 +6118,7 @@ Game.Launch = function () {
             return price;
         }
 
-        Game.storeBulkButton = function (id) {
+        Game.storeBulkButton = id => {
             if (id === 0) Game.buyMode = 1;
             else if (id === 1) Game.buyMode = -1;
             else if (id === 2) Game.buyBulk = 1;
@@ -6153,11 +6147,12 @@ Game.Launch = function () {
             Game.storeToRefresh = 1;
             if (id !== -1) PlaySound('snd/tick.mp3');
         }
-        Game.BuildStore = function ()//create the DOM for the store's buildings
-        {
-            //if (typeof showAds!=='undefined') l('store').scrollTop=100;
+        Game.BuildStore = () => {
+            let me;
+            let i;
+//if (typeof showAds!=='undefined') l('store').scrollTop=100;
 
-            var str = '';
+            let str = '';
             str += '<div id="storeBulk" class="storePre" ' + Game.getTooltip(
                     '<div style="padding:8px;min-width:200px;text-align:center;font-size:11px;">You can also press <b>Ctrl</b> to bulk-buy or sell <b>10</b> of a building at a time, or <b>Shift</b> for <b>100</b>.</div>'
                     , 'store') +
@@ -6169,8 +6164,8 @@ Game.Launch = function () {
                 '<div id="storeBulk100" class="storePreButton storeBulkAmount" ' + Game.clickStr + '="Game.storeBulkButton(4);">100</div>' +
                 '<div id="storeBulkMax" class="storePreButton storeBulkAmount" ' + Game.clickStr + '="Game.storeBulkButton(5);">all</div>' +
                 '</div>';
-            for (var i in Game.Objects) {
-                var me = Game.Objects[i];
+            for (i in Game.Objects) {
+                me = Game.Objects[i];
                 str += '<div class="product toggledOff" ' + Game.getDynamicTooltip('Game.ObjectsById[' + me.id + '].tooltip', 'store') + ' id="product' + me.id + '"><div class="icon off" id="productIconOff' + me.id + '" style=""></div><div class="icon" id="productIcon' + me.id + '" style=""></div><div class="content"><div class="lockedTitle">???</div><div class="title" id="productName' + me.id + '"></div><span class="priceMult" id="productPriceMult' + me.id + '"></span><span class="price" id="productPrice' + me.id + '"></span><div class="title owned" id="productOwned' + me.id + '"></div></div>' +
                     /*'<div class="buySell"><div style="left:0px;" id="buttonBuy10-'+me.id+'">Buy 10</div><div style="left:100px;" id="buttonSell-'+me.id+'">Sell 1</div><div style="left:200px;" id="buttonSellAll-'+me.id+'">Sell all</div></div>'+*/
                     '</div>';
@@ -6179,7 +6174,7 @@ Game.Launch = function () {
 
             Game.storeBulkButton(-1);
 
-            var SellAllPrompt = function (id) {
+             function SellAllPrompt(id) {
                 return function (id) {
                     Game.Prompt('<div class="block">Do you really want to sell your ' + Game.ObjectsById[id].amount + ' ' + (Game.ObjectsById[id].amount === 1 ? Game.ObjectsById[id].single : Game.ObjectsById[id].plural) + '?</div>', [['Yes', 'Game.ObjectsById[' + id + '].sell(-1);Game.ClosePrompt();'], ['No', 'Game.ClosePrompt();']]);
                 }(id);
@@ -6189,8 +6184,8 @@ Game.Launch = function () {
                 Game.ObjectsById[what].buy();
             }
 
-            for (var i in Game.Objects) {
-                var me = Game.Objects[i];
+            for (i in Game.Objects) {
+                me = Game.Objects[i];
                 me.l = elementByID('product' + me.id);
 
                 //these are a bit messy but ah well
@@ -6212,50 +6207,42 @@ Game.Launch = function () {
             }
         }
 
-        Game.RefreshStore = function ()//refresh the store's buildings
-        {
-            for (var i in Game.Objects) {
+        Game.RefreshStore = () => {
+            for (let i in Game.Objects) {
                 Game.Objects[i].refresh();
             }
             Game.storeToRefresh = 0;
         }
 
-        Game.ComputeCps = function (base, mult, bonus) {
+        Game.ComputeCps = (base, mult, bonus) => {
             if (!bonus) bonus = 0;
             return ((base) * (Math.pow(2, mult)) + bonus);
         }
 
-        Game.isMinigameReady = function (me) {
-            return (me.minigameUrl && me.minigameLoaded && me.level > 0);
-        }
+        Game.isMinigameReady = me => (me.minigameUrl && me.minigameLoaded && me.level > 0)
         Game.scriptBindings = [];
-        Game.LoadMinigames = function ()//load scripts for each minigame
-        {
-            for (var i in Game.Objects) {
-                var me = Game.Objects[i];
+        Game.LoadMinigames = () => {
+            for (let i in Game.Objects) {
+                let me = Game.Objects[i];
                 if (me.minigameUrl && me.level > 0 && !me.minigameLoaded && !me.minigameLoading && !elementByID('minigameScript-' + me.id)) {
                     me.minigameLoading = true;
                     //we're only loading the minigame scripts that aren't loaded yet and which have enough building level
                     //we call this function on building level up and on load
                     //console.log('Loading script '+me.minigameUrl+'...');
-                    setTimeout(function (me) {
-                        return function () {
-                            var script = document.createElement('script');
-                            script.id = 'minigameScript-' + me.id;
-                            Game.scriptBindings['minigameScript-' + me.id] = me;
-                            script.setAttribute('src', me.minigameUrl + '?r=' + Game.version);
-                            script.onload = function (me, script) {
-                                return function () {
-                                    if (!me.minigameLoaded) Game.scriptLoaded(me, script);
-                                }
-                            }(me, 'minigameScript-' + me.id);
-                            document.head.appendChild(script);
-                        }
-                    }(me), 10);
+                    setTimeout((me => () => {
+                        let script = document.createElement('script');
+                        script.id = 'minigameScript-' + me.id;
+                        Game.scriptBindings['minigameScript-' + me.id] = me;
+                        script.setAttribute('src', me.minigameUrl + '?r=' + Game.version);
+                        script.onload = ((me, script) => () => {
+                            if (!me.minigameLoaded) Game.scriptLoaded(me, script);
+                        })(me, 'minigameScript-' + me.id);
+                        document.head.appendChild(script);
+                    })(me), 10);
                 }
             }
         }
-        Game.scriptLoaded = function (who, script) {
+        Game.scriptLoaded = (who, script) => {
             who.minigameLoading = false;
             who.minigameLoaded = true;
             who.refresh();
@@ -6267,7 +6254,7 @@ Game.Launch = function () {
             }
         }
 
-        Game.magicCpS = function (what) {
+        Game.magicCpS = what => {
             /*
 			if (Game.Objects[what].amount>=250)
 			{
@@ -6283,7 +6270,7 @@ Game.Launch = function () {
 
         //define objects
         new Game.Object('Cursor', 'cursor|cursors|clicked|[X] extra finger|[X] extra fingers', 'Autoclicks once every 10 seconds.', 0, 0, {}, 15, function (me) {
-            var add = 0;
+            let add = 0;
             if (Game.Has('Thousand fingers')) add += 0.1;
             if (Game.Has('Million fingers')) add += 0.5;
             if (Game.Has('Billion fingers')) add += 5;
@@ -6293,9 +6280,9 @@ Game.Launch = function () {
             if (Game.Has('Sextillion fingers')) add += 50000;
             if (Game.Has('Septillion fingers')) add += 500000;
             if (Game.Has('Octillion fingers')) add += 5000000;
-            var mult = 1;
-            var num = 0;
-            for (var i in Game.Objects) {
+            let mult = 1;
+            let num = 0;
+            for (let i in Game.Objects) {
                 if (Game.Objects[i].name !== 'Cursor') num += Game.Objects[i].amount;
             }
             add = add * num;
@@ -6330,7 +6317,7 @@ Game.Launch = function () {
         Game.SpecialGrandmaUnlock = 15;
         new Game.Object('Grandma', 'grandma|grandmas|baked|Grandmas are [X] year older|Grandmas are [X] years older', 'A nice grandma to bake more Neuros.', 1, 1, {
             pic: function (i) {
-                var list = ['grandma'];
+                let list = ['grandma'];
                 if (Game.Has('Farmer grandmas')) list.push('farmerGrandma');
                 if (Game.Has('Worker grandmas')) list.push('workerGrandma');
                 if (Game.Has('Mining Rigr grandmas')) list.push('minerGrandma');
@@ -6349,9 +6336,10 @@ Game.Launch = function () {
                 if (Game.season === 'easter') list.push('bunnyGrandma');
                 return chooseRandomElement(list) + '.png';
             }, bg: 'grandmaBackground.png', xV: 8, yV: 8, w: 32, rows: 3, x: 0, y: 16
-        }, 100, function (me) {
-            var mult = 1;
-            for (var i in Game.GrandmaSynergies) {
+        }, 100, me => {
+            let i;
+            let mult = 1;
+            for (i in Game.GrandmaSynergies) {
                 if (Game.Has(Game.GrandmaSynergies[i])) mult *= 2;
             }
             if (Game.Has('Bingo center/Research facility')) mult *= 4;
@@ -6364,13 +6352,13 @@ Game.Launch = function () {
 
             mult *= Game.GetTieredCpsMult(me);
 
-            var add = 0;
+            let add = 0;
             if (Game.Has('One mind')) add += Game.Objects['Grandma'].amount * 0.02;
             if (Game.Has('Communal brainsweep')) add += Game.Objects['Grandma'].amount * 0.02;
             if (Game.Has('Elder Pact')) add += Game.Objects['Portal'].amount * 0.05;
 
-            var num = 0;
-            for (var i in Game.Objects) {
+            let num = 0;
+            for (i in Game.Objects) {
                 if (Game.Objects[i].name !== 'Grandma') num += Game.Objects[i].amount;
             }
             if (Game.hasAura('Elder Battalion')) mult *= 1 + 0.01 * num;
@@ -6389,8 +6377,8 @@ Game.Launch = function () {
                 Game.pledgeT = 0;
             }
         };
-        Game.last.iconFunc = function (type) {
-            var grandmaIcons = [[0, 1], [0, 2], [1, 2], [2, 2]];
+        Game.last.iconFunc = type => {
+            const grandmaIcons = [[0, 1], [0, 2], [1, 2], [2, 2]];
             if (type === 'off') return [0, 1];
             return grandmaIcons[Game.elderWrath];
         };
@@ -6405,7 +6393,7 @@ Game.Launch = function () {
             x: 0,
             y: 16
         }, 500, function (me) {
-            var mult = 1;
+            let mult = 1;
             mult *= Game.GetTieredCpsMult(me);
             mult *= Game.magicCpS(me.name);
             return me.baseCps * mult;
@@ -6424,8 +6412,8 @@ Game.Launch = function () {
             rows: 2,
             x: 0,
             y: 24
-        }, 10000, function (me) {
-            var mult = 1;
+        }, 10000, me => {
+            let mult = 1;
             mult *= Game.GetTieredCpsMult(me);
             mult *= Game.magicCpS(me.name);
             return me.baseCps * mult;
@@ -6442,8 +6430,8 @@ Game.Launch = function () {
             rows: 1,
             x: 0,
             y: -22
-        }, 3000, function (me) {
-            var mult = 1;
+        }, 3000, me => {
+            let mult = 1;
             mult *= Game.GetTieredCpsMult(me);
             mult *= Game.magicCpS(me.name);
             return me.baseCps * mult;
@@ -6462,8 +6450,8 @@ Game.Launch = function () {
             rows: 1,
             x: 0,
             y: 0
-        }, 0, function (me) {
-            var mult = 1;
+        }, 0, me => {
+            let mult = 1;
             mult *= Game.GetTieredCpsMult(me);
             mult *= Game.magicCpS(me.name);
             return me.baseCps * mult;
@@ -6480,8 +6468,8 @@ Game.Launch = function () {
             rows: 2,
             x: 0,
             y: -5
-        }, 0, function (me) {
-            var mult = 1;
+        }, 0, me => {
+            let mult = 1;
             mult *= Game.GetTieredCpsMult(me);
             mult *= Game.magicCpS(me.name);
             return me.baseCps * mult;
@@ -6500,8 +6488,8 @@ Game.Launch = function () {
             rows: 2,
             x: 0,
             y: 20
-        }, 0, function (me) {
-            var mult = 1;
+        }, 0, me => {
+            let mult = 1;
             mult *= Game.GetTieredCpsMult(me);
             mult *= Game.magicCpS(me.name);
             return me.baseCps * mult;
@@ -6520,8 +6508,8 @@ Game.Launch = function () {
             rows: 1,
             x: 0,
             y: 0
-        }, 40000, function (me) {
-            var mult = 1;
+        }, 40000, me => {
+            let mult = 1;
             mult *= Game.GetTieredCpsMult(me);
             mult *= Game.magicCpS(me.name);
             return me.baseCps * mult;
@@ -6538,8 +6526,8 @@ Game.Launch = function () {
             rows: 2,
             x: 0,
             y: 16
-        }, 200000, function (me) {
-            var mult = 1;
+        }, 200000, me => {
+            let mult = 1;
             mult *= Game.GetTieredCpsMult(me);
             mult *= Game.magicCpS(me.name);
             return me.baseCps * mult;
@@ -6556,8 +6544,8 @@ Game.Launch = function () {
             rows: 2,
             x: 0,
             y: 0
-        }, 1666666, function (me) {
-            var mult = 1;
+        }, 1666666, me => {
+            let mult = 1;
             mult *= Game.GetTieredCpsMult(me);
             mult *= Game.magicCpS(me.name);
             return me.baseCps * mult;
@@ -6574,8 +6562,8 @@ Game.Launch = function () {
             rows: 1,
             x: 0,
             y: 0
-        }, 123456789, function (me) {
-            var mult = 1;
+        }, 123456789, me => {
+            let mult = 1;
             mult *= Game.GetTieredCpsMult(me);
             mult *= Game.magicCpS(me.name);
             return me.baseCps * mult;
@@ -6592,8 +6580,8 @@ Game.Launch = function () {
             rows: 1,
             x: 0,
             y: 0
-        }, 3999999999, function (me) {
-            var mult = 1;
+        }, 3999999999, me => {
+            let mult = 1;
             mult *= Game.GetTieredCpsMult(me);
             mult *= Game.magicCpS(me.name);
             return me.baseCps * mult;
@@ -6611,8 +6599,8 @@ Game.Launch = function () {
             rows: 1,
             x: 0,
             y: 20
-        }, 75000000000, function (me) {
-            var mult = 1;
+        }, 75000000000, me => {
+            let mult = 1;
             mult *= Game.GetTieredCpsMult(me);
             mult *= Game.magicCpS(me.name);
             return me.baseCps * mult;
@@ -6629,8 +6617,8 @@ Game.Launch = function () {
             rows: 2,
             x: 0,
             y: 0
-        }, 77777777777, function (me) {
-            var mult = 1;
+        }, 77777777777, me => {
+            let mult = 1;
             mult *= Game.GetTieredCpsMult(me);
             mult *= Game.magicCpS(me.name);
             return me.baseCps * mult;
@@ -6647,8 +6635,8 @@ Game.Launch = function () {
             rows: 1,
             x: 0,
             y: 0
-        }, 12345678987654321, function (me) {
-            var mult = 1;
+        }, 12345678987654321, me => {
+            let mult = 1;
             mult *= Game.GetTieredCpsMult(me);
             mult *= Game.magicCpS(me.name);
             return me.baseCps * mult;
@@ -6738,47 +6726,40 @@ Game.Launch = function () {
         Game.BuildStore();
 
         //build master bar
-        var str = '';
-        str += '<div id="buildingsMute" class="shadowFilter" style="position:relative;z-index:100;padding:4px 16px 0px 64px;"></div>';
+        str = '';
+        str += '<div id="buildingsMute" class="shadowFilter" style="position:relative;z-index:100;padding:4px 16px 0 64px;"></div>';
         str += '<div class="separatorBottom" style="position:absolute;bottom:-8px;z-index:0;"></div>';
         elementByID('buildingsMaster').innerHTML = str;
 
         //build object displays
-        var muteStr = '<div style="position:absolute;left:8px;bottom:12px;opacity:0.5;">Muted :</div>';
+        let muteStr = '<div style="position:absolute;left:8px;bottom:12px;opacity:0.5;">Muted :</div>';
         for (i in Game.Objects) {
             me = Game.Objects[i];
             if (me.id > 0) {
                 me.canvas = elementByID('rowCanvas' + me.id);
                 me.ctx = me.canvas.getContext('2d', {alpha: false});
                 me.pics = [];
-                var icon = [0 * 64, me.icon * 64];
                 muteStr += '<div class="tinyProductIcon" id="mutedProduct' + me.id + '" style="display:none;background-position:-' + icon[0] + 'px -' + icon[1] + 'px;" ' + Game.clickStr + '="Game.ObjectsById[' + me.id + '].mute(0);PlaySound(Game.ObjectsById[' + me.id + '].muted?\'snd/clickOff.mp3\':\'snd/clickOn.mp3\');" ' + Game.getDynamicTooltip('Game.mutedBuildingTooltip(' + me.id + ')', 'this') + '></div>';
                 //muteStr+='<div class="tinyProductIcon" id="mutedProduct'+me.id+'" style="display:none;background-position:-'+icon[0]+'px -'+icon[1]+'px;" '+Game.clickStr+'="Game.ObjectsById['+me.id+'].mute(0);PlaySound(Game.ObjectsById['+me.id+'].muted?\'snd/clickOff.mp3\':\'snd/clickOn.mp3\');" '+Game.getTooltip('<div style="width:150px;text-align:center;font-size:11px;"><b>Unmute '+me.plural+'</b><br>(Display this building)</div>')+'></div>';
 
-                AddEvent(me.canvas, 'mouseover', function (me) {
-                    return function () {
-                        me.mouseOn = true;
-                    }
-                }(me));
-                AddEvent(me.canvas, 'mouseout', function (me) {
-                    return function () {
-                        me.mouseOn = false;
-                    }
-                }(me));
-                AddEvent(me.canvas, 'mousemove', function (me) {
+                AddEvent(me.canvas, 'mouseover', (me => () => {
+                    me.mouseOn = true;
+                })(me));
+                AddEvent(me.canvas, 'mouseout', (me => () => {
+                    me.mouseOn = false;
+                })(me));
+                AddEvent(me.canvas, 'mousemove', (me => {
                     return function (e) {
-                        var box = this.getBoundingClientRect();
+                        let box = this.getBoundingClientRect();
                         me.mousePos[0] = e.pageX - box.left;
                         me.mousePos[1] = e.pageY - box.top;
-                    }
-                }(me));
+                    };
+                })(me));
             }
         }
-        Game.mutedBuildingTooltip = function (id) {
-            return function () {
-                var me = Game.ObjectsById[id];
-                return '<div style="width:150px;text-align:center;font-size:11px;"><b>' + (me.plural.charAt(0).toUpperCase() + me.plural.slice(1)) + (me.level > 0 ? ' (lvl.&nbsp;' + me.level + ')' : '') + '</b><div class="line"></div>Click to unmute ' + me.plural + '<br>(display this building)</div>';
-            }
+        Game.mutedBuildingTooltip = id => () => {
+            let me = Game.ObjectsById[id];
+            return '<div style="width:150px;text-align:center;font-size:11px;"><b>' + (me.plural.charAt(0).toUpperCase() + me.plural.slice(1)) + (me.level > 0 ? ' (lvl.&nbsp;' + me.level + ')' : '') + '</b><div class="line"></div>Click to unmute ' + me.plural + '<br>(display this building)</div>';
         }
         elementByID('buildingsMute').innerHTML = muteStr;
 
@@ -6814,7 +6795,6 @@ Game.Launch = function () {
             if (power) this.power = power;
             this.vanilla = Game.vanilla;
             this.unlockAt = 0;
-            this.techUnlock = [];
             this.parents = [];
             this.type = 'upgrade';
             this.tier = 0;
@@ -6851,10 +6831,10 @@ Game.Launch = function () {
             return Game.cookies >= this.getPrice();
         }
 
-        Game.storeBuyAll = function () {
+        Game.storeBuyAll = () => {
             if (!Game.Has('Inspired checklist')) return false;
-            for (var i in Game.UpgradesInStore) {
-                var me = Game.UpgradesInStore[i];
+            for (let i in Game.UpgradesInStore) {
+                let me = Game.UpgradesInStore[i];
                 if (!me.isVaulted() && me.pool !== 'toggle' && me.pool !== 'tech') me.buy(1);
             }
         }
@@ -6884,8 +6864,10 @@ Game.Launch = function () {
 
 
         Game.Upgrade.prototype.buy = function (bypass) {
-            var success = 0;
-            var cancelPurchase = 0;
+            let price;
+            let str;
+            let success = 0;
+            let cancelPurchase = 0;
             if (this.clickFunction && !bypass) cancelPurchase = !this.clickFunction();
             if (!cancelPurchase) {
                 if (this.choicesFunction) {
@@ -6893,26 +6875,27 @@ Game.Launch = function () {
                         elementByID('toggleBox').style.display = 'none';
                         elementByID('toggleBox').innerHTML = '';
                         Game.choiceSelectorOn = -1;
-                        PlaySound('snd/tick.mp3');
+                        PlaySound('/snd/tick.mp3');
                     } else {
                         Game.choiceSelectorOn = this.id;
-                        var choices = this.choicesFunction();
+                        const choices = this.choicesFunction();
                         if (choices.length > 0) {
-                            var selected = 0;
-                            for (var i in choices) {
+                            let i;
+                            let selected = 0;
+                            for (i in choices) {
                                 if (choices[i].selected) selected = i;
                             }
                             Game.choiceSelectorChoices = choices;//this is a really dumb way of doing this i am so sorry
                             Game.choiceSelectorSelected = selected;
-                            var str = '';
+                            str = '';
                             str += '<div class="close" onclick="Game.UpgradesById[' + this.id + '].buy();">x</div>';
                             str += '<h3>' + this.name + '</h3>' +
                                 '<div class="line"></div>' +
                                 '<h4 id="choiceSelectedName">' + choices[selected].name + '</h4>' +
                                 '<div class="line"></div>';
 
-                            for (var i in choices) {
-                                var icon = choices[i].icon;
+                            for (i in choices) {
+                                const icon = choices[i].icon;
                                 str += '<div class="crate enabled' + (i === selected ? ' highlighted' : '') + '" style="opacity:1;float:none;display:inline-block;' + (icon[2] ? 'background-image:url(' + icon[2] + ');' : '') + 'background-position:' + (-icon[0] * 48) + 'px ' + (-icon[1] * 48) + 'px;" ' + Game.clickStr + '="Game.UpgradesById[' + this.id + '].choicesPick(' + i + ');PlaySound(\'snd/tick.mp3\');Game.choiceSelectorOn=-1;Game.UpgradesById[' + this.id + '].buy();" onMouseOut="elementByID(\'choiceSelectedName\').innerHTML=Game.choiceSelectorChoices[Game.choiceSelectorSelected].name;" onMouseOver="elementByID(\'choiceSelectedName\').innerHTML=Game.choiceSelectorChoices[' + i + '].name;"' +
                                     '></div>';
                             }
@@ -6921,11 +6904,11 @@ Game.Launch = function () {
                         elementByID('toggleBox').style.display = 'block';
                         elementByID('toggleBox').focus();
                         Game.tooltip.hide();
-                        PlaySound('snd/tick.mp3');
+                        PlaySound('/snd/tick.mp3');
                         success = 1;
                     }
                 } else if (this.pool !== 'prestige') {
-                    var price = this.getPrice();
+                    price = this.getPrice();
                     if (this.canBuy() && !this.bought) {
                         Game.Spend(price);
                         this.bought = 1;
@@ -6939,11 +6922,11 @@ Game.Launch = function () {
                         if (Game.CountsAsUpgradeOwned(this.pool)) Game.UpgradesOwned++;
                         Game.setOnCrate(0);
                         Game.tooltip.hide();
-                        PlaySound('snd/buy' + chooseRandomElement([1, 2, 3, 4]) + '.mp3', 0.75);
+                        PlaySound('/snd/buy' + chooseRandomElement([1, 2, 3, 4]) + '.mp3', 0.75);
                         success = 1;
                     }
                 } else {
-                    var price = this.getPrice();
+                    price = this.getPrice();
                     if (Game.heavenlyChips >= price && !this.bought) {
                         Game.heavenlyChips -= price;
                         Game.heavenlyChipsSpent += price;
@@ -6951,8 +6934,8 @@ Game.Launch = function () {
                         this.bought = 1;
                         if (this.buyFunction) this.buyFunction();
                         Game.BuildAscendTree();
-                        PlaySound('snd/buy' + chooseRandomElement([1, 2, 3, 4]) + '.mp3', 0.75);
-                        PlaySound('snd/shimmerClick.mp3');
+                        PlaySound('/snd/buy' + chooseRandomElement([1, 2, 3, 4]) + '.mp3', 0.75);
+                        PlaySound('/snd/shimmerClick.mp3');
                         //PlaySound('snd/buyHeavenly.mp3');
                         success = 1;
                     }
@@ -6969,13 +6952,6 @@ Game.Launch = function () {
             Game.upgradesToRebuild = 1;
             Game.recalculateGains = 1;
             if (Game.CountsAsUpgradeOwned(this.pool)) Game.UpgradesOwned++;
-        }
-        Game.Upgrade.prototype.unearn = function ()//remove the upgrade, but keep it unlocked
-        {
-            this.bought = 0;
-            Game.upgradesToRebuild = 1;
-            Game.recalculateGains = 1;
-            if (Game.CountsAsUpgradeOwned(this.pool)) Game.UpgradesOwned--;
         }
         Game.Upgrade.prototype.unlock = function () {
             this.unlocked = 1;
@@ -6996,22 +6972,20 @@ Game.Launch = function () {
                 Game.upgradesToRebuild = 1;
                 Game.recalculateGains = 1;
                 if (Game.CountsAsUpgradeOwned(this.pool)) Game.UpgradesOwned++;
-                PlaySound('snd/buy' + chooseRandomElement([1, 2, 3, 4]) + '.mp3', 0.75);
-                if (this.pool === 'prestige' || this.pool === 'debug') PlaySound('snd/shimmerClick.mp3');
+                PlaySound('/snd/buy' + chooseRandomElement([1, 2, 3, 4]) + '.mp3', 0.75);
+                if (this.pool === 'prestige' || this.pool === 'debug') PlaySound('/snd/shimmerClick.mp3');
             } else {
                 this.bought = 0;
                 Game.upgradesToRebuild = 1;
                 Game.recalculateGains = 1;
                 if (Game.CountsAsUpgradeOwned(this.pool)) Game.UpgradesOwned--;
-                PlaySound('snd/sell' + chooseRandomElement([1, 2, 3, 4]) + '.mp3', 0.75);
-                if (this.pool === 'prestige' || this.pool === 'debug') PlaySound('snd/shimmerClick.mp3');
+                PlaySound('/snd/sell' + chooseRandomElement([1, 2, 3, 4]) + '.mp3', 0.75);
+                if (this.pool === 'prestige' || this.pool === 'debug') PlaySound('/snd/shimmerClick.mp3');
             }
             if (Game.onMenu === 'stats') Game.UpdateMenu();
         }
 
-        Game.CountsAsUpgradeOwned = function (pool) {
-            if (pool === '' || pool === 'cookie' || pool === 'tech') return true; else return false;
-        }
+        Game.CountsAsUpgradeOwned = pool => pool === '' || pool === 'cookie' || pool === 'tech'
 
         /*AddEvent(l('toggleBox'),'blur',function()//if we click outside of the selector, close it
 			{
@@ -7022,14 +6996,14 @@ Game.Launch = function () {
 			}
 		);*/
 
-        Game.RequiresConfirmation = function (upgrade, prompt) {
-            upgrade.clickFunction = function () {
+        Game.RequiresConfirmation = (upgrade, prompt) => {
+            upgrade.clickFunction = () => {
                 Game.Prompt(prompt, [['Yes', 'Game.UpgradesById[' + upgrade.id + '].buy(1);Game.ClosePrompt();'], 'No']);
                 return false;
             };
         }
 
-        Game.Unlock = function (what) {
+        Game.Unlock = what => {
             if (typeof what === 'string') {
                 if (Game.Upgrades[what]) {
                     if (Game.Upgrades[what].unlocked === 0) {
@@ -7041,12 +7015,12 @@ Game.Launch = function () {
                     }
                 }
             } else {
-                for (var i in what) {
+                for (let i in what) {
                     Game.Unlock(what[i]);
                 }
             }
         }
-        Game.Lock = function (what) {
+        Game.Lock = what => {
             if (typeof what === 'string') {
                 if (Game.Upgrades[what]) {
                     Game.Upgrades[what].unlocked = 0;
@@ -7056,34 +7030,33 @@ Game.Launch = function () {
                     Game.recalculateGains = 1;
                 }
             } else {
-                for (var i in what) {
+                for (let i in what) {
                     Game.Lock(what[i]);
                 }
             }
         }
 
-        Game.Has = function (what) {
+        Game.Has = what => {
             if (Game.ascensionMode === 1 && Game.Upgrades[what].pool === 'prestige') return 0;
             return (Game.Upgrades[what] ? Game.Upgrades[what].bought : 0);
         }
-        Game.HasUnlocked = function (what) {
-            return (Game.Upgrades[what] ? Game.Upgrades[what].unlocked : 0);
-        }
+        Game.HasUnlocked = what => (Game.Upgrades[what] ? Game.Upgrades[what].unlocked : 0)
 
 
-        Game.RebuildUpgrades = function ()//recalculate the upgrades you can buy
-        {
+        Game.RebuildUpgrades = () => {
+            let me;
+            let i;
             Game.upgradesToRebuild = 0;
-            var list = [];
-            for (var i in Game.Upgrades) {
-                var me = Game.Upgrades[i];
+            let list = [];
+            for (i in Game.Upgrades) {
+                me = Game.Upgrades[i];
                 if (!me.bought && me.pool !== 'debug' && me.pool !== 'prestige' && me.pool !== 'prestigeDecor' && (!me.lasting || Game.ascensionMode !== 1)) {
                     if (me.unlocked) list.push(me);
                 } else if (me.displayFuncWhenOwned && me.bought) list.push(me);
             }
-            var sortMap = function (a, b) {
-                var ap = a.pool === 'toggle' ? a.order : a.getPrice();
-                var bp = b.pool === 'toggle' ? b.order : b.getPrice();
+            function sortMap(a, b) {
+                const ap = a.pool === 'toggle' ? a.order : a.getPrice();
+                const bp = b.pool === 'toggle' ? b.order : b.getPrice();
                 if (ap > bp) return 1;
                 else if (ap < bp) return -1;
                 else return 0;
@@ -7091,13 +7064,13 @@ Game.Launch = function () {
             list.sort(sortMap);
 
             Game.UpgradesInStore = [];
-            for (var i in list) {
+            for (i in list) {
                 Game.UpgradesInStore.push(list[i]);
             }
-            var storeStr = '';
-            var toggleStr = '';
-            var techStr = '';
-            var vaultStr = '';
+            let storeStr = '';
+            let toggleStr = '';
+            let techStr = '';
+            let vaultStr = '';
 
             if (Game.Has('Inspired checklist')) {
                 storeStr += '<div id="storeBuyAll" class="storePre" ' + Game.getTooltip(
@@ -7109,10 +7082,10 @@ Game.Launch = function () {
                 elementByID('upgrades').classList.add('hasMenu');
             } else elementByID('upgrades').classList.remove('hasMenu');
 
-            for (var i in Game.UpgradesInStore) {
+            for (i in Game.UpgradesInStore) {
                 //if (!Game.UpgradesInStore[i]) break;
-                var me = Game.UpgradesInStore[i];
-                var str = Game.crate(me, 'store', 'Game.UpgradesById[' + me.id + '].click(event);', 'upgrade' + i);
+                me = Game.UpgradesInStore[i];
+                const str = Game.crate(me, 'store', 'Game.UpgradesById[' + me.id + '].click(event);', 'upgrade' + i);
 
                 /*var str='<div class="crate upgrade" '+Game.getTooltip(
 				'<div style="min-width:200px;"><div style="float:right;"><span class="price">'+Beautify(Math.round(me.getPrice()))+'</span></div><small>'+(me.pool=='toggle'?'[Togglable]':'[Upgrade]')+'</small><div class="name">'+me.name+'</div><div class="line"></div><div class="description">'+me.desc+'</div></div>'
@@ -7134,11 +7107,11 @@ Game.Launch = function () {
         Game.UnlockAt = [];//this contains an array of every upgrade with a cookie requirement in the form of {cookies:(amount of cookies earned required),name:(name of upgrade or achievement to unlock)} (and possibly require:(name of upgrade of achievement to own))
         //note : the cookie will not be added to the list if it contains locked:1 (use for seasonal cookies and such)
 
-        Game.NewUpgradeCookie = function (obj) {
-            var upgrade = new Game.Upgrade(obj.name, 'Neuro production multiplier <b>+' + Beautify((typeof (obj.power) == 'function' ? obj.power(obj) : obj.power), 1) + '%</b>.<q>' + obj.desc + '</q>', obj.price, obj.icon);
+        Game.NewUpgradeCookie = obj => {
+            let upgrade = new Game.Upgrade(obj.name, 'Neuro production multiplier <b>+' + Beautify((typeof (obj.power) == 'function' ? obj.power(obj) : obj.power), 1) + '<q>' + obj.desc + '</q>', obj.price, obj.icon);
             upgrade.power = obj.power;
             upgrade.pool = 'cookie';
-            var toPush = {cookies: obj.price / 20, name: obj.name};
+            let toPush = {cookies: obj.price / 20, name: obj.name};
             if (obj.require) toPush.require = obj.require;
             if (obj.season) toPush.season = obj.season;
             if (!obj.locked) Game.UnlockAt.push(toPush);
@@ -7215,24 +7188,24 @@ Game.Launch = function () {
                 price: 200000000000
             },
         };
-        Game.GetIcon = function (type, tier) {
-            var col = 0;
+        Game.GetIcon = (type, tier) => {
+            let col;
             if (type === 'Kitten') col = 18; else col = Game.Objects[type].iconColumn;
             return [col, Game.Tiers[tier].iconRow];
         }
-        Game.SetTier = function (building, tier) {
+        Game.SetTier = (building, tier) => {
             if (!Game.Objects[building]) alert('No building named ' + building);
             Game.last.tier = tier;
             Game.last.buildingTie = Game.Objects[building];
             if (Game.last.type === 'achievement') Game.Objects[building].tieredAchievs[tier] = Game.last;
             else Game.Objects[building].tieredUpgrades[tier] = Game.last;
         }
-        Game.MakeTiered = function (upgrade, tier, col) {
+        Game.MakeTiered = (upgrade, tier, col) => {
             upgrade.tier = tier;
             if (typeof col !== 'undefined') upgrade.icon = [col, Game.Tiers[tier].iconRow];
         }
         Game.TieredUpgrade = function (name, desc, building, tier) {
-            var upgrade = new Game.Upgrade(name, desc, Game.Objects[building].basePrice * Game.Tiers[tier].price, Game.GetIcon(building, tier));
+            let upgrade = new Game.Upgrade(name, desc, Game.Objects[building].basePrice * Game.Tiers[tier].price, Game.GetIcon(building, tier));
             Game.SetTier(building, tier);
             return upgrade;
         }
@@ -7245,8 +7218,8 @@ Game.Launch = function () {
 				-if building2 is below building1 in worth, swap them
 			*/
             //if (Game.Objects[building1].basePrice>Game.Objects[building2].basePrice) {var temp=building2;building2=building1;building1=temp;}
-            var b1 = Game.Objects[building1];
-            var b2 = Game.Objects[building2];
+            let b1 = Game.Objects[building1];
+            let b2 = Game.Objects[building2];
             if (b1.basePrice > b2.basePrice) {
                 b1 = Game.Objects[building2];
                 b2 = Game.Objects[building1];
@@ -7256,7 +7229,7 @@ Game.Launch = function () {
                 (b1.plural.charAt(0).toUpperCase() + b1.plural.slice(1)) + ' gain <b>+5% CpS</b> per ' + b2.name.toLowerCase() + '.<br>' +
                 (b2.plural.charAt(0).toUpperCase() + b2.plural.slice(1)) + ' gain <b>+0.1% CpS</b> per ' + b1.name.toLowerCase() + '.' +
                 desc;
-            var upgrade = new Game.Upgrade(name, desc, (b1.basePrice * 10 + b2.basePrice * 1) * Game.Tiers[tier].price, Game.GetIcon(building1, tier));//Math.sqrt(b1.basePrice*b2.basePrice)*Game.Tiers[tier].price
+            let upgrade = new Game.Upgrade(name, desc, (b1.basePrice * 10 + b2.basePrice * 1) * Game.Tiers[tier].price, Game.GetIcon(building1, tier));//Math.sqrt(b1.basePrice*b2.basePrice)*Game.Tiers[tier].price
             upgrade.tier = tier;
             upgrade.buildingTie1 = b1;
             upgrade.buildingTie2 = b2;
@@ -7268,13 +7241,14 @@ Game.Launch = function () {
             //Game.SetTier(building1,tier);
             return upgrade;
         }
-        Game.GetTieredCpsMult = function (me) {
-            var mult = 1;
-            for (var i in me.tieredUpgrades) {
+        Game.GetTieredCpsMult = me => {
+            let i;
+            let mult = 1;
+            for (i in me.tieredUpgrades) {
                 if (!Game.Tiers[me.tieredUpgrades[i].tier].special && Game.Has(me.tieredUpgrades[i].name)) mult *= 2;
             }
-            for (var i in me.synergies) {
-                var syn = me.synergies[i];
+            for (i in me.synergies) {
+                let syn = me.synergies[i];
                 if (Game.Has(syn.name)) {
                     if (syn.buildingTie1.name === me.name) mult *= (1 + 0.05 * syn.buildingTie2.amount);
                     else if (syn.buildingTie2.name === me.name) mult *= (1 + 0.001 * syn.buildingTie1.amount);
@@ -7283,26 +7257,24 @@ Game.Launch = function () {
             if (me.grandma && Game.Has(me.grandma.name)) mult *= (1 + Game.Objects['Grandma'].amount * 0.01 * (1 / (me.id - 1)));
             return mult;
         }
-        Game.UnlockTiered = function (me) {
-            for (var i in me.tieredUpgrades) {
+        Game.UnlockTiered = me => {
+            let i;
+            for (i in me.tieredUpgrades) {
                 if (me.amount >= Game.Tiers[me.tieredUpgrades[i].tier].unlock) Game.Unlock(me.tieredUpgrades[i].name);
             }
-            for (var i in me.tieredAchievs) {
+            for (i in me.tieredAchievs) {
                 if (me.amount >= Game.Tiers[me.tieredAchievs[i].tier].achievUnlock) Game.Win(me.tieredAchievs[i].name);
             }
-            for (var i in me.synergies) {
-                var syn = me.synergies[i];
+            for (i in me.synergies) {
+                let syn = me.synergies[i];
                 if (Game.Has(Game.Tiers[syn.tier].req) && syn.buildingTie1.amount >= Game.Tiers[syn.tier].unlock && syn.buildingTie2.amount >= Game.Tiers[syn.tier].unlock) Game.Unlock(syn.name);
             }
         }
 
 
-        var pool = '';
-        var power = 0;
-
         //define upgrades
         //WARNING : do NOT add new upgrades in between, this breaks the saves. Add them at the end !
-        var order = 100;//this is used to set the order in which the items are listed
+        order = 100;//this is used to set the order in which the items are listed
         new Game.Upgrade('Reinforced index finger', 'The mouse and cursors are <b>twice</b> as efficient.<q>prod prod</q>', 100, [0, 0]);
         Game.MakeTiered(Game.last, 1, 0);
         new Game.Upgrade('Carpal tunnel prevention cream', 'The mouse and cursors are <b>twice</b> as efficient.<q>it... it hurts to click...</q>', 500, [0, 1]);
@@ -7486,14 +7458,14 @@ Game.Launch = function () {
         });
 
         Game.GrandmaSynergies = [];
-        Game.GrandmaSynergy = function (name, desc, building) {
-            var building = Game.Objects[building];
-            var grandmaNumber = (building.id - 1);
+        Game.GrandmaSynergy = (name, desc, buildingParam) => {
+            let building = Game.Objects[buildingParam];
+            let grandmaNumber = (building.id - 1);
             if (grandmaNumber === 1) grandmaNumber = 'grandma';
             else grandmaNumber += ' grandmas';
             desc = 'Grandmas are <b>twice</b> as efficient. ' + (building.plural.charAt(0).toUpperCase() + building.plural.slice(1)) + ' gain <b>+1% CpS</b> per ' + grandmaNumber + '.<q>' + desc + '</q>';
 
-            var upgrade = new Game.Upgrade(name, desc, building.basePrice * Game.Tiers[2].price, [10, 9], function () {
+            let upgrade = new Game.Upgrade(name, desc, building.basePrice * Game.Tiers[2].price, [10, 9], function () {
                 Game.Objects['Grandma'].redraw();
             });
             building.grandma = upgrade;
@@ -7513,7 +7485,7 @@ Game.Launch = function () {
 
         order = 14000;
         Game.baseResearchTime = Game.fps * 60 * 30;
-        Game.SetResearch = function (what, time) {
+        Game.SetResearch = (what, time) => {
             if (Game.Upgrades[what] && !Game.Has(what)) {
                 Game.researchT = Game.baseResearchTime;
                 if (Game.Has('Persistent memory')) Game.researchT = Math.ceil(Game.baseResearchTime / 10);
@@ -7581,19 +7553,13 @@ Game.Launch = function () {
             Game.CollectWrinklers();
             Game.storeToRefresh = 1;
         });
-        Game.getPledgeDuration = function () {
-            return Game.fps * 60 * (Game.Has('Sacrificial rolling pins') ? 60 : 30);
-        }
+        Game.getPledgeDuration = () => Game.fps * 60 * (Game.Has('Sacrificial rolling pins') ? 60 : 30)
         Game.last.pool = 'toggle';
-        Game.last.displayFuncWhenOwned = function () {
-            return '<div style="text-align:center;">Time remaining until pledge runs out :<br><b>' + Game.sayTime(Game.pledgeT, -1) + '</b></div>';
-        }
-        Game.last.timerDisplay = function () {
+        Game.last.displayFuncWhenOwned = () => '<div style="text-align:center;">Time remaining until pledge runs out :<br><b>' + Game.sayTime(Game.pledgeT, -1) + '</b></div>'
+        Game.last.timerDisplay = () => {
             if (!Game.Upgrades['Elder Pledge'].bought) return -1; else return 1 - Game.pledgeT / Game.getPledgeDuration();
         }
-        Game.last.priceFunc = function () {
-            return Math.pow(8, Math.min(Game.pledges + 2, 14));
-        }
+        Game.last.priceFunc = () => Math.pow(8, Math.min(Game.pledges + 2, 14))
 
         Game.last.descFunc = function () {
             return '<div style="text-align:center;">' + (Game.pledges === 0 ? 'You haven\'t pledged to the elders yet.' : ('You\'ve pledged to the elders <b>' + (Game.pledges === 1 ? 'once' : Game.pledges === 2 ? 'twice' : (Game.pledges + ' times')) + '</b>.')) + '<div class="line"></div></div>' + this.desc;
@@ -7956,9 +7922,9 @@ Game.Launch = function () {
 
         Game.halloweenDrops = ['Skull cookies', 'Ghost cookies', 'Bat cookies', 'Slime cookies', 'Pumpkin cookies', 'Eyeball cookies', 'Spider cookies'];
 
-        Game.GetHowManyHalloweenDrops = function () {
-            var num = 0;
-            for (var i in Game.halloweenDrops) {
+        Game.GetHowManyHalloweenDrops = () => {
+            let num = 0;
+            for (let i in Game.halloweenDrops) {
                 if (Game.Has(Game.halloweenDrops[i])) num++;
             }
             return num;
@@ -8052,7 +8018,7 @@ Game.Launch = function () {
 
         order = 25000;
         new Game.Upgrade('A festive hat', '<b>Unlocks... something.</b><q>Not a creature was stirring, not even a mouse.</q>', 25, [19, 9], function () {
-            var drop = chooseRandomElement(Game.santaDrops);
+            let drop = chooseRandomElement(Game.santaDrops);
             Game.Unlock(drop);
             if (Game.prefs.popups) Game.Popup('In the festive hat, you find...<br>a festive test tube<br>and ' + drop + '.');
             else Game.Notify('In the festive hat, you find...', 'a festive test tube<br>and <b>' + drop + '</b>.', Game.Upgrades[drop].icon);
@@ -8087,11 +8053,11 @@ Game.Launch = function () {
         });
 
         order = 10300;
-        var heartPower = function () {
-            var pow = 2;
+        function heartPower() {
+            let pow = 2;
             if (Game.Has('Starlove')) pow = 3;
             if (Game.hasGod) {
-                var godLvl = Game.hasGod('seasons');
+                let godLvl = Game.hasGod('seasons');
                 if (godLvl === 1) pow *= 1.3;
                 else if (godLvl === 2) pow *= 1.2;
                 else if (godLvl === 3) pow *= 1.1;
@@ -8154,9 +8120,9 @@ Game.Launch = function () {
 
         Game.heartDrops = ['Pure heart biscuits', 'Ardent heart biscuits', 'Sour heart biscuits', 'Weeping heart biscuits', 'Golden heart biscuits', 'Eternal heart biscuits'];
 
-        Game.GetHowManyHeartDrops = function () {
-            var num = 0;
-            for (var i in Game.heartDrops) {
+        Game.GetHowManyHeartDrops = () => {
+            let num = 0;
+            for (let i in Game.heartDrops) {
                 if (Game.Has(Game.heartDrops[i])) num++;
             }
             return num;
@@ -8179,7 +8145,7 @@ Game.Launch = function () {
         order = 24000;
         Game.seasonTriggerBasePrice = 1000000000;//1111111111;
         new Game.Upgrade('Season switcher', 'Allows you to <b>trigger seasonal events</b> at will, for a price.<q>There will always be time.</q>', 1111, [16, 6], function () {
-            for (var i in Game.seasons) {
+            for (let i in Game.seasons) {
                 Game.Unlock(Game.seasons[i].trigger);
             }
         });
@@ -8201,7 +8167,7 @@ Game.Launch = function () {
 
         order = 40000;
         new Game.Upgrade('Eternal seasons', 'Seasons now last forever.<q>Season to taste.</q>', 7, [16, 6], function () {
-            for (var i in Game.seasons) {
+            for (let i in Game.seasons) {
                 Game.Unlock(Game.seasons[i].trigger);
             }
         });//debug purposes only
@@ -8296,7 +8262,7 @@ Game.Launch = function () {
         });
 
         order = 40000;
-        new Game.Upgrade('Magic shenanigans', 'Neuro production <b>multiplied by 1,000</b>.<q>It\'s magic. I ain\'t gotta explain sh<div style="display:inline-block;background:url(/img/money.png);width:16px;height:16px;position:relative;top:4px;left:0px;margin:0px -2px;"></div>t.</q>', 7, [17, 5]);//debug purposes only
+        new Game.Upgrade('Magic shenanigans', 'Neuro production <b>multiplied by 1,000</b>.<q>It\'s magic. I ain\'t gotta explain sh<div style="display:inline-block;background:url(/img/money.png);width:16px;height:16px;position:relative;top:4px;left:0;margin:0 -2px;"></div>t.</q>', 7, [17, 5]);//debug purposes only
         Game.last.pool = 'debug';
 
 
@@ -8305,8 +8271,8 @@ Game.Launch = function () {
         Game.last.season = 'easter';
         Game.last.pool = 'toggle';
 
-        var eggPrice = 999999999999;
-        var eggPrice2 = 99999999999999;
+        const eggPrice = 999999999999;
+        const eggPrice2 = 99999999999999;
         new Game.Upgrade('Chicken egg', 'Neuro production multiplier <b>+1%</b>.<br>Cost scales with how many eggs you own.<q>The egg. The egg came first. Get over it.</q>', eggPrice, [1, 12]);
         new Game.Upgrade('Duck egg', 'Neuro production multiplier <b>+1%</b>.<br>Cost scales with how many eggs you own.<q>Then he waddled away.</q>', eggPrice, [2, 12]);
         new Game.Upgrade('Turkey egg', 'Neuro production multiplier <b>+1%</b>.<br>Cost scales with how many eggs you own.<q>These hatch into strange, hand-shaped creatures.</q>', eggPrice, [3, 12]);
@@ -8327,16 +8293,16 @@ Game.Launch = function () {
         new Game.Upgrade('Cookie egg', 'Clicking is <b>10% more powerful</b>.<br>Cost scales with how many eggs you own.<q>The shell appears to be chipped.<br>I wonder what\'s inside this one!</q>', eggPrice2, [16, 12]);
         new Game.Upgrade('Omelette', 'Other eggs appear <b>10% more frequently</b>.<br>Cost scales with how many eggs you own.<q>Fromage not included.</q>', eggPrice2, [17, 12]);
         new Game.Upgrade('Chocolate egg', 'Contains <b>a lot of Neuros</b>.<br>Cost scales with how many eggs you own.<q>Laid by the elusive cocoa bird. There\'s a surprise inside!</q>', eggPrice2, [18, 12], function () {
-            var cookies = Game.cookies * 0.05;
+            let cookies = Game.cookies * 0.05;
             if (Game.prefs.popups) Game.Popup('The chocolate egg bursts into<br>' + Beautify(cookies) + '!');
             else Game.Notify('Chocolate egg', 'The egg bursts into <b>' + Beautify(cookies) + '</b> Neuros!', Game.Upgrades['Chocolate egg'].icon);
             Game.Earn(cookies);
         });
         new Game.Upgrade('Century egg', 'You continually gain <b>more CpS the longer you\'ve played</b> in the current ascension.<br>Cost scales with how many eggs you own.<q>Actually not centuries-old. This one isn\'t a day over 86!</q>', eggPrice2, [19, 12]);
         Game.last.descFunc = function () {
-            var day = Math.floor((Date.now() - Game.startDate) / 1000 / 10) * 10 / 60 / 60 / 24;
+            let day = Math.floor((Date.now() - Game.startDate) / 1000 / 10) * 10 / 60 / 60 / 24;
             day = Math.min(day, 100);
-            var n = (1 - Math.pow(1 - day / 100, 3)) * 0.1;
+            let n = (1 - Math.pow(1 - day / 100, 3)) * 0.1;
             return '<div style="text-align:center;">Current boost : <b>+' + Beautify(n * 100, 1) + '%</b></div><div class="line"></div>' + this.desc;
         };
         new Game.Upgrade('"egg"', '<b>+9 CpS</b><q>hey it\'s "egg"</q>', eggPrice2, [20, 12]);
@@ -8345,24 +8311,20 @@ Game.Launch = function () {
         Game.eggDrops = ['Chicken egg', 'Duck egg', 'Turkey egg', 'Quail egg', 'Robin egg', 'Ostrich egg', 'Cassowary egg', 'Salmon roe', 'Frogspawn', 'Shark egg', 'Turtle egg', 'Ant larva'];
         Game.rareEggDrops = ['Golden goose egg', 'Faberge egg', 'Wrinklerspawn', 'Cookie egg', 'Omelette', 'Chocolate egg', 'Century egg', '"egg"'];
 
-        Game.GetHowManyEggs = function () {
-            var num = 0;
-            for (var i in Game.easterEggs) {
+        Game.GetHowManyEggs = () => {
+            let num = 0;
+            for (let i in Game.easterEggs) {
                 if (Game.Has(Game.easterEggs[i])) num++;
             }
             return num;
         }
         for (i in Game.eggDrops)//scale egg prices to how many eggs you have
         {
-            Game.Upgrades[Game.eggDrops[i]].priceFunc = function () {
-                return Math.pow(2, Game.GetHowManyEggs()) * 999;
-            }
+            Game.Upgrades[Game.eggDrops[i]].priceFunc = () => Math.pow(2, Game.GetHowManyEggs()) * 999
         }
         //{Game.Upgrades[Game.eggDrops[i]].priceFunc=function(){return Math.pow(Game.GetHowManyEggs()+1,2)*Game.cookiesPs*60*5;}}
         for (i in Game.rareEggDrops) {
-            Game.Upgrades[Game.rareEggDrops[i]].priceFunc = function () {
-                return Math.pow(3, Game.GetHowManyEggs()) * 999;
-            }
+            Game.Upgrades[Game.rareEggDrops[i]].priceFunc = () => Math.pow(3, Game.GetHowManyEggs()) * 999
         }
         //{Game.Upgrades[Game.rareEggDrops[i]].priceFunc=function(){return Math.pow(Game.GetHowManyEggs()+1,3)*Game.cookiesPs*60*5;}}
 
@@ -8371,20 +8333,20 @@ Game.Launch = function () {
 			Game.Upgrades[Game.easterEggs[i]].descFunc=function(){return '<div style="text-align:center;">You currently own <b>'+Game.GetHowManyEggs()+'/'+Game.easterEggs.length+'</b> eggs.</div><div class="line"></div>'+this.desc;};
 		}*/
 
-        Game.DropEgg = function (failRate) {
+        Game.DropEgg = failRate => {
             failRate *= 1 / Game.dropRateMult();
             if (Game.season !== 'easter') return;
             if (Game.HasAchiev('Hide & seek champion')) failRate *= 0.7;
             if (Game.Has('Omelette')) failRate *= 0.9;
             if (Game.Has('Starspawn')) failRate *= 0.9;
             if (Game.hasGod) {
-                var godLvl = Game.hasGod('seasons');
+                let godLvl = Game.hasGod('seasons');
                 if (godLvl === 1) failRate *= 0.9;
                 else if (godLvl === 2) failRate *= 0.95;
                 else if (godLvl === 3) failRate *= 0.97;
             }
             if (Math.random() >= failRate) {
-                var drop = '';
+                let drop;
                 if (Math.random() < 0.1) drop = chooseRandomElement(Game.rareEggDrops);
                 else drop = chooseRandomElement(Game.eggDrops);
                 if (Game.Has(drop) || Game.HasUnlocked(drop))//reroll if we have it
@@ -8518,105 +8480,95 @@ Game.Launch = function () {
         });
 
         order = 0;
-        var desc = 'Placing an upgrade in this slot will make its effects <b>permanent</b> across all playthroughs.<br><b>Click to activate.</b>';
+        let desc = 'Placing an upgrade in this slot will make its effects <b>permanent</b> across all playthroughs.<br><b>Click to activate.</b>';
         new Game.Upgrade('Permanent upgrade slot I', desc, 100, [0, 10]);
         Game.last.pool = 'prestige';
-        Game.last.iconFunction = function () {
-            return Game.PermanentSlotIcon(0);
-        };
+        Game.last.iconFunction = () => Game.PermanentSlotIcon(0);
         Game.last.activateFunction = function () {
             Game.AssignPermanentSlot(0);
         };
         new Game.Upgrade('Permanent upgrade slot II', desc, 2000, [1, 10]);
         Game.last.pool = 'prestige';
         Game.last.parents = ['Permanent upgrade slot I'];
-        Game.last.iconFunction = function () {
-            return Game.PermanentSlotIcon(1);
-        };
-        Game.last.activateFunction = function () {
+        Game.last.iconFunction = () => Game.PermanentSlotIcon(1);
+        Game.last.activateFunction = () => {
             Game.AssignPermanentSlot(1);
         };
         new Game.Upgrade('Permanent upgrade slot III', desc, 30000, [2, 10]);
         Game.last.pool = 'prestige';
         Game.last.parents = ['Permanent upgrade slot II'];
-        Game.last.iconFunction = function () {
-            return Game.PermanentSlotIcon(2);
-        };
-        Game.last.activateFunction = function () {
+        Game.last.iconFunction = () => Game.PermanentSlotIcon(2);
+        Game.last.activateFunction = () => {
             Game.AssignPermanentSlot(2);
         };
         new Game.Upgrade('Permanent upgrade slot IV', desc, 400000, [3, 10]);
         Game.last.pool = 'prestige';
         Game.last.parents = ['Permanent upgrade slot III'];
-        Game.last.iconFunction = function () {
-            return Game.PermanentSlotIcon(3);
-        };
-        Game.last.activateFunction = function () {
+        Game.last.iconFunction = () => Game.PermanentSlotIcon(3);
+        Game.last.activateFunction = () => {
             Game.AssignPermanentSlot(3);
         };
         new Game.Upgrade('Permanent upgrade slot V', desc, 5000000, [4, 10]);
         Game.last.pool = 'prestige';
         Game.last.parents = ['Permanent upgrade slot IV'];
-        Game.last.iconFunction = function () {
-            return Game.PermanentSlotIcon(4);
-        };
-        Game.last.activateFunction = function () {
+        Game.last.iconFunction = () => Game.PermanentSlotIcon(4);
+        Game.last.activateFunction = () => {
             Game.AssignPermanentSlot(4);
         };
 
-        var slots = ['Permanent upgrade slot I', 'Permanent upgrade slot II', 'Permanent upgrade slot III', 'Permanent upgrade slot IV', 'Permanent upgrade slot V'];
+        const slots = ['Permanent upgrade slot I', 'Permanent upgrade slot II', 'Permanent upgrade slot III', 'Permanent upgrade slot IV', 'Permanent upgrade slot V'];
         for (i = 0; i < slots.length; i++) {
-            Game.Upgrades[slots[i]].descFunc = function (i) {
-                return function () {
-                    if (Game.permanentUpgrades[i] === -1) return this.desc;
-                    var upgrade = Game.UpgradesById[Game.permanentUpgrades[i]];
-                    return '<div style="text-align:center;">' + 'Current : <div class="icon" style="vertical-align:middle;display:inline-block;' + (upgrade.icon[2] ? 'background-image:url(' + upgrade.icon[2] + ');' : '') + 'background-position:' + (-upgrade.icon[0] * 48) + 'px ' + (-upgrade.icon[1] * 48) + 'px;transform:scale(0.5);margin:-16px;"></div> <b>' + upgrade.name + '</b><div class="line"></div></div>' + this.desc;
-                };
-            }(i);
+            Game.Upgrades[slots[i]].descFunc = (i => function () {
+                if (Game.permanentUpgrades[i] === -1) return this.desc;
+                let upgrade = Game.UpgradesById[Game.permanentUpgrades[i]];
+                return '<div style="text-align:center;">' + 'Current : <div class="icon" style="vertical-align:middle;display:inline-block;' + (upgrade.icon[2] ? 'background-image:url(' + upgrade.icon[2] + ');' : '') + 'background-position:' + (-upgrade.icon[0] * 48) + 'px ' + (-upgrade.icon[1] * 48) + 'px;transform:scale(0.5);margin:-16px;"></div> <b>' + upgrade.name + '</b><div class="line"></div></div>' + this.desc;
+            })(i);
         }
 
-        Game.PermanentSlotIcon = function (slot) {
+        Game.PermanentSlotIcon = slot => {
             if (Game.permanentUpgrades[slot] === -1) return [slot, 10];
             return Game.UpgradesById[Game.permanentUpgrades[slot]].icon;
         }
-        Game.AssignPermanentSlot = function (slot) {
+        Game.AssignPermanentSlot = slot => {
+            let me;
+            let i;
             PlaySound('snd/tick.mp3');
             Game.tooltip.hide();
-            var list = [];
-            for (var i in Game.Upgrades) {
-                var me = Game.Upgrades[i];
+            let list = [];
+            for (i in Game.Upgrades) {
+                me = Game.Upgrades[i];
                 if (me.bought && me.unlocked && !me.noPerm && (me.pool === '' || me.pool === 'cookie')) {
-                    var fail = 0;
-                    for (var ii in Game.permanentUpgrades) {
+                    let fail = 0;
+                    for (let ii in Game.permanentUpgrades) {
                         if (Game.permanentUpgrades[ii] === me.id) fail = 1;
                     }//check if not already in another permaslot
                     if (!fail) list.push(me);
                 }
             }
 
-            var sortMap = function (a, b) {
+            function sortMap(a, b) {
                 if (a.order > b.order) return 1;
                 else if (a.order < b.order) return -1;
                 else return 0;
             }
             list.sort(sortMap);
 
-            var upgrades = '';
-            for (var i in list) {
-                var me = list[i];
+            let upgrades = '';
+            for (i in list) {
+                me = list[i];
                 upgrades += Game.crate(me, '', 'PlaySound(\'snd/tick.mp3\');Game.PutUpgradeInPermanentSlot(' + me.id + ',' + slot + ');', 'upgradeForPermanent' + me.id);
             }
-            var upgrade = Game.permanentUpgrades[slot];
+            let upgrade = Game.permanentUpgrades[slot];
             Game.SelectingPermanentUpgrade = upgrade;
             Game.Prompt('<h3>Pick an upgrade to make permanent</h3>' +
 
                 '<div class="line"></div><div style="margin:4px auto;clear:both;width:120px;"><div class="crate upgrade enabled" style="background-position:' + (-slot * 48) + 'px ' + (-10 * 48) + 'px;"></div><div id="upgradeToSlotNone" class="crate upgrade enabled" style="background-position:' + (-0 * 48) + 'px ' + (-7 * 48) + 'px;display:' + (upgrade !== -1 ? 'none' : 'block') + ';"></div><div id="upgradeToSlotWrap" style="float:left;display:' + (upgrade === -1 ? 'none' : 'block') + ';">' + (Game.crate(Game.UpgradesById[upgrade === -1 ? 0 : upgrade], '', '', 'upgradeToSlot')) + '</div></div>' +
-                '<div class="block crateBox" style="overflow-y:scroll;float:left;clear:left;width:317px;padding:0px;height:250px;">' + upgrades + '</div>' +
+                '<div class="block crateBox" style="overflow-y:scroll;float:left;clear:left;width:317px;padding:0;height:250px;">' + upgrades + '</div>' +
                 '<div class="block" style="float:right;width:152px;clear:right;height:234px;">Here are all the upgrades you\'ve purchased last playthrough.<div class="line"></div>Pick one to permanently gain its effects!<div class="line"></div>You can reassign this slot anytime you ascend.</div>'
                 , [['Confirm', 'Game.permanentUpgrades[' + slot + ']=Game.SelectingPermanentUpgrade;Game.BuildAscendTree();Game.ClosePrompt();'], 'Cancel'], 0, 'widePrompt');
         }
         Game.SelectingPermanentUpgrade = -1;
-        Game.PutUpgradeInPermanentSlot = function (upgrade, slot) {
+        Game.PutUpgradeInPermanentSlot = (upgrade) => {
             Game.SelectingPermanentUpgrade = upgrade;
             elementByID('upgradeToSlotWrap').innerHTML = '';
             elementByID('upgradeToSlotWrap').style.display = (upgrade === -1 ? 'none' : 'block');
@@ -8640,10 +8592,8 @@ Game.Launch = function () {
         Game.last.pool = 'prestige';
         Game.last.parents = ['Season switcher'];
 
-        var angelPriceFactor = 7;
-        var desc = function (percent, total) {
-            return 'You gain another <b>+' + percent + '%</b> of your regular CpS while the game is closed, for a total of <b>' + total + '%</b>.';
-        }
+        const angelPriceFactor = 7;
+        desc = (percent, total) => 'You gain another <b>+' + percent + '%</b> of your regular CpS while the game is closed, for a total of <b>' + total + '%</b>.';
         new Game.Upgrade('Angels', desc(10, 15) + '<q>Lowest-ranking at the first sphere of pastry heaven, angels are tasked with delivering new recipes to the mortals they deem worthy.</q>', Math.pow(angelPriceFactor, 1), [0, 11]);
         Game.last.pool = 'prestige';
         Game.last.parents = ['Twin Gates of Transcendence'];
@@ -8820,40 +8770,38 @@ Game.Launch = function () {
         new Game.Upgrade('Golden switch [off]', 'Turning this on will give you a passive <b>+50% CpS</b>, but prevents golden Neuros from spawning.<br>Cost is equal to 1 hour of production.', 1000000, [20, 10]);
         Game.last.pool = 'toggle';
         Game.last.toggleInto = 'Golden switch [on]';
-        Game.last.priceFunc = function () {
-            return Game.cookiesPs * 60 * 60;
-        }
-        var func = function () {
+        Game.last.priceFunc = () => Game.cookiesPs * 60 * 60
+
+        function func2() {
             if (Game.Has('Residual luck')) {
-                var bonus = 0;
-                var upgrades = Game.goldenCookieUpgrades;
-                for (var i in upgrades) {
+                let bonus = 0;
+                let upgrades = Game.goldenCookieUpgrades;
+                for (let i in upgrades) {
                     if (Game.Has(upgrades[i])) bonus++;
                 }
                 return '<div style="text-align:center;">' + Game.listTinyOwnedUpgrades(Game.goldenCookieUpgrades) + '<br><br>The effective boost is <b>+' + Beautify(Math.round(50 + bonus * 10)) + '%</b><br>thanks to residual luck<br>and your <b>' + bonus + '</b> golden Neuro upgrade' + (bonus === 1 ? '' : 's') + '.</div><div class="line"></div>' + this.desc;
             }
             return this.desc;
-        };
-        Game.last.descFunc = func;
+        }
+
+        Game.last.descFunc = func2;
 
         new Game.Upgrade('Golden switch [on]', 'The switch is currently giving you a passive <b>+50% CpS</b>; it also prevents golden Neuros from spawning.<br>Turning it off will revert those effects.<br>Cost is equal to 1 hour of production.', 1000000, [21, 10]);
         Game.last.pool = 'toggle';
         Game.last.toggleInto = 'Golden switch [off]';
-        Game.last.priceFunc = function () {
-            return Game.cookiesPs * 60 * 60;
-        }
-        Game.last.descFunc = func;
+        Game.last.priceFunc = () => Game.cookiesPs * 60 * 60
+        Game.last.descFunc = func2;
 
         order = 50000;
         new Game.Upgrade('Rum Selector', 'Lets you pick what flavor of rum to display.', 0, [1, 8]);
         Game.last.descFunc = function () {
-            var choice = this.choicesFunction()[Game.milkType];
+            const choice = this.choicesFunction()[Game.milkType];
             return '<div style="text-align:center;">Current : <div class="icon" style="vertical-align:middle;display:inline-block;' + (choice.icon[2] ? 'background-image:url(' + choice.icon[2] + ');' : '') + 'background-position:' + (-choice.icon[0] * 48) + 'px ' + (-choice.icon[1] * 48) + 'px;transform:scale(0.5);margin:-16px;"></div> <b>' + choice.name + '</b></div><div class="line"></div>' + this.desc;
         };
 
         Game.last.pool = 'toggle';
-        Game.last.choicesFunction = function () {
-            var choices = [];
+        Game.last.choicesFunction = () => {
+            let choices = [];
             choices[0] = {name: 'Alcoholic', icon: [0, 7]};
             choices[1] = {name: 'Plain Rum', icon: [1, 8]};
             choices[2] = {name: 'Chocolate Rum', icon: [2, 8]};
@@ -8893,7 +8841,7 @@ Game.Launch = function () {
             choices[Game.milkType].selected = 1;
             return choices;
         }
-        Game.last.choicesPick = function (id) {
+        Game.last.choicesPick = id => {
             Game.milkType = id;
         }
 
@@ -9086,13 +9034,13 @@ Game.Launch = function () {
         });
 
 
-        var desc = function (totalHours) {
-            var hours = totalHours % 24;
-            var days = Math.floor(totalHours / 24);
-            var str = hours + (hours === 1 ? ' hour' : ' hours');
+        desc = totalHours => {
+            let hours = totalHours % 24;
+            let days = Math.floor(totalHours / 24);
+            let str = hours + (hours === 1 ? ' hour' : ' hours');
             if (days > 0) str = days + (days === 1 ? ' day' : ' days') + ' and ' + str;
             return 'You retain optimal cookie production while the game is closed for twice as long, for a total of <b>' + str + '</b>.';
-        }
+        };
         new Game.Upgrade('Belphegor', desc(2) + '<q>A demon of shortcuts and laziness, Belphegor commands machines to do work in his stead.</q>', Math.pow(angelPriceFactor, 1), [7, 11]);
         Game.last.pool = 'prestige';
         Game.last.parents = ['Twin Gates of Transcendence'];
@@ -9122,20 +9070,20 @@ Game.Launch = function () {
         order = 49900;
         new Game.Upgrade('Golden cookie sound selector', 'Lets you change the sound golden Neuros make when they spawn.', 0, [28, 6]);
         Game.last.descFunc = function () {
-            var choice = this.choicesFunction()[Game.chimeType];
+            let choice = this.choicesFunction()[Game.chimeType];
             return '<div style="text-align:center;">Current : <div class="icon" style="vertical-align:middle;display:inline-block;' + (choice.icon[2] ? 'background-image:url(' + icon[2] + ');' : '') + 'background-position:' + (-choice.icon[0] * 48) + 'px ' + (-choice.icon[1] * 48) + 'px;transform:scale(0.5);margin:-16px;"></div> <b>' + choice.name + '</b></div><div class="line"></div>' + this.desc;
         };
 
         Game.last.pool = 'toggle';
-        Game.last.choicesFunction = function () {
-            var choices = [];
+        Game.last.choicesFunction = () => {
+            let choices = [];
             choices[0] = {name: 'No sound', icon: [0, 7]};
             choices[1] = {name: 'Chime', icon: [22, 6]};
 
             choices[Game.chimeType].selected = 1;
             return choices;
         }
-        Game.last.choicesPick = function (id) {
+        Game.last.choicesPick = id => {
             Game.chimeType = id;
         }
 
@@ -9314,32 +9262,26 @@ Game.Launch = function () {
         new Game.Upgrade('Lucky digit', '<b>+1%</b> prestige level effect on CpS.<br><b>+1%</b> golden Neuro effect duration.<br><b>+1%</b> golden Neuro lifespan.<q>This upgrade is a bit shy and only appears when your prestige level ends in 7.</q>', 777, [24, 15]);
         Game.last.pool = 'prestige';
         Game.last.parents = ['Heavenly luck'];
-        Game.last.showIf = function () {
-            return (Math.ceil(Game.prestige) % 10 === 7);
-        };
+        Game.last.showIf = () => (Math.ceil(Game.prestige) % 10 === 7);
         new Game.Upgrade('Lucky number', '<b>+1%</b> prestige level effect on CpS.<br><b>+1%</b> golden Neuro effect duration.<br><b>+1%</b> golden Neuro lifespan.<q>This upgrade is a reclusive hermit and only appears when your prestige level ends in 777.</q>', 77777, [24, 15]);
         Game.last.pool = 'prestige';
         Game.last.parents = ['Lucky digit', 'Lasting fortune'];
-        Game.last.showIf = function () {
-            return (Math.ceil(Game.prestige) % 1000 === 777);
-        };
+        Game.last.showIf = () => (Math.ceil(Game.prestige) % 1000 === 777);
         new Game.Upgrade('Lucky payout', '<b>+1%</b> prestige level effect on CpS.<br><b>+1%</b> golden Neuro effect duration.<br><b>+1%</b> golden Neuro lifespan.<q>This upgrade took an oath of complete seclusion from the rest of the world and only appears when your prestige level ends in 777777.</q>', 77777777, [24, 15]);
         Game.last.pool = 'prestige';
         Game.last.parents = ['Lucky number', 'Decisive fate'];
-        Game.last.showIf = function () {
-            return (Math.ceil(Game.prestige) % 1000000 === 777777);
-        };
+        Game.last.showIf = () => (Math.ceil(Game.prestige) % 1000000 === 777777);
 
         order = 50000;
         new Game.Upgrade('Background selector', 'Lets you pick which wallpaper to display.', 0, [29, 5]);
         Game.last.descFunc = function () {
-            var choice = this.choicesFunction()[Game.bgType];
+            let choice = this.choicesFunction()[Game.bgType];
             return '<div style="text-align:center;">Current : <div class="icon" style="vertical-align:middle;display:inline-block;' + (choice.icon[2] ? 'background-image:url(' + choice.icon[2] + ');' : '') + 'background-position:' + (-choice.icon[0] * 48) + 'px ' + (-choice.icon[1] * 48) + 'px;transform:scale(0.5);margin:-16px;"></div> <b>' + choice.name + '</b></div><div class="line"></div>' + this.desc;
         };
 
         Game.last.pool = 'toggle';
-        Game.last.choicesFunction = function () {
-            var choices = [];
+        Game.last.choicesFunction = () => {
+            let choices = [];
             choices[0] = {name: 'Automatic', icon: [0, 7]};
             choices[1] = {name: 'Blue', icon: [21, 21]};
             choices[2] = {name: 'Red', icon: [22, 21]};
@@ -9353,7 +9295,7 @@ Game.Launch = function () {
             choices[Game.bgType].selected = 1;
             return choices;
         }
-        Game.last.choicesPick = function (id) {
+        Game.last.choicesPick = id => {
             Game.bgType = id;
         }
 
@@ -9392,7 +9334,7 @@ Game.Launch = function () {
         Game.MakeTiered(Game.last, 9, 18);
 
         order = 99999;
-        var years = Math.floor((Date.now() - new Date(2013, 7, 8)) / (1000 * 60 * 60 * 24 * 365));
+        const years = Math.floor((Date.now() - new Date(2013, 7, 8)) / (1000 * 60 * 60 * 24 * 365));
         //only updates on page load
         //may behave strangely on leap years
         Game.NewUpgradeCookie({
@@ -9501,12 +9443,10 @@ Game.Launch = function () {
         Game.last.priceLumps = 1;
         Game.last.pool = 'toggle';
         Game.last.toggleInto = 0;
-        Game.last.canBuyFunc = function () {
-            return Game.lumps >= 1;
-        };
-        Game.last.clickFunction = Game.spendLump(1, 'activate the sugar frenzy', function () {
+        Game.last.canBuyFunc = () => Game.lumps >= 1;
+        Game.last.clickFunction = Game.spendLump(1, 'activate the sugar frenzy', () => {
             Game.Upgrades['Sugar frenzy'].buy(1);
-            let buff = Game.gainBuff('sugar frenzy', 60 * 60, 3);
+            Game.gainBuff('sugar frenzy', 60 * 60, 3);
             if (Game.prefs.popups) Game.Popup('Sugar frenzy activated!');
             else Game.Notify('Sugar frenzy!', 'CpS x3 for 1 hour!', [29, 14]);
         });
@@ -9558,7 +9498,7 @@ Game.Launch = function () {
 
         order = 40000;
         new Game.Upgrade('Turbo-charged soil', 'Garden plants grow every second.<br>Garden seeds are free to plant.<br>You can switch soils at any time.<q>It\'s got electrolytes!</q>', 7, [2, 16]);//debug purposes only
-        Game.last.buyFunction = function () {
+        Game.last.buyFunction = () => {
             if (Game.Objects['Farm'].minigameLoaded) {
                 Game.Objects['Farm'].minigame.computeStepT();
             }
@@ -9669,15 +9609,11 @@ Game.Launch = function () {
         Game.NewUpgradeCookie({name: 'Wheat slims', desc: '-', icon: [28, 25], power: 1, price: 30, locked: 1});
         Game.last.baseDesc = 'Neuro production multiplier <b>+1%</b>.<br>Dropped by baker\'s wheat plants.<q>The only reason you\'d consider these to be Neuros is because you feel slightly sorry for them.</q>';
 
-        var gardenDrops = ['Elderwort biscuits', 'Bakeberry cookies', 'Duketater cookies', 'Green yeast digestives', 'Fern tea', 'Ichor syrup', 'Wheat slims'];
+        const gardenDrops = ['Elderwort biscuits', 'Bakeberry cookies', 'Duketater cookies', 'Green yeast digestives', 'Fern tea', 'Ichor syrup', 'Wheat slims'];
         for (i in gardenDrops)//scale by CpS
         {
-            var it = Game.Upgrades[gardenDrops[i]];
-            it.priceFunc = function (cost) {
-                return function () {
-                    return cost * Game.cookiesPs * 60;
-                }
-            }(it.basePrice);
+            let it = Game.Upgrades[gardenDrops[i]];
+            it.priceFunc = (cost => () => cost * Game.cookiesPs * 60)(it.basePrice);
             it.baseDesc = it.baseDesc.replace('<q>', '<br>Cost scales with CpS.<q>');
             it.desc = BeautifyInText(it.baseDesc);
             it.lasting = true;
@@ -9873,9 +9809,9 @@ Game.Launch = function () {
         new Game.TieredUpgrade('Space-filling fibers', 'Fractal engines are <b>twice</b> as efficient.<q>This special ingredient has the incredible ability to fill the local space perfectly, effectively eradicating hunger in those who consume it!<br>Knowing that no hunger means no need for Neuros, your marketers urge you to repurpose this product into next-level packing peanuts.</q>', 'Fractal engine', 9);
         new Game.TieredUpgrade('Endless book of prose', 'Fractal engines are <b>twice</b> as efficient.', 'Fractal engine', 10);
         Game.last.descFunc = function () {
-            var str = '"There once was a baker named ' + Game.bakeryName + '. One day, there was a knock at the door; ' + Game.bakeryName + ' opened it and was suddenly face-to-face with a strange and menacing old grandma. The grandma opened her mouth and, in a strange little voice, started reciting this strange little tale : ';
-            var n = 35;
-            var i = Math.floor(Game.T * 0.1);
+            const str = '"There once was a baker named ' + Game.bakeryName + '. One day, there was a knock at the door; ' + Game.bakeryName + ' opened it and was suddenly face-to-face with a strange and menacing old grandma. The grandma opened her mouth and, in a strange little voice, started reciting this strange little tale : ';
+            const n = 35;
+            const i = Math.floor(Game.T * 0.1);
             return this.desc + '<q style="font-family:Courier;">' + (str.substr(i % str.length, n) + (i % str.length > (str.length - n) ? str.substr(0, i % str.length - (str.length - n)) : '')) + '</q>';
         };
         new Game.TieredUpgrade('The set of all sets', 'Fractal engines are <b>twice</b> as efficient.<q>The answer, of course, is a definite maybe.</q>', 'Fractal engine', 11);
@@ -9929,17 +9865,17 @@ Game.Launch = function () {
         new Game.Upgrade('Sugar crystal cookies', 'Neuro production multiplier <b>+5% permanently</b>, and <b>+1%</b> for every building type level 10 or higher.<q>Infused with cosmic sweetness. It gives off a faint shimmery sound when you hold it up to your ear.</q>', 1000000000, [21, 30]);
         Game.last.pool = 'prestige';
         Game.last.parents = ['Sugar baking'];
-        Game.last.power = function () {
-            var n = 5;
-            for (var i in Game.Objects) {
+        Game.last.power = () => {
+            let n = 5;
+            for (let i in Game.Objects) {
                 if (Game.Objects[i].level >= 10) n++;
             }
             return n;
         };
         Game.last.pseudoCookie = true;
         Game.last.descFunc = function () {
-            var n = 5;
-            for (var i in Game.Objects) {
+            let n = 5;
+            for (let i in Game.Objects) {
                 if (Game.Objects[i].level >= 10) n++;
             }
             return '<div style="text-align:center;">Current : <b>+' + Beautify(n) + '%</b><div class="line"></div></div>' + this.desc;
@@ -10115,28 +10051,28 @@ Game.Launch = function () {
         Game.last.parents = ['Distilled essence of redoubled luck'];
 
         order = 40005;
-        var func = function () {
-            var boost = 50;
-            var resist = 0;
+
+        function func() {
+            let boost = 50;
+            let resist = 0;
             if (Game.Has('Reinforced membrane')) {
                 boost += 10;
                 resist += 10;
             }
             return (this.name === 'Shimmering veil [on]' ? '<div style="text-align:center;">Active.</div><div class="line"></div>' : '') + 'Boosts your Neuro production by <b>' + Beautify(boost) + '%</b> when active.<br>The veil is very fragile and will break if you click the big Neuro or any golden Neuros or reindeer.<br><br>Once broken, turning the veil back on costs 24 hours of unbuffed CpS.' + (resist > 0 ? ('<br><br>Has a <b>' + Beautify(resist) + '%</b> chance to not break.') : '');
-        };
+        }
+
         new Game.Upgrade('Shimmering veil [off]', '', 1000000, [9, 10]);
         Game.last.pool = 'toggle';
         Game.last.toggleInto = 'Shimmering veil [on]';
-        Game.last.priceFunc = function () {
-            return Game.unbuffedCps * 60 * 60 * 24;
-        }
+        Game.last.priceFunc = () => Game.unbuffedCps * 60 * 60 * 24
         Game.last.descFunc = func;
         new Game.Upgrade('Shimmering veil [on]', '', 0, [9, 10]);
         Game.last.pool = 'toggle';
         Game.last.toggleInto = 'Shimmering veil [off]';
         Game.last.descFunc = func;
 
-        Game.loseShimmeringVeil = function (context) {
+        Game.loseShimmeringVeil = context => {
             if (!Game.Has('Shimmering veil')) return false;
             if (!Game.Has('Shimmering veil [off]') && Game.Has('Shimmering veil [on]')) return false;
             if (Game.Has('Reinforced membrane')) {
@@ -10149,9 +10085,8 @@ Game.Launch = function () {
                 }
                 Math.seededRandom();
             }
-            var me = Game.Upgrades['Shimmering veil [on]'];
+            let me = Game.Upgrades['Shimmering veil [on]'];
             me.bought = 1;
-            //Game.Upgrades[me.toggleInto].bought=false;
             Game.Lock(me.toggleInto);
             Game.Unlock(me.toggleInto);
             Game.Notify('The shimmering veil disappears...', '', [9, 10]);
@@ -10161,7 +10096,7 @@ Game.Launch = function () {
         }
 
 
-        var getCookiePrice = function (level) {
+        function getCookiePrice(level) {
             return 999999999999999999999999999999999999999 * Math.pow(10, (level - 1) / 2);
         };
 
@@ -10404,10 +10339,10 @@ Game.Launch = function () {
         };
 
         Game.listTinyOwnedUpgrades = function (arr) {
-            var str = '';
-            for (var i = 0; i < arr.length; i++) {
+            let str = '';
+            for (let i = 0; i < arr.length; i++) {
                 if (Game.Has(arr[i])) {
-                    var it = Game.Upgrades[arr[i]];
+                    let it = Game.Upgrades[arr[i]];
                     str += '<div class="icon" style="vertical-align:middle;display:inline-block;' + (it.icon[2] ? 'background-image:url(' + it.icon[2] + ');' : '') + 'background-position:' + (-it.icon[0] * 48) + 'px ' + (-it.icon[1] * 48) + 'px;transform:scale(0.5);margin:-16px;"></div>';
                 }
             }
@@ -10417,17 +10352,17 @@ Game.Launch = function () {
         Game.santaDrops = ['Increased merriness', 'Improved jolliness', 'A lump of coal', 'An itchy sweater', 'Reindeer baking grounds', 'Weighted sleighs', 'Ho ho ho-flavored frosting', 'Season savings', 'Toy workshop', 'Naughty list', 'Santa\'s bottomless bag', 'Santa\'s helpers', 'Santa\'s legacy', 'Santa\'s milk and cookies'];
 
         Game.GetHowManySantaDrops = function () {
-            var num = 0;
-            for (var i in Game.santaDrops) {
+            let num = 0;
+            for (let i in Game.santaDrops) {
                 if (Game.Has(Game.santaDrops[i])) num++;
             }
             return num;
         }
 
         Game.reindeerDrops = ['Christmas tree biscuits', 'Snowflake biscuits', 'Snowman biscuits', 'Holly biscuits', 'Candy cane biscuits', 'Bell biscuits', 'Present biscuits'];
-        Game.GetHowManyReindeerDrops = function () {
-            var num = 0;
-            for (var i in Game.reindeerDrops) {
+        Game.GetHowManyReindeerDrops = () => {
+            let num = 0;
+            for (let i in Game.reindeerDrops) {
                 if (Game.Has(Game.reindeerDrops[i])) num++;
             }
             return num;
@@ -10439,7 +10374,7 @@ Game.Launch = function () {
 
         Game.seasonDrops = Game.heartDrops.concat(Game.halloweenDrops).concat(Game.easterEggs).concat(Game.santaDrops).concat(Game.reindeerDrops);
 
-        Game.saySeasonSwitchUses = function () {
+        Game.saySeasonSwitchUses = () => {
             if (Game.seasonUses === 0) return 'You haven\'t switched seasons this ascension yet.';
             return 'You\'ve switched seasons <b>' + (Game.seasonUses === 1 ? 'once' : Game.seasonUses === 2 ? 'twice' : (Game.seasonUses + ' times')) + '</b> this ascension.';
         }
@@ -10459,12 +10394,12 @@ Game.Launch = function () {
             return '<div style="text-align:center;">' + Game.saySeasonSwitchUses() + '<div class="line"></div></div>' + this.desc;
         };
 
-        Game.computeSeasonPrices = function () {
-            for (var i in Game.seasons) {
-                Game.seasons[i].triggerUpgrade.priceFunc = function () {
-                    var m = 1;
+        Game.computeSeasonPrices = () => {
+            for (let i in Game.seasons) {
+                Game.seasons[i].triggerUpgrade.priceFunc = () => {
+                    let m = 1;
                     if (Game.hasGod) {
-                        var godLvl = Game.hasGod('seasons');
+                        let godLvl = Game.hasGod('seasons');
                         if (godLvl === 1) m *= 2;
                         else if (godLvl === 2) m *= 1.50;
                         else if (godLvl === 3) m *= 1.25;
@@ -10475,24 +10410,25 @@ Game.Launch = function () {
                 }
             }
         }
-        Game.computeSeasons = function () {
-            for (var i in Game.seasons) {
-                var me = Game.Upgrades[Game.seasons[i].trigger];
+        Game.computeSeasons = () => {
+            for (let i in Game.seasons) {
+                let me = Game.Upgrades[Game.seasons[i].trigger];
                 Game.seasons[i].triggerUpgrade = me;
                 me.pool = 'toggle';
                 me.buyFunction = function () {
+                    let str;
                     Game.seasonUses += 1;
                     Game.computeSeasonPrices();
                     //Game.Lock(this.name);
-                    for (var i in Game.seasons) {
-                        var me = Game.Upgrades[Game.seasons[i].trigger];
+                    for (let i in Game.seasons) {
+                        let me = Game.Upgrades[Game.seasons[i].trigger];
                         if (me.name !== this.name) {
                             Game.Lock(me.name);
                             Game.Unlock(me.name);
                         }
                     }
                     if (Game.season !== '' && Game.season !== this.season) {
-                        var str = Game.seasons[Game.season].over + '<div class="line"></div>';
+                        str = Game.seasons[Game.season].over + '<div class="line"></div>';
                         if (Game.prefs.popups) Game.Popup(str);
                         else Game.Notify(str, '', Game.seasons[Game.season].triggerUpgrade.icon, 4);
                     }
@@ -10501,48 +10437,40 @@ Game.Launch = function () {
                     Game.storeToRefresh = 1;
                     Game.upgradesToRebuild = 1;
                     Game.Objects['Grandma'].redraw();
-                    var str = Game.seasons[this.season].start + '<div class="line"></div>';
+                    str = Game.seasons[this.season].start + '<div class="line"></div>';
                     if (Game.prefs.popups) Game.Popup(str);
                     else Game.Notify(str, '', this.icon, 4);
                 }
 
-                me.clickFunction = function (me) {
-                    return function () {
-                        //undo season
-                        if (me.bought && Game.season && me === Game.seasons[Game.season].triggerUpgrade) {
-                            me.lose();
-                            var str = Game.seasons[Game.season].over;
-                            if (Game.prefs.popups) Game.Popup(str);
-                            else Game.Notify(str, '', Game.seasons[Game.season].triggerUpgrade.icon);
-                            if (Game.Has('Season switcher')) {
-                                Game.Unlock(Game.seasons[Game.season].trigger);
-                                Game.seasons[Game.season].triggerUpgrade.bought = 0;
-                            }
+                me.clickFunction = (me => () => {
+                    //undo season
+                    if (me.bought && Game.season && me === Game.seasons[Game.season].triggerUpgrade) {
+                        me.lose();
+                        let str = Game.seasons[Game.season].over;
+                        if (Game.prefs.popups) Game.Popup(str);
+                        else Game.Notify(str, '', Game.seasons[Game.season].triggerUpgrade.icon);
+                        if (Game.Has('Season switcher')) {
+                            Game.Unlock(Game.seasons[Game.season].trigger);
+                            Game.seasons[Game.season].triggerUpgrade.bought = 0;
+                        }
 
-                            Game.upgradesToRebuild = 1;
-                            Game.recalculateGains = 1;
-                            Game.season = Game.baseSeason;
-                            Game.seasonT = -1;
-                            PlaySound('snd/tick.mp3');
-                            return false;
-                        } else return true;
-                    };
-                }(me);
+                        Game.upgradesToRebuild = 1;
+                        Game.recalculateGains = 1;
+                        Game.season = Game.baseSeason;
+                        Game.seasonT = -1;
+                        PlaySound('snd/tick.mp3');
+                        return false;
+                    } else return true;
+                })(me);
 
-                me.displayFuncWhenOwned = function () {
-                    return '<div style="text-align:center;">Time remaining :<br><b>' + (Game.Has('Eternal seasons') ? 'forever' : Game.sayTime(Game.seasonT, -1)) + '</b><div style="font-size:80%;">(Click again to cancel season)</div></div>';
-                }
-                me.timerDisplay = function (upgrade) {
-                    return function () {
-                        if (!Game.Upgrades[upgrade.name].bought || Game.Has('Eternal seasons')) return -1; else return 1 - Game.seasonT / Game.getSeasonDuration();
-                    }
-                }(me);
+                me.displayFuncWhenOwned = () => '<div style="text-align:center;">Time remaining :<br><b>' + (Game.Has('Eternal seasons') ? 'forever' : Game.sayTime(Game.seasonT, -1)) + '</b><div style="font-size:80%;">(Click again to cancel season)</div></div>'
+                me.timerDisplay = (upgrade => () => {
+                    if (!Game.Upgrades[upgrade.name].bought || Game.Has('Eternal seasons')) return -1; else return 1 - Game.seasonT / Game.getSeasonDuration();
+                })(me);
 
             }
         }
-        Game.getSeasonDuration = function () {
-            return Game.fps * 60 * 60 * 24;
-        }
+        Game.getSeasonDuration = () => Game.fps * 60 * 60 * 24
         Game.computeSeasons();
 
         //alert untiered building upgrades
@@ -10565,7 +10493,7 @@ Game.Launch = function () {
                 Game.Upgrades[i].posY = 0;
                 if (Game.Upgrades[i].parents.length === 0 && Game.Upgrades[i].name !== 'Legacy') Game.Upgrades[i].parents = ['Legacy'];
                 Game.Upgrades[i].parents = Game.Upgrades[i].parents || [-1];
-                for (var ii in Game.Upgrades[i].parents) {
+                for (let ii in Game.Upgrades[i].parents) {
                     if (Game.Upgrades[i].parents[ii] !== -1) Game.Upgrades[i].parents[ii] = Game.Upgrades[Game.Upgrades[i].parents[ii]];
                 }
             }
@@ -10710,11 +10638,11 @@ Game.Launch = function () {
             return this;
         }
 
-        Game.Win = function (what) {
+        Game.Win = what => {
             if (typeof what === 'string') {
                 if (Game.Achievements[what]) {
                     if (Game.Achievements[what].won === 0) {
-                        var name = Game.Achievements[what].shortName ? Game.Achievements[what].shortName : Game.Achievements[what].name;
+                        let name = Game.Achievements[what].shortName ? Game.Achievements[what].shortName : Game.Achievements[what].name;
                         Game.Achievements[what].won = 1;
                         if (Game.prefs.popups) Game.Popup('Achievement unlocked :<br>' + name);
                         else Game.Notify('Achievement unlocked', '<div class="title" style="font-size:18px;margin-top:-2px;">' + name + '</div>', Game.Achievements[what].icon);
@@ -10723,12 +10651,12 @@ Game.Launch = function () {
                     }
                 }
             } else {
-                for (var i in what) {
+                for (let i in what) {
                     Game.Win(what[i]);
                 }
             }
         }
-        Game.RemoveAchiev = function (what) {
+        Game.RemoveAchiev = what => {
             if (Game.Achievements[what]) {
                 if (Game.Achievements[what].won === 1) {
                     Game.Achievements[what].won = 0;
@@ -10747,24 +10675,20 @@ Game.Launch = function () {
             if (Game.onMenu === 'stats') Game.UpdateMenu();
         }
 
-        Game.CountsAsAchievementOwned = function (pool) {
-            if (pool === '' || pool === 'normal') return true; else return false;
-        }
+        Game.CountsAsAchievementOwned = pool => pool === '' || pool === 'normal'
 
-        Game.HasAchiev = function (what) {
-            return (Game.Achievements[what] ? Game.Achievements[what].won : 0);
-        }
+        Game.HasAchiev = what => (Game.Achievements[what] ? Game.Achievements[what].won : 0)
 
-        Game.TieredAchievement = function (name, desc, building, tier) {
-            var achiev = new Game.Achievement(name, desc, Game.GetIcon(building, tier));
+        Game.TieredAchievement = (name, desc, building, tier) => {
+            let achiev = new Game.Achievement(name, desc, Game.GetIcon(building, tier));
             Game.SetTier(building, tier);
             return achiev;
         }
 
-        Game.ProductionAchievement = function (name, building, tier, q, mult) {
-            var building = Game.Objects[building];
-            var icon = [building.iconColumn, 22];
-            var n = 12 + building.n + (mult || 0);
+        Game.ProductionAchievement = (name, buildingParam, tier, q, mult) => {
+            let building = Game.Objects[buildingParam];
+            let icon = [building.iconColumn, 22];
+            let n = 12 + building.n + (mult || 0);
             if (tier === 2) {
                 icon[1] = 23;
                 n += 7;
@@ -10772,8 +10696,8 @@ Game.Launch = function () {
                 icon[1] = 24;
                 n += 14;
             }
-            var pow = Math.pow(10, n);
-            var achiev = new Game.Achievement(name, 'Make <b>' + Beautify(pow) + '</b> Neuros just from ' + building.plural + '.' + (q ? '<q>' + q + '</q>' : ''), icon);
+            const pow = Math.pow(10, n);
+            let achiev = new Game.Achievement(name, 'Make <b>' + Beautify(pow) + '</b> Neuros just from ' + building.plural + '.' + (q ? '<q>' + q + '</q>' : ''), icon);
             building.productionAchievs.push({pow: pow, achiev: achiev});
             return achiev;
         }
@@ -10781,9 +10705,9 @@ Game.Launch = function () {
         Game.thresholdIcons = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30];
         Game.GymAchievements = [];
         Game.GymAchievement = function (name) {
-            var threshold = Math.pow(10, Math.floor(Game.GymAchievements.length * 1.5 + 2));
+            let threshold = Math.pow(10, Math.floor(Game.GymAchievements.length * 1.5 + 2));
             if (Game.GymAchievements.length === 0) threshold = 1;
-            var achiev = new Game.Achievement(name, 'Bake <b>' + Beautify(threshold) + '</b> Neuro' + (threshold === 1 ? '' : 's') + ' in one ascension.', [Game.thresholdIcons[Game.GymAchievements.length], (Game.GymAchievements.length > 23 ? 2 : 5)]);
+            let achiev = new Game.Achievement(name, 'Bake <b>' + Beautify(threshold) + '</b> Neuro' + (threshold === 1 ? '' : 's') + ' in one ascension.', [Game.thresholdIcons[Game.GymAchievements.length], (Game.GymAchievements.length > 23 ? 2 : 5)]);
             achiev.threshold = threshold;
             achiev.order = 100 + Game.GymAchievements.length * 0.01;
             Game.GymAchievements.push(achiev);
@@ -10791,9 +10715,9 @@ Game.Launch = function () {
         }
         Game.CpsAchievements = [];
         Game.CpsAchievement = function (name) {
-            var threshold = Math.pow(10, Math.floor(Game.CpsAchievements.length * 1.2));
+            const threshold = Math.pow(10, Math.floor(Game.CpsAchievements.length * 1.2));
             //if (Game.CpsAchievements.length==0) threshold=1;
-            var achiev = new Game.Achievement(name, 'Bake <b>' + Beautify(threshold) + '</b> Neuro' + (threshold === 1 ? '' : 's') + ' per second.', [Game.thresholdIcons[Game.CpsAchievements.length], (Game.CpsAchievements.length > 23 ? 2 : 5)]);
+            let achiev = new Game.Achievement(name, 'Bake <b>' + Beautify(threshold) + '</b> Neuro' + (threshold === 1 ? '' : 's') + ' per second.', [Game.thresholdIcons[Game.CpsAchievements.length], (Game.CpsAchievements.length > 23 ? 2 : 5)]);
             achiev.threshold = threshold;
             achiev.order = 200 + Game.CpsAchievements.length * 0.01;
             Game.CpsAchievements.push(achiev);
@@ -10803,7 +10727,7 @@ Game.Launch = function () {
         //define achievements
         //WARNING : do NOT add new achievements in between, this breaks the saves. Add them at the end !
 
-        var order = 0;//this is used to set the order in which the items are listed
+        order = 0;//this is used to set the order in which the items are listed
 
         Game.GymAchievement('Wake and bake');
         Game.GymAchievement('Making some dough');
@@ -10971,13 +10895,13 @@ Game.Launch = function () {
 
 
         order = 61000;
-        var achiev = new Game.Achievement('Getting even with the oven', 'Defeat the <b>Sentient Furnace</b> in the factory dungeons.', [12, 7]);
+        new Game.Achievement('Getting even with the oven', 'Defeat the <b>Sentient Furnace</b> in the factory dungeons.', [12, 7]);
         Game.last.pool = 'dungeon';
-        var achiev = new Game.Achievement('Now this is pod-smashing', 'Defeat the <b>Ascended Baking Pod</b> in the factory dungeons.', [12, 7]);
+        new Game.Achievement('Now this is pod-smashing', 'Defeat the <b>Ascended Baking Pod</b> in the factory dungeons.', [12, 7]);
         Game.last.pool = 'dungeon';
-        var achiev = new Game.Achievement('Chirped out', 'Find and defeat <b>Chirpy</b>, the dysfunctionning alarm bot.', [13, 7]);
+        new Game.Achievement('Chirped out', 'Find and defeat <b>Chirpy</b>, the dysfunctionning alarm bot.', [13, 7]);
         Game.last.pool = 'dungeon';
-        var achiev = new Game.Achievement('Follow the white rabbit', 'Find and defeat the elusive <b>sugar bunny</b>.', [14, 7]);
+        new Game.Achievement('Follow the white rabbit', 'Find and defeat the elusive <b>sugar bunny</b>.', [14, 7]);
         Game.last.pool = 'dungeon';
 
         order = 1000;
@@ -11189,7 +11113,7 @@ Game.Launch = function () {
 
         order = 11000;
         new Game.Achievement('Here you go', 'Click this achievement\'s slot.<q>All you had to do was ask.</q>', [1, 7]);
-        Game.last.clickFunction = function () {
+        Game.last.clickFunction = () => {
             if (!Game.HasAchiev('Here you go')) {
                 PlaySound('snd/tick.mp3');
                 Game.Win('Here you go');
@@ -11671,15 +11595,15 @@ Game.Launch = function () {
         Game.buffs = [];//buffs currently in effect by name
         Game.buffsN = 0;
         Game.buffsL = elementByID('buffs');
-        Game.gainBuff = function (type, time, arg1, arg2, arg3) {
+        Game.gainBuff = (type, time, arg1, arg2, arg3) => {
             type = Game.buffTypesByName[type];
-            var obj = type.func(time, arg1, arg2, arg3);
+            let obj = type.func(time, arg1, arg2, arg3);
             obj.type = type;
             obj.arg1 = arg1;
             obj.arg2 = arg2;
             obj.arg3 = arg3;
 
-            var buff = {
+            let buff = {
                 visible: true,
                 time: 0,
                 name: '???',
@@ -11688,14 +11612,14 @@ Game.Launch = function () {
             };
             if (Game.buffs[obj.name])//if there is already a buff in effect with this name
             {
-                var buff = Game.buffs[obj.name];
+                buff = Game.buffs[obj.name];
                 if (obj.max) buff.time = Math.max(obj.time, buff.time);//new duration is max of old and new
                 if (obj.add) buff.time += obj.time;//new duration is old + new
                 if (!obj.max && !obj.add) buff.time = obj.time;//new duration is set to new
                 buff.maxTime = buff.time;
             } else//create new buff
             {
-                for (var i in obj)//paste parameters onto buff
+                for (let i in obj)//paste parameters onto buff
                 {
                     buff[i] = obj[i];
                 }
@@ -11705,7 +11629,7 @@ Game.Launch = function () {
 
                 //create dom
                 Game.buffsL.innerHTML = Game.buffsL.innerHTML + '<div id="buff' + buff.id + '" class="crate enabled buff" ' + (buff.desc ? Game.getTooltip(
-                    '<div class="prompt" style="min-width:200px;text-align:center;font-size:11px;margin:8px 0px;"><h3>' + buff.name + '</h3><div class="line"></div>' + buff.desc + '</div>'
+                    '<div class="prompt" style="min-width:200px;text-align:center;font-size:11px;margin:8px 0;"><h3>' + buff.name + '</h3><div class="line"></div>' + buff.desc + '</div>'
                     , 'left', true) : '') + ' style="opacity:1;float:none;display:block;' + (buff.icon[2] ? 'background-image:url(' + buff.icon[2] + ');' : '') + 'background-position:' + (-buff.icon[0] * 48) + 'px ' + (-buff.icon[1] * 48) + 'px;"></div>';
 
                 buff.l = elementByID('buff' + buff.id);
@@ -11716,18 +11640,16 @@ Game.Launch = function () {
             Game.storeToRefresh = 1;
             return buff;
         }
-        Game.hasBuff = function (what)//returns 0 if there is no buff in effect with this name; else, returns it
-        {
+        Game.hasBuff = what => {
             if (!Game.buffs[what]) return 0; else return Game.buffs[what];
         }
-        Game.updateBuffs = function ()//executed every logic frame
-        {
-            for (var i in Game.buffs) {
-                var buff = Game.buffs[i];
+        Game.updateBuffs = () => {
+            for (let i in Game.buffs) {
+                let buff = Game.buffs[i];
 
                 if (buff.time >= 0) {
                     if (!elementByID('buffPieTimer' + buff.id)) elementByID('buff' + buff.id).innerHTML = elementByID('buff' + buff.id).innerHTML + '<div class="pieTimer" id="buffPieTimer' + buff.id + '"></div>';
-                    var T = 1 - (buff.time / buff.maxTime);
+                    let T = 1 - (buff.time / buff.maxTime);
                     T = (T * 144) % 144;
                     elementByID('buffPieTimer' + buff.id).style.backgroundPosition = (-Math.floor(T % 18)) * 48 + 'px ' + (-Math.floor(T / 18)) * 48 + 'px';
                 }
@@ -11745,14 +11667,12 @@ Game.Launch = function () {
                 }
             }
         }
-        Game.killBuff = function (what)//remove a buff by name
-        {
+        Game.killBuff = what => {
             if (Game.buffs[what]) {
                 Game.buffs[what].time = 0;/*Game.buffs[what]=0;*/
             }
         }
-        Game.killBuffs = function ()//remove all buffs
-        {
+        Game.killBuffs = () => {
             Game.buffsL.innerHTML = '';
             Game.buffs = [];
             Game.recalculateGains = 1;
@@ -11790,108 +11710,90 @@ Game.Launch = function () {
 		*/
 
         //base buffs
-        new Game.buffType('frenzy', function (time, pow) {
-            return {
-                name: 'Frenzy',
-                desc: 'Neuro production x' + pow + ' for ' + Game.sayTime(time * Game.fps, -1) + '!',
-                icon: [10, 14],
-                time: time * Game.fps,
-                add: true,
-                multCpS: pow,
-                aura: 1
-            };
-        });
-        new Game.buffType('blood frenzy', function (time, pow) {
-            return {
-                name: 'Elder frenzy',
-                desc: 'Neuro production x' + pow + ' for ' + Game.sayTime(time * Game.fps, -1) + '!',
-                icon: [29, 6],
-                time: time * Game.fps,
-                add: true,
-                multCpS: pow,
-                aura: 1
-            };
-        });
-        new Game.buffType('clot', function (time, pow) {
-            return {
-                name: 'Clot',
-                desc: 'Neuro production halved for ' + Game.sayTime(time * Game.fps, -1) + '!',
-                icon: [15, 5],
-                time: time * Game.fps,
-                add: true,
-                multCpS: pow,
-                aura: 2
-            };
-        });
-        new Game.buffType('dragon harvest', function (time, pow) {
-            return {
-                name: 'Dragon Harvest',
-                desc: 'Neuro production x' + pow + ' for ' + Game.sayTime(time * Game.fps, -1) + '!',
-                icon: [10, 25],
-                time: time * Game.fps,
-                add: true,
-                multCpS: pow,
-                aura: 1
-            };
-        });
-        new Game.buffType('everything must go', function (time, pow) {
-            return {
-                name: 'Everything must go',
-                desc: 'All buildings are ' + pow + '% cheaper for ' + Game.sayTime(time * Game.fps, -1) + '!',
-                icon: [17, 6],
-                time: time * Game.fps,
-                add: true,
-                power: pow,
-                aura: 1
-            };
-        });
-        new Game.buffType('cursed finger', function (time, pow) {
-            return {
-                name: 'Cursed finger',
-                desc: 'Neuro production halted for ' + Game.sayTime(time * Game.fps, -1) + ',<br>but each click is worth ' + Game.sayTime(time * Game.fps, -1) + ' of CpS.',
-                icon: [12, 17],
-                time: time * Game.fps,
-                add: true,
-                power: pow,
-                multCpS: 0,
-                aura: 1
-            };
-        });
-        new Game.buffType('click frenzy', function (time, pow) {
-            return {
-                name: 'Click frenzy',
-                desc: 'Clicking power x' + pow + ' for ' + Game.sayTime(time * Game.fps, -1) + '!',
-                icon: [0, 14],
-                time: time * Game.fps,
-                add: true,
-                multClick: pow,
-                aura: 1
-            };
-        });
-        new Game.buffType('dragonflight', function (time, pow) {
-            return {
-                name: 'Dragonflight',
-                desc: 'Clicking power x' + pow + ' for ' + Game.sayTime(time * Game.fps, -1) + '!',
-                icon: [0, 25],
-                time: time * Game.fps,
-                add: true,
-                multClick: pow,
-                aura: 1
-            };
-        });
-        new Game.buffType('Neuro storm', function (time, pow) {
-            return {
-                name: 'Neuro storm',
-                desc: 'Neuros everywhere!',
-                icon: [22, 6],
-                time: time * Game.fps,
-                add: true,
-                power: pow,
-                aura: 1
-            };
-        });
-        new Game.buffType('building buff', function (time, pow, building) {
-            var obj = Game.ObjectsById[building];
+        new Game.buffType('frenzy', (time, pow) => ({
+            name: 'Frenzy',
+            desc: 'Neuro production x' + pow + ' for ' + Game.sayTime(time * Game.fps, -1) + '!',
+            icon: [10, 14],
+            time: time * Game.fps,
+            add: true,
+            multCpS: pow,
+            aura: 1
+        }));
+        new Game.buffType('blood frenzy', (time, pow) => ({
+            name: 'Elder frenzy',
+            desc: 'Neuro production x' + pow + ' for ' + Game.sayTime(time * Game.fps, -1) + '!',
+            icon: [29, 6],
+            time: time * Game.fps,
+            add: true,
+            multCpS: pow,
+            aura: 1
+        }));
+        new Game.buffType('clot', (time, pow) => ({
+            name: 'Clot',
+            desc: 'Neuro production halved for ' + Game.sayTime(time * Game.fps, -1) + '!',
+            icon: [15, 5],
+            time: time * Game.fps,
+            add: true,
+            multCpS: pow,
+            aura: 2
+        }));
+        new Game.buffType('dragon harvest', (time, pow) => ({
+            name: 'Dragon Harvest',
+            desc: 'Neuro production x' + pow + ' for ' + Game.sayTime(time * Game.fps, -1) + '!',
+            icon: [10, 25],
+            time: time * Game.fps,
+            add: true,
+            multCpS: pow,
+            aura: 1
+        }));
+        new Game.buffType('everything must go', (time, pow) => ({
+            name: 'Everything must go',
+            desc: 'All buildings are ' + pow + '% cheaper for ' + Game.sayTime(time * Game.fps, -1) + '!',
+            icon: [17, 6],
+            time: time * Game.fps,
+            add: true,
+            power: pow,
+            aura: 1
+        }));
+        new Game.buffType('cursed finger', (time, pow) => ({
+            name: 'Cursed finger',
+            desc: 'Neuro production halted for ' + Game.sayTime(time * Game.fps, -1) + ',<br>but each click is worth ' + Game.sayTime(time * Game.fps, -1) + ' of CpS.',
+            icon: [12, 17],
+            time: time * Game.fps,
+            add: true,
+            power: pow,
+            multCpS: 0,
+            aura: 1
+        }));
+        new Game.buffType('click frenzy', (time, pow) => ({
+            name: 'Click frenzy',
+            desc: 'Clicking power x' + pow + ' for ' + Game.sayTime(time * Game.fps, -1) + '!',
+            icon: [0, 14],
+            time: time * Game.fps,
+            add: true,
+            multClick: pow,
+            aura: 1
+        }));
+        new Game.buffType('dragonflight', (time, pow) => ({
+            name: 'Dragonflight',
+            desc: 'Clicking power x' + pow + ' for ' + Game.sayTime(time * Game.fps, -1) + '!',
+            icon: [0, 25],
+            time: time * Game.fps,
+            add: true,
+            multClick: pow,
+            aura: 1
+        }));
+        new Game.buffType('Neuro storm', (time, pow) => ({
+            name: 'Neuro storm',
+            desc: 'Neuros everywhere!',
+            icon: [22, 6],
+            time: time * Game.fps,
+            add: true,
+            power: pow,
+            aura: 1
+        }));
+        new Game.buffType('building buff', (time, pow, building) => {
+            let obj = Game.ObjectsById[building];
             return {
                 name: Game.goldenCookieBuildingBuffs[obj.name][0],
                 desc: 'Your ' + obj.amount + ' ' + obj.plural + ' are boosting your CpS!<br>Neuro production +' + (Math.ceil(pow * 100 - 100)) + '% for ' + Game.sayTime(time * Game.fps, -1) + '!',
@@ -11902,8 +11804,8 @@ Game.Launch = function () {
                 aura: 1
             };
         });
-        new Game.buffType('building debuff', function (time, pow, building) {
-            var obj = Game.ObjectsById[building];
+        new Game.buffType('building debuff', (time, pow, building) => {
+            let obj = Game.ObjectsById[building];
             return {
                 name: Game.goldenCookieBuildingBuffs[obj.name][1],
                 desc: 'Your ' + obj.amount + ' ' + obj.plural + ' are rusting your CpS!<br>Neuro production ' + (Math.ceil(pow * 100 - 100)) + '% slower for ' + Game.sayTime(time * Game.fps, -1) + '!',
@@ -11914,97 +11816,79 @@ Game.Launch = function () {
                 aura: 2
             };
         });
-        new Game.buffType('sugar blessing', function (time, pow) {
-            return {
-                name: 'Sugar blessing',
-                desc: 'You find 10% more golden Neuros for the next ' + Game.sayTime(time * Game.fps, -1) + '.',
-                icon: [29, 16],
-                time: time * Game.fps,
-                //add:true
-            };
-        });
-        new Game.buffType('haggler luck', function (time, pow) {
-            return {
-                name: 'Haggler\'s luck',
-                desc: 'All upgrades are ' + pow + '% cheaper for ' + Game.sayTime(time * Game.fps, -1) + '!',
-                icon: [25, 11],
-                time: time * Game.fps,
-                power: pow,
-                max: true
-            };
-        });
-        new Game.buffType('haggler misery', function (time, pow) {
-            return {
-                name: 'Haggler\'s misery',
-                desc: 'All upgrades are ' + pow + '% pricier for ' + Game.sayTime(time * Game.fps, -1) + '!',
-                icon: [25, 11],
-                time: time * Game.fps,
-                power: pow,
-                max: true
-            };
-        });
-        new Game.buffType('pixie luck', function (time, pow) {
-            return {
-                name: 'Crafty pixies',
-                desc: 'All buildings are ' + pow + '% cheaper for ' + Game.sayTime(time * Game.fps, -1) + '!',
-                icon: [26, 11],
-                time: time * Game.fps,
-                power: pow,
-                max: true
-            };
-        });
-        new Game.buffType('pixie misery', function (time, pow) {
-            return {
-                name: 'Nasty goblins',
-                desc: 'All buildings are ' + pow + '% pricier for ' + Game.sayTime(time * Game.fps, -1) + '!',
-                icon: [26, 11],
-                time: time * Game.fps,
-                power: pow,
-                max: true
-            };
-        });
-        new Game.buffType('magic adept', function (time, pow) {
-            return {
-                name: 'Magic adept',
-                desc: 'Spells backfire ' + pow + ' times less for ' + Game.sayTime(time * Game.fps, -1) + '.',
-                icon: [29, 11],
-                time: time * Game.fps,
-                power: pow,
-                max: true
-            };
-        });
-        new Game.buffType('magic inept', function (time, pow) {
-            return {
-                name: 'Magic inept',
-                desc: 'Spells backfire ' + pow + ' times more for ' + Game.sayTime(time * Game.fps, -1) + '.',
-                icon: [29, 11],
-                time: time * Game.fps,
-                power: pow,
-                max: true
-            };
-        });
-        new Game.buffType('devastation', function (time, pow) {
-            return {
-                name: 'Devastation',
-                desc: 'Clicking power +' + Math.floor(pow * 100 - 100) + '% for ' + Game.sayTime(time * Game.fps, -1) + '!',
-                icon: [23, 18],
-                time: time * Game.fps,
-                multClick: pow,
-                aura: 1,
-                max: true
-            };
-        });
-        new Game.buffType('sugar frenzy', function (time, pow) {
-            return {
-                name: 'Sugar frenzy',
-                desc: 'Neuro production x' + pow + ' for ' + Game.sayTime(time * Game.fps, -1) + '!',
-                icon: [29, 14],
-                time: time * Game.fps,
-                add: true,
-                multCpS: pow,
-                aura: 0
-            };
-        });
+        new Game.buffType('sugar blessing', time => ({
+            name: 'Sugar blessing',
+            desc: 'You find 10% more golden Neuros for the next ' + Game.sayTime(time * Game.fps, -1) + '.',
+            icon: [29, 16],
+            time: time * Game.fps,
+            //add:true
+        }));
+        new Game.buffType('haggler luck', (time, pow) => ({
+            name: 'Haggler\'s luck',
+            desc: 'All upgrades are ' + pow + '% cheaper for ' + Game.sayTime(time * Game.fps, -1) + '!',
+            icon: [25, 11],
+            time: time * Game.fps,
+            power: pow,
+            max: true
+        }));
+        new Game.buffType('haggler misery', (time, pow) => ({
+            name: 'Haggler\'s misery',
+            desc: 'All upgrades are ' + pow + '% pricier for ' + Game.sayTime(time * Game.fps, -1) + '!',
+            icon: [25, 11],
+            time: time * Game.fps,
+            power: pow,
+            max: true
+        }));
+        new Game.buffType('pixie luck', (time, pow) => ({
+            name: 'Crafty pixies',
+            desc: 'All buildings are ' + pow + '% cheaper for ' + Game.sayTime(time * Game.fps, -1) + '!',
+            icon: [26, 11],
+            time: time * Game.fps,
+            power: pow,
+            max: true
+        }));
+        new Game.buffType('pixie misery', (time, pow) => ({
+            name: 'Nasty goblins',
+            desc: 'All buildings are ' + pow + '% pricier for ' + Game.sayTime(time * Game.fps, -1) + '!',
+            icon: [26, 11],
+            time: time * Game.fps,
+            power: pow,
+            max: true
+        }));
+        new Game.buffType('magic adept', (time, pow) => ({
+            name: 'Magic adept',
+            desc: 'Spells backfire ' + pow + ' times less for ' + Game.sayTime(time * Game.fps, -1) + '.',
+            icon: [29, 11],
+            time: time * Game.fps,
+            power: pow,
+            max: true
+        }));
+        new Game.buffType('magic inept', (time, pow) => ({
+            name: 'Magic inept',
+            desc: 'Spells backfire ' + pow + ' times more for ' + Game.sayTime(time * Game.fps, -1) + '.',
+            icon: [29, 11],
+            time: time * Game.fps,
+            power: pow,
+            max: true
+        }));
+        new Game.buffType('devastation', (time, pow) => ({
+            name: 'Devastation',
+            desc: 'Clicking power +' + Math.floor(pow * 100 - 100) + '% for ' + Game.sayTime(time * Game.fps, -1) + '!',
+            icon: [23, 18],
+            time: time * Game.fps,
+            multClick: pow,
+            aura: 1,
+            max: true
+        }));
+        new Game.buffType('sugar frenzy', (time, pow) => ({
+            name: 'Sugar frenzy',
+            desc: 'Neuro production x' + pow + ' for ' + Game.sayTime(time * Game.fps, -1) + '!',
+            icon: [29, 14],
+            time: time * Game.fps,
+            add: true,
+            multCpS: pow,
+            aura: 0
+        }));
 
         //end of buffs
 
@@ -12021,7 +11905,7 @@ Game.Launch = function () {
         /*=====================================================================================
 		GRANDMAPOCALYPSE
 		=======================================================================================*/
-        Game.UpdateGrandmapocalypse = function () {
+        Game.UpdateGrandmapocalypse = () => {
             if (Game.Has('Elder Covenant') || Game.Objects['Grandma'].amount === 0) Game.elderWrath = 0;
             else if (Game.pledgeT > 0)//if the pledge is active, lower it
             {
@@ -12058,15 +11942,15 @@ Game.Launch = function () {
         function inRect(x, y, rect) {
             //find out if the point x,y is in the rotated rectangle rect{w,h,r,o} (width,height,rotation in radians,y-origin) (needs to be normalized)
             //I found this somewhere online I guess
-            var dx = x + Math.sin(-rect.r) * (-(rect.h / 2 - rect.o)),
+            let dx = x + Math.sin(-rect.r) * (-(rect.h / 2 - rect.o)),
                 dy = y + Math.cos(-rect.r) * (-(rect.h / 2 - rect.o));
-            var h1 = Math.sqrt(dx * dx + dy * dy);
-            var currA = Math.atan2(dy, dx);
-            var newA = currA - rect.r;
-            var x2 = Math.cos(newA) * h1;
-            var y2 = Math.sin(newA) * h1;
-            if (x2 > -0.5 * rect.w && x2 < 0.5 * rect.w && y2 > -0.5 * rect.h && y2 < 0.5 * rect.h) return true;
-            return false;
+            let h1 = Math.sqrt(dx * dx + dy * dy);
+            let currA = Math.atan2(dy, dx);
+            let newA = currA - rect.r;
+            let x2 = Math.cos(newA) * h1;
+            let y2 = Math.sin(newA) * h1;
+            return x2 > -0.5 * rect.w && x2 < 0.5 * rect.w && y2 > -0.5 * rect.h && y2 < 0.5 * rect.h;
+
         }
 
         Game.wrinklerHP = 2.1;
@@ -12086,13 +11970,13 @@ Game.Launch = function () {
                 type: 0
             });
         }
-        Game.getWrinklersMax = function () {
-            var n = 10;
+        Game.getWrinklersMax = () => {
+            let n = 10;
             if (Game.Has('Elder spice')) n += 2;
             return n;
         }
-        Game.ResetWrinklers = function () {
-            for (var i in Game.wrinklers) {
+        Game.ResetWrinklers = () => {
+            for (let i in Game.wrinklers) {
                 Game.wrinklers[i] = {
                     id: parseInt(i),
                     close: 0,
@@ -12107,26 +11991,27 @@ Game.Launch = function () {
                 };
             }
         }
-        Game.CollectWrinklers = function () {
-            for (var i in Game.wrinklers) {
+        Game.CollectWrinklers = () => {
+            for (let i in Game.wrinklers) {
                 Game.wrinklers[i].hp = 0;
             }
         }
         Game.wrinklerSquishSound = Math.floor(Math.random() * 4) + 1;
-        Game.playWrinklerSquishSound = function () {
-            PlaySound('snd/squish' + (Game.wrinklerSquishSound) + '.mp3', 0.5);
+        Game.playWrinklerSquishSound = () => {
+            PlaySound('/snd/squish' + (Game.wrinklerSquishSound) + '.mp3', 0.5);
             Game.wrinklerSquishSound += Math.floor(Math.random() * 1.5) + 1;
             if (Game.wrinklerSquishSound > 4) Game.wrinklerSquishSound -= 4;
         }
-        Game.SpawnWrinkler = function (me) {
+        Game.SpawnWrinkler = me => {
             if (!me) {
-                var max = Game.getWrinklersMax();
-                var n = 0;
-                for (var i in Game.wrinklers) {
+                let i;
+                let max = Game.getWrinklersMax();
+                let n = 0;
+                for (i in Game.wrinklers) {
                     if (Game.wrinklers[i].phase > 0) n++;
                 }
-                for (var i in Game.wrinklers) {
-                    var it = Game.wrinklers[i];
+                for (i in Game.wrinklers) {
+                    let it = Game.wrinklers[i];
                     if (it.phase === 0 && Game.elderWrath > 0 && n < max && it.id < max) {
                         me = it;
                         break;
@@ -12140,39 +12025,45 @@ Game.Launch = function () {
             if (Math.random() < 0.0001) me.type = 1;//shiny wrinkler
             return me;
         }
-        Game.PopRandomWrinkler = function () {
-            var wrinklers = [];
-            for (var i in Game.wrinklers) {
+        Game.PopRandomWrinkler = () => {
+            let wrinklers = [];
+            for (let i in Game.wrinklers) {
                 if (Game.wrinklers[i].phase > 0 && Game.wrinklers[i].hp > 0) wrinklers.push(Game.wrinklers[i]);
             }
             if (wrinklers.length > 0) {
-                var me = chooseRandomElement(wrinklers);
+                let me = chooseRandomElement(wrinklers);
                 me.hp = -10;
                 return me;
             }
             return false;
         }
-        Game.UpdateWrinklers = function () {
-            var xBase = 0;
-            var yBase = 0;
-            var onWrinkler = 0;
+        Game.UpdateWrinklers = () => {
+            let part;
+            let ii;
+            let x;
+            let y;
+            let godLvl;
+            let i;
+            let xBase = 0;
+            let yBase = 0;
+            let onWrinkler = 0;
             if (Game.LeftBackground) {
                 xBase = Game.cookieOriginX;
                 yBase = Game.cookieOriginY;
             }
-            var max = Game.getWrinklersMax();
-            var n = 0;
-            for (var i in Game.wrinklers) {
+            const max = Game.getWrinklersMax();
+            let n = 0;
+            for (i in Game.wrinklers) {
                 if (Game.wrinklers[i].phase > 0) n++;
             }
-            for (var i in Game.wrinklers) {
-                var me = Game.wrinklers[i];
+            for (i in Game.wrinklers) {
+                let me = Game.wrinklers[i];
                 if (me.phase === 0 && Game.elderWrath > 0 && n < max && me.id < max) {
-                    var chance = 0.00001 * Game.elderWrath;
+                    let chance = 0.00001 * Game.elderWrath;
                     chance *= Game.eff('wrinklerSpawn');
                     if (Game.Has('Unholy bait')) chance *= 5;
                     if (Game.hasGod) {
-                        var godLvl = Game.hasGod('scorn');
+                        godLvl = Game.hasGod('scorn');
                         if (godLvl === 1) chance *= 2.5;
                         else if (godLvl === 2) chance *= 2;
                         else if (godLvl === 3) chance *= 1.5;
@@ -12202,14 +12093,14 @@ Game.Launch = function () {
                         if (me.hp < Game.wrinklerHP * 3) me.hp += 0.04;
                         me.hp = Math.min(Game.wrinklerHP * 3, me.hp);
                     }
-                    var d = 128 * (2 - me.close);//*Game.BigCookieSize;
+                    let d = 128 * (2 - me.close);//*Game.BigCookieSize;
                     if (Game.prefs.fancy) d += Math.cos(Game.T * 0.05 + parseInt(me.id)) * 4;
                     me.r = (me.id / max) * 360;
                     if (Game.prefs.fancy) me.r += Math.sin(Game.T * 0.05 + parseInt(me.id)) * 4;
                     me.x = xBase + (Math.sin(me.r * Math.PI / 180) * d);
                     me.y = yBase + (Math.cos(me.r * Math.PI / 180) * d);
                     if (Game.prefs.fancy) me.r += Math.sin(Game.T * 0.09 + parseInt(me.id)) * 4;
-                    var rect = {w: 100, h: 200, r: (-me.r) * Math.PI / 180, o: 10};
+                    const rect = {w: 100, h: 200, r: (-me.r) * Math.PI / 180, o: 10};
                     if (Math.random() < 0.01) me.hurt = Math.max(me.hurt, Math.random());
                     if (Game.T % 5 === 0 && Game.CanClick) {
                         if (Game.LeftBackground && Game.mouseX < Game.LeftBackground.canvas.width && inRect(Game.mouseX - me.x, Game.mouseY - me.y, rect)) me.selected = 1; else me.selected = 0;
@@ -12220,18 +12111,18 @@ Game.Launch = function () {
                         if (Game.Click && Game.lastClickedEl === elementByID('backgroundLeftCanvas')) {
                             if (Game.keys[17] && Game.sesame) {
                                 me.type = !me.type;
-                                PlaySound('snd/shimmerClick.mp3');
+                                PlaySound('/snd/shimmerClick.mp3');
                             }//ctrl-click on a wrinkler in god mode to toggle its shininess
                             else {
                                 Game.playWrinklerSquishSound();
                                 me.hurt = 1;
                                 me.hp -= 0.75;
                                 if (Game.prefs.particles && !(me.hp <= 0.5 && me.phase > 0)) {
-                                    var x = me.x + (Math.sin(me.r * Math.PI / 180) * 90);
-                                    var y = me.y + (Math.cos(me.r * Math.PI / 180) * 90);
-                                    for (var ii = 0; ii < 3; ii++) {
+                                    x = me.x + (Math.sin(me.r * Math.PI / 180) * 90);
+                                    y = me.y + (Math.cos(me.r * Math.PI / 180) * 90);
+                                    for (ii = 0; ii < 3; ii++) {
                                         //Game.particleAdd(x+Math.random()*50-25,y+Math.random()*50-25,Math.random()*4-2,Math.random()*-2-2,1,1,2,'wrinklerBits.png');
-                                        var part = Game.particleAdd(x, y, Math.random() * 4 - 2, Math.random() * -2 - 2, 1, 1, 2, me.type === 1 ? 'shinyWrinklerBits.png' : 'wrinklerBits.png');
+                                        part = Game.particleAdd(x, y, Math.random() * 4 - 2, Math.random() * -2 - 2, 1, 1, 2, me.type === 1 ? 'shinyWrinklerBits.png' : 'wrinklerBits.png');
                                         part.r = -me.r;
                                     }
                                 }
@@ -12251,20 +12142,20 @@ Game.Launch = function () {
                 }
                 if (me.hp <= 0.5 && me.phase > 0) {
                     Game.playWrinklerSquishSound();
-                    PlaySound('snd/pop' + Math.floor(Math.random() * 3 + 1) + '.mp3', 0.75);
+                    PlaySound('/snd/pop' + Math.floor(Math.random() * 3 + 1) + '.mp3', 0.75);
                     Game.wrinklersPopped++;
                     Game.recalculateGains = 1;
                     me.phase = 0;
                     me.close = 0;
                     me.hurt = 0;
                     me.hp = 3;
-                    var toSuck = 1.1;
+                    let toSuck = 1.1;
                     if (Game.Has('Sacrilegious corruption')) toSuck *= 1.05;
                     if (me.type === 1) toSuck *= 3;//shiny wrinklers are an elusive, profitable breed
                     me.sucked *= toSuck;//cookie dough does weird things inside wrinkler digestive tracts
                     if (Game.Has('Wrinklerspawn')) me.sucked *= 1.05;
                     if (Game.hasGod) {
-                        var godLvl = Game.hasGod('scorn');
+                        godLvl = Game.hasGod('scorn');
                         if (godLvl === 1) me.sucked *= 1.15;
                         else if (godLvl === 2) me.sucked *= 1.1;
                         else if (godLvl === 3) me.sucked *= 1.05;
@@ -12276,12 +12167,12 @@ Game.Launch = function () {
 
                         if (Game.season === 'halloween') {
                             //if (Math.random()<(Game.HasAchiev('Spooky cookies')?0.2:0.05))//halloween cookie drops
-                            var failRate = 0.95;
+                            let failRate = 0.95;
                             if (Game.HasAchiev('Spooky cookies')) failRate = 0.8;
                             if (Game.Has('Starterror')) failRate *= 0.9;
                             failRate *= 1 / Game.dropRateMult();
                             if (Game.hasGod) {
-                                var godLvl = Game.hasGod('seasons');
+                                godLvl = Game.hasGod('seasons');
                                 if (godLvl === 1) failRate *= 0.9;
                                 else if (godLvl === 2) failRate *= 0.95;
                                 else if (godLvl === 3) failRate *= 0.97;
@@ -12289,7 +12180,7 @@ Game.Launch = function () {
                             if (me.type === 1) failRate *= 0.9;
                             if (Math.random() > failRate)//halloween cookie drops
                             {
-                                var cookie = chooseRandomElement(['Skull cookies', 'Ghost cookies', 'Bat cookies', 'Slime cookies', 'Pumpkin cookies', 'Eyeball cookies', 'Spider cookies']);
+                                const cookie = chooseRandomElement(['Skull cookies', 'Ghost cookies', 'Bat cookies', 'Slime cookies', 'Pumpkin cookies', 'Eyeball cookies', 'Spider cookies']);
                                 if (!Game.HasUnlocked(cookie) && !Game.Has(cookie)) {
                                     Game.Unlock(cookie);
                                     if (Game.prefs.popups) Game.Popup('Found : ' + cookie + '!');
@@ -12311,15 +12202,15 @@ Game.Launch = function () {
 						}
 					}*/
                     if (Game.prefs.particles) {
-                        var x = me.x + (Math.sin(me.r * Math.PI / 180) * 90);
-                        var y = me.y + (Math.cos(me.r * Math.PI / 180) * 90);
+                        x = me.x + (Math.sin(me.r * Math.PI / 180) * 90);
+                        y = me.y + (Math.cos(me.r * Math.PI / 180) * 90);
                         if (me.sucked > 0) {
-                            for (var ii = 0; ii < 5; ii++) {
+                            for (ii = 0; ii < 5; ii++) {
                                 Game.particleAdd(Game.mouseX, Game.mouseY, Math.random() * 4 - 2, Math.random() * -2 - 2, Math.random() * 0.5 + 0.75, 1.5, 2);
                             }
                         }
-                        for (var ii = 0; ii < 8; ii++) {
-                            var part = Game.particleAdd(x, y, Math.random() * 4 - 2, Math.random() * -2 - 2, 1, 1, 2, me.type === 1 ? 'shinyWrinklerBits.png' : 'wrinklerBits.png');
+                        for (ii = 0; ii < 8; ii++) {
+                            part = Game.particleAdd(x, y, Math.random() * 4 - 2, Math.random() * -2 - 2, 1, 1, 2, me.type === 1 ? 'shinyWrinklerBits.png' : 'wrinklerBits.png');
                             part.r = -me.r;
                         }
                     }
@@ -12331,10 +12222,10 @@ Game.Launch = function () {
             }
         }
         Game.DrawWrinklers = function () {
-            var ctx = Game.LeftBackground;
-            var selected = 0;
-            for (var i in Game.wrinklers) {
-                var me = Game.wrinklers[i];
+            let ctx = Game.LeftBackground;
+            let selected = 0;
+            for (let i in Game.wrinklers) {
+                let me = Game.wrinklers[i];
                 if (me.phase > 0) {
                     ctx.globalAlpha = me.close;
                     ctx.save();
@@ -12350,7 +12241,7 @@ Game.Launch = function () {
                     if (me.type === 1 && Math.random() < 0.3 && Game.prefs.particles)//sparkle
                     {
                         ctx.globalAlpha = Math.random() * 0.65 + 0.1;
-                        var s = Math.random() * 30 + 5;
+                        const s = Math.random() * 30 + 5;
                         ctx.globalCompositeOperation = 'lighter';
                         ctx.drawImage(Pic('glint.jpg'), -s / 2 + Math.random() * 50 - 25, -s / 2 + Math.random() * 200, s, s);
                     }
@@ -12364,11 +12255,11 @@ Game.Launch = function () {
                 }
             }
             if (selected && Game.Has('Eye of the wrinkler')) {
-                var x = Game.cookieOriginX;
-                var y = Game.cookieOriginY;
+                let x = Game.cookieOriginX;
+                let y = Game.cookieOriginY;
                 ctx.font = '14px Merriweather';
                 ctx.textAlign = 'center';
-                var width = Math.max(ctx.measureText('Swallowed :').width, ctx.measureText(Beautify(selected.sucked)).width);
+                const width = Math.max(ctx.measureText('Swallowed :').width, ctx.measureText(Beautify(selected.sucked)).width);
                 ctx.fillStyle = '#000';
                 ctx.strokeStyle = '#000';
                 ctx.lineWidth = 8;
@@ -12385,12 +12276,12 @@ Game.Launch = function () {
                 ctx.drawImage(Pic('icons.png'), 27 * 48, 26 * 48, 48, 48, x - width / 2 - 8 - 22, y - 4 - 24, 48, 48);
             }
         }
-        Game.SaveWrinklers = function () {
-            var amount = 0;
-            var amountShinies = 0;
-            var number = 0;
-            var shinies = 0;
-            for (var i in Game.wrinklers) {
+        Game.SaveWrinklers = () => {
+            let amount = 0;
+            let amountShinies = 0;
+            let number = 0;
+            let shinies = 0;
+            for (let i in Game.wrinklers) {
                 if (Game.wrinklers[i].sucked > 0.5) {
                     number++;
                     if (Game.wrinklers[i].type === 1) {
@@ -12401,11 +12292,11 @@ Game.Launch = function () {
             }
             return {amount: amount, number: number, shinies: shinies, amountShinies: amountShinies};
         }
-        Game.LoadWrinklers = function (amount, number, shinies, amountShinies) {
+        Game.LoadWrinklers = (amount, number, shinies, amountShinies) => {
             if (number > 0 && (amount > 0 || amountShinies > 0)) {
-                var fullNumber = number - shinies;
-                var fullNumberShinies = shinies;
-                for (var i in Game.wrinklers) {
+                const fullNumber = number - shinies;
+                const fullNumberShinies = shinies;
+                for (let i in Game.wrinklers) {
                     if (number > 0) {
                         Game.wrinklers[i].phase = 2;
                         Game.wrinklers[i].close = 1;
@@ -12430,7 +12321,7 @@ Game.Launch = function () {
         Game.specialTabHovered = '';
         Game.specialTabs = [];
 
-        Game.UpdateSpecial = function () {
+        Game.UpdateSpecial = () => {
             Game.specialTabs = [];
             if (Game.Has('A festive hat')) Game.specialTabs.push('santa');
             if (Game.Has('A crumbly egg')) Game.specialTabs.push('dragon');
@@ -12441,14 +12332,14 @@ Game.Launch = function () {
 
             if (Game.LeftBackground) {
                 Game.specialTabHovered = '';
-                var len = Game.specialTabs.length;
+                let len = Game.specialTabs.length;
                 if (len === 0) return;
-                var y = Game.LeftBackground.canvas.height - 24 - 48 * len;
-                for (var i in Game.specialTabs) {
-                    var selected = 0;
+                let y = Game.LeftBackground.canvas.height - 24 - 48 * len;
+                for (let i in Game.specialTabs) {
+                    let selected = 0;
                     if (Game.specialTab === Game.specialTabs[i]) selected = 1;
-                    var x = 24;
-                    var s = 1;
+                    let x = 24;
+                    let s = 1;
                     if (selected) {
                         s = 2;
                         x += 24;
@@ -12479,14 +12370,12 @@ Game.Launch = function () {
         Game.santaLevels = ['Festive test tube', 'Festive ornament', 'Festive wreath', 'Festive tree', 'Festive present', 'Festive elf fetus', 'Elf toddler', 'Elfling', 'Young elf', 'Bulky elf', 'Nick', 'Santa Claus', 'Elder Santa', 'True Santa', 'Final Claus'];
         for (i in Game.santaDrops)//scale christmas upgrade prices with santa level
         {
-            Game.Upgrades[Game.santaDrops[i]].priceFunc = function () {
-                return Math.pow(3, Game.santaLevel) * 2525;
-            }
+            Game.Upgrades[Game.santaDrops[i]].priceFunc = () => Math.pow(3, Game.santaLevel) * 2525
         }
 
 
-        Game.UpgradeSanta = function () {
-            var moni = Math.pow(Game.santaLevel + 1, Game.santaLevel + 1);
+        Game.UpgradeSanta = () => {
+            const moni = Math.pow(Game.santaLevel + 1, Game.santaLevel + 1);
             if (Game.cookies > moni && Game.santaLevel < 14) {
                 PlaySound('snd/shimmerClick.mp3');
 
@@ -12497,11 +12386,11 @@ Game.Launch = function () {
                     if (Game.prefs.popups) Game.Popup('You are granted<br>Santa\'s dominion.');
                     else Game.Notify('You are granted Santa\'s dominion.', '', Game.Upgrades['Santa\'s dominion'].icon);
                 }
-                var drops = [];
-                for (var i in Game.santaDrops) {
+                let drops = [];
+                for (let i in Game.santaDrops) {
                     if (!Game.HasUnlocked(Game.santaDrops[i])) drops.push(Game.santaDrops[i]);
                 }
-                var drop = chooseRandomElement(drops);
+                let drop = chooseRandomElement(drops);
                 if (drop) {
                     Game.Unlock(drop);
                     if (Game.prefs.popups) Game.Popup('You find a present which contains...<br>' + drop + '!');
@@ -12511,7 +12400,7 @@ Game.Launch = function () {
                 Game.ToggleSpecialMenu(1);
 
                 if (elementByID('specialPic')) {
-                    var rect = elementByID('specialPic').getBoundingClientRect();
+                    let rect = elementByID('specialPic').getBoundingClientRect();
                     Game.SparkleAt((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2);
                 }
 
@@ -12525,328 +12414,240 @@ Game.Launch = function () {
         Game.dragonLevels = [
             {
                 name: 'Dragon egg', action: 'Chip it', pic: 0,
-                cost: function () {
-                    return Game.cookies >= 1000000;
-                },
-                buy: function () {
+                cost: () => Game.cookies >= 1000000,
+                buy: () => {
                     Game.Spend(1000000);
                 },
-                costStr: function () {
-                    return Beautify(1000000) + ' cookies';
-                }
+                costStr: () => Beautify(1000000) + ' cookies'
             },
             {
                 name: 'Dragon egg', action: 'Chip it', pic: 1,
-                cost: function () {
-                    return Game.cookies >= 1000000 * 2;
-                },
-                buy: function () {
+                cost: () => Game.cookies >= 1000000 * 2,
+                buy: () => {
                     Game.Spend(1000000 * 2);
                 },
-                costStr: function () {
-                    return Beautify(1000000 * 2) + ' cookies';
-                }
+                costStr: () => Beautify(1000000 * 2) + ' cookies'
             },
             {
                 name: 'Dragon egg', action: 'Chip it', pic: 2,
-                cost: function () {
-                    return Game.cookies >= 1000000 * 4;
-                },
-                buy: function () {
+                cost: () => Game.cookies >= 1000000 * 4,
+                buy: () => {
                     Game.Spend(1000000 * 4);
                 },
-                costStr: function () {
-                    return Beautify(1000000 * 4) + ' cookies';
-                }
+                costStr: () => Beautify(1000000 * 4) + ' cookies'
             },
             {
                 name: 'Shivering dragon egg', action: 'Hatch it', pic: 3,
-                cost: function () {
-                    return Game.cookies >= 1000000 * 8;
-                },
-                buy: function () {
+                cost: () => Game.cookies >= 1000000 * 8,
+                buy: () => {
                     Game.Spend(1000000 * 8);
                 },
-                costStr: function () {
-                    return Beautify(1000000 * 8) + ' cookies';
-                }
+                costStr: () => Beautify(1000000 * 8) + ' cookies'
             },
             {
                 name: 'Krumblor, Neuro hatchling',
                 action: 'Train Breath of Milk<br><small>Aura : kittens are 5% more effective</small>',
                 pic: 4,
-                cost: function () {
-                    return Game.cookies >= 1000000 * 16;
-                },
-                buy: function () {
+                cost: () => Game.cookies >= 1000000 * 16,
+                buy: () => {
                     Game.Spend(1000000 * 16);
                 },
-                costStr: function () {
-                    return Beautify(1000000 * 16) + ' cookies';
-                }
+                costStr: () => Beautify(1000000 * 16) + ' cookies'
             },
             {
                 name: 'Krumblor, Neuro hatchling',
                 action: 'Train Dragon Cursor<br><small>Aura : clicking is 5% more effective</small>',
                 pic: 4,
-                cost: function () {
-                    return Game.Objects['Cursor'].amount >= 100;
-                },
-                buy: function () {
+                cost: () => Game.Objects['Cursor'].amount >= 100,
+                buy: () => {
                     Game.Objects['Cursor'].sacrifice(100);
                 },
-                costStr: function () {
-                    return '100 cursors';
-                }
+                costStr: () => '100 cursors'
             },
             {
                 name: 'Krumblor, Neuro hatchling',
                 action: 'Train Elder Battalion<br><small>Aura : grandmas gain +1% CpS for every non-grandma building</small>',
                 pic: 4,
-                cost: function () {
-                    return Game.Objects['Grandma'].amount >= 100;
-                },
-                buy: function () {
+                cost: () => Game.Objects['Grandma'].amount >= 100,
+                buy: () => {
                     Game.Objects['Grandma'].sacrifice(100);
                 },
-                costStr: function () {
-                    return '100 grandmas';
-                }
+                costStr: () => '100 grandmas'
             },
             {
                 name: 'Krumblor, Neuro hatchling',
                 action: 'Train Reaper of Fields<br><small>Aura : golden Neuros may trigger a Dragon Harvest</small>',
                 pic: 4,
-                cost: function () {
-                    return Game.Objects['Farm'].amount >= 100;
-                },
-                buy: function () {
+                cost: () => Game.Objects['Farm'].amount >= 100,
+                buy: () => {
                     Game.Objects['Farm'].sacrifice(100);
                 },
-                costStr: function () {
-                    return '100 farms';
-                }
+                costStr: () => '100 farms'
             },
             {
                 name: 'Krumblor, Neuro dragon',
                 action: 'Train Earth Shatterer<br><small>Aura : buildings sell back for 50% instead of 25%</small>',
                 pic: 5,
-                cost: function () {
-                    return Game.Objects['Mining Rig'].amount >= 100;
-                },
-                buy: function () {
+                cost: () => Game.Objects['Mining Rig'].amount >= 100,
+                buy: () => {
                     Game.Objects['Mining Rig'].sacrifice(100);
                 },
-                costStr: function () {
-                    return '100 mines';
-                }
+                costStr: () => '100 mines'
             },
             {
                 name: 'Krumblor, Neuro dragon',
                 action: 'Train Master of the Armory<br><small>Aura : all upgrades are 2% cheaper</small>',
                 pic: 5,
-                cost: function () {
-                    return Game.Objects['Factory'].amount >= 100;
-                },
-                buy: function () {
+                cost: () => Game.Objects['Factory'].amount >= 100,
+                buy: () => {
                     Game.Objects['Factory'].sacrifice(100);
                 },
-                costStr: function () {
-                    return '100 factories';
-                }
+                costStr: () => '100 factories'
             },
             {
                 name: 'Krumblor, Neuro dragon',
                 action: 'Train Fierce Hoarder<br><small>Aura : all buildings are 2% cheaper</small>',
                 pic: 5,
-                cost: function () {
-                    return Game.Objects['Gym'].amount >= 100;
-                },
-                buy: function () {
+                cost: () => Game.Objects['Gym'].amount >= 100,
+                buy: () => {
                     Game.Objects['Gym'].sacrifice(100);
                 },
-                costStr: function () {
-                    return '100 gyms';
-                }
+                costStr: () => '100 gyms'
             },
             {
                 name: 'Krumblor, Neuro dragon',
                 action: 'Train Dragon God<br><small>Aura : prestige CpS bonus +5%</small>',
                 pic: 5,
-                cost: function () {
-                    return Game.Objects['Temple'].amount >= 100;
-                },
-                buy: function () {
+                cost: () => Game.Objects['Temple'].amount >= 100,
+                buy: () => {
                     Game.Objects['Temple'].sacrifice(100);
                 },
-                costStr: function () {
-                    return '100 temples';
-                }
+                costStr: () => '100 temples'
             },
             {
                 name: 'Krumblor, Neuro dragon',
                 action: 'Train Arcane Aura<br><small>Aura : golden Neuros appear 5% more often</small>',
                 pic: 5,
-                cost: function () {
-                    return Game.Objects['Wizard tower'].amount >= 100;
-                },
-                buy: function () {
+                cost: () => Game.Objects['Wizard tower'].amount >= 100,
+                buy: () => {
                     Game.Objects['Wizard tower'].sacrifice(100);
                 },
-                costStr: function () {
-                    return '100 wizard towers';
-                }
+                costStr: () => '100 wizard towers'
             },
             {
                 name: 'Krumblor, Neuro dragon',
                 action: 'Train Dragonflight<br><small>Aura : golden Neuros may trigger a Dragonflight</small>',
                 pic: 5,
-                cost: function () {
-                    return Game.Objects['Shipment'].amount >= 100;
-                },
-                buy: function () {
+                cost: () => Game.Objects['Shipment'].amount >= 100,
+                buy: () => {
                     Game.Objects['Shipment'].sacrifice(100);
                 },
-                costStr: function () {
-                    return '100 shipments';
-                }
+                costStr: () => '100 shipments'
             },
             {
                 name: 'Krumblor, Neuro dragon',
                 action: 'Train Ancestral Metamorphosis<br><small>Aura : golden Neuros give 10% more Neuros</small>',
                 pic: 5,
-                cost: function () {
-                    return Game.Objects['Alchemy lab'].amount >= 100;
-                },
-                buy: function () {
+                cost: () => Game.Objects['Alchemy lab'].amount >= 100,
+                buy: () => {
                     Game.Objects['Alchemy lab'].sacrifice(100);
                 },
-                costStr: function () {
-                    return '100 alchemy labs';
-                }
+                costStr: () => '100 alchemy labs'
             },
             {
                 name: 'Krumblor, Neuro dragon',
                 action: 'Train Unholy Dominion<br><small>Aura : wrath Neuros give 10% more Neuros</small>',
                 pic: 5,
-                cost: function () {
-                    return Game.Objects['Portal'].amount >= 100;
-                },
-                buy: function () {
+                cost: () => Game.Objects['Portal'].amount >= 100,
+                buy: () => {
                     Game.Objects['Portal'].sacrifice(100);
                 },
-                costStr: function () {
-                    return '100 portals';
-                }
+                costStr: () => '100 portals'
             },
             {
                 name: 'Krumblor, Neuro dragon',
                 action: 'Train Epoch Manipulator<br><small>Aura : golden Neuro effects last 5% longer</small>',
                 pic: 5,
-                cost: function () {
-                    return Game.Objects['Time machine'].amount >= 100;
-                },
-                buy: function () {
+                cost: () => Game.Objects['Time machine'].amount >= 100,
+                buy: () => {
                     Game.Objects['Time machine'].sacrifice(100);
                 },
-                costStr: function () {
-                    return '100 time machines';
-                }
+                costStr: () => '100 time machines'
             },
             {
                 name: 'Krumblor, Neuro dragon',
                 action: 'Train Mind Over Matter<br><small>Aura : +25% random drops</small>',
                 pic: 5,
-                cost: function () {
-                    return Game.Objects['Antimatter condenser'].amount >= 100;
-                },
-                buy: function () {
+                cost: () => Game.Objects['Antimatter condenser'].amount >= 100,
+                buy: () => {
                     Game.Objects['Antimatter condenser'].sacrifice(100);
                 },
-                costStr: function () {
-                    return '100 antimatter condensers';
-                }
+                costStr: () => '100 antimatter condensers'
             },
             {
                 name: 'Krumblor, Neuro dragon',
                 action: 'Train Radiant Appetite<br><small>Aura : all Neuro production multiplied by 2</small>',
                 pic: 5,
-                cost: function () {
-                    return Game.Objects['Prism'].amount >= 100;
-                },
-                buy: function () {
+                cost: () => Game.Objects['Prism'].amount >= 100,
+                buy: () => {
                     Game.Objects['Prism'].sacrifice(100);
                 },
-                costStr: function () {
-                    return '100 prisms';
-                }
+                costStr: () => '100 prisms'
             },
             {
                 name: 'Krumblor, Neuro dragon',
                 action: 'Train Dragon\'s Fortune<br><small>Aura : +123% CpS per golden Neuro on-screen</small>',
                 pic: 5,
-                cost: function () {
-                    return Game.Objects['Wheel of fortune'].amount >= 100;
-                },
-                buy: function () {
+                cost: () => Game.Objects['Wheel of fortune'].amount >= 100,
+                buy: () => {
                     Game.Objects['Wheel of fortune'].sacrifice(100);
                 },
-                costStr: function () {
-                    return '100 wheels of fortune';
-                }
+                costStr: () => '100 wheels of fortune'
             },
             {
                 name: 'Krumblor, Neuro dragon',
                 action: 'Train Dragon\'s Curve<br><small>Aura : sugar lumps grow 5% faster, 50% weirder</small>',
                 pic: 5,
-                cost: function () {
-                    return Game.Objects['Fractal engine'].amount >= 100;
-                },
-                buy: function () {
+                cost: () => Game.Objects['Fractal engine'].amount >= 100,
+                buy: () => {
                     Game.Objects['Fractal engine'].sacrifice(100);
                 },
-                costStr: function () {
-                    return '100 fractal engines';
-                }
+                costStr: () => '100 fractal engines'
             },
             {
                 name: 'Krumblor, Neuro dragon', action: 'Bake dragon cookie<br><small>Delicious!</small>', pic: 6,
-                cost: function () {
-                    var fail = 0;
-                    for (var i in Game.Objects) {
+                cost: () => {
+                    let fail = 0;
+                    for (let i in Game.Objects) {
                         if (Game.Objects[i].amount < 50) fail = 1;
                     }
                     return (fail === 0);
                 },
-                buy: function () {
-                    for (var i in Game.Objects) {
+                buy: () => {
+                    for (let i in Game.Objects) {
                         Game.Objects[i].sacrifice(50);
                     }
                     Game.Unlock('Dragon cookie');
                 },
-                costStr: function () {
-                    return '50 of every building';
-                }
+                costStr: () => '50 of every building'
             },
             {
                 name: 'Krumblor, Neuro dragon',
                 action: 'Train secondary aura<br><small>Lets you use two dragon auras simultaneously</small>',
                 pic: 7,
-                cost: function () {
-                    var fail = 0;
-                    for (var i in Game.Objects) {
+                cost: () => {
+                    let fail = 0;
+                    for (let i in Game.Objects) {
                         if (Game.Objects[i].amount < 200) fail = 1;
                     }
                     return (fail === 0);
                 },
-                buy: function () {
-                    for (var i in Game.Objects) {
+                buy: () => {
+                    for (let i in Game.Objects) {
                         Game.Objects[i].sacrifice(200);
                     }
                 },
-                costStr: function () {
-                    return '200 of every building';
-                }
+                costStr: () => '200 of every building'
             },
             {name: 'Krumblor, Neuro dragon', action: 'Your dragon is fully trained.', pic: 8}
         ];
@@ -12884,28 +12685,27 @@ Game.Launch = function () {
             },
         };
 
-        Game.hasAura = function (what) {
-            if (Game.dragonAuras[Game.dragonAura].name === what || Game.dragonAuras[Game.dragonAura2].name === what) return true; else return false;
-        }
+        Game.hasAura = what => Game.dragonAuras[Game.dragonAura].name === what || Game.dragonAuras[Game.dragonAura2].name === what
 
-        Game.SelectDragonAura = function (slot, update) {
-            var currentAura = 0;
-            var otherAura = 0;
+        Game.SelectDragonAura = (slot, update) => {
+            let i;
+            let currentAura;
+            let otherAura;
             if (slot === 0) currentAura = Game.dragonAura; else currentAura = Game.dragonAura2;
             if (slot === 0) otherAura = Game.dragonAura2; else otherAura = Game.dragonAura;
             if (!update) Game.SelectingDragonAura = currentAura;
 
-            var str = '';
-            for (var i in Game.dragonAuras) {
+            let str = '';
+            for (i in Game.dragonAuras) {
                 if (Game.dragonLevel >= parseInt(i) + 4) {
-                    var icon = Game.dragonAuras[i].pic;
+                    let icon = Game.dragonAuras[i].pic;
                     if (i === 0 || i !== otherAura) str += '<div class="crate enabled' + (i === Game.SelectingDragonAura ? ' highlighted' : '') + '" style="opacity:1;float:none;display:inline-block;' + (icon[2] ? 'background-image:url(' + icon[2] + ');' : '') + 'background-position:' + (-icon[0] * 48) + 'px ' + (-icon[1] * 48) + 'px;" ' + Game.clickStr + '="PlaySound(\'snd/tick.mp3\');Game.SetDragonAura(' + i + ',' + slot + ');" onMouseOut="Game.DescribeDragonAura(' + Game.SelectingDragonAura + ');" onMouseOver="Game.DescribeDragonAura(' + i + ');"' +
                         '></div>';
                 }
             }
 
-            var highestBuilding = 0;
-            for (var i in Game.Objects) {
+            let highestBuilding = 0;
+            for (i in Game.Objects) {
                 if (Game.Objects[i].amount > 0) highestBuilding = Game.Objects[i];
             }
 
@@ -12919,11 +12719,11 @@ Game.Launch = function () {
             Game.DescribeDragonAura(Game.SelectingDragonAura);
         }
         Game.SelectingDragonAura = -1;
-        Game.SetDragonAura = function (aura, slot) {
+        Game.SetDragonAura = (aura, slot) => {
             Game.SelectingDragonAura = aura;
             Game.SelectDragonAura(slot, 1);
         }
-        Game.DescribeDragonAura = function (aura) {
+        Game.DescribeDragonAura = aura => {
             elementByID('dragonAuraInfo').innerHTML =
                 '<div style="min-width:200px;text-align:center;"><h4>' + Game.dragonAuras[aura].name + '</h4>' +
                 '<div class="line"></div>' +
@@ -12931,16 +12731,16 @@ Game.Launch = function () {
                 '</div>';
         }
 
-        Game.UpgradeDragon = function () {
+        Game.UpgradeDragon = () => {
             if (Game.dragonLevel < Game.dragonLevels.length - 1 && Game.dragonLevels[Game.dragonLevel].cost()) {
-                PlaySound('snd/shimmerClick.mp3');
+                PlaySound('/snd/shimmerClick.mp3');
                 Game.dragonLevels[Game.dragonLevel].buy();
                 Game.dragonLevel = (Game.dragonLevel + 1) % Game.dragonLevels.length;
 
                 if (Game.dragonLevel >= Game.dragonLevels.length - 1) Game.Win('Here be dragon');
                 Game.ToggleSpecialMenu(1);
                 if (elementByID('specialPic')) {
-                    var rect = elementByID('specialPic').getBoundingClientRect();
+                    const rect = elementByID('specialPic').getBoundingClientRect();
                     Game.SparkleAt((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2);
                 }
                 Game.recalculateGains = 1;
@@ -12948,10 +12748,11 @@ Game.Launch = function () {
             }
         }
 
-        Game.ToggleSpecialMenu = function (on) {
+        Game.ToggleSpecialMenu = on => {
+            let icon;
             if (on) {
-                var pic = '';
-                var frame = 0;
+                let pic;
+                let frame;
                 if (Game.specialTab === 'santa') {
                     pic = 'santa.png';
                     frame = Game.santaLevel;
@@ -12964,7 +12765,7 @@ Game.Launch = function () {
                 }
 
                 let str = '<div id="specialPic" style="position:absolute;left:-16px;top:-64px;width:96px;height:96px;background:url(/img/' + pic + ');background-position:' + (-frame * 96) + 'px 0px;filter:drop-shadow(0px 3px 2px #000);-webkit-filter:drop-shadow(0px 3px 2px #000);"></div>';
-                str += '<div class="close" onclick="PlaySound(\'snd/press.mp3\');Game.ToggleSpecialMenu(0);">x</div>';
+                str += '<div class="close" onclick="PlaySound(\'/snd/press.mp3\');Game.ToggleSpecialMenu(0);">x</div>';
 
                 if (Game.specialTab === 'santa') {
                     const moni = Math.pow(Game.santaLevel + 1, Game.santaLevel + 1);
@@ -12972,19 +12773,19 @@ Game.Launch = function () {
                     str += '<h3>' + Game.santaLevels[Game.santaLevel] + '</h3>';
                     if (Game.santaLevel < 14) {
                         str += '<div class="line"></div>' +
-                            '<div class="optionBox" style="margin-bottom:0px;"><a class="option framed large title" ' + Game.clickStr + '="Game.UpgradeSanta();">' +
+                            '<div class="optionBox" style="margin-bottom:0;"><a class="option framed large title" ' + Game.clickStr + '="Game.UpgradeSanta();">' +
                             '<div style="display:table-cell;vertical-align:middle;">Evolve</div>' +
                             '<div style="display:table-cell;vertical-align:middle;padding:4px 12px;">|</div>' +
                             '<div style="display:table-cell;vertical-align:middle;font-size:65%;">cost :<div' + (Game.cookies > moni ? '' : ' style="color:#777;"') + '>' + Beautify(Math.pow(Game.santaLevel + 1, Game.santaLevel + 1)) + ' ' + (Game.santaLevel > 0 ? 'cookies' : 'cookie') + '</div></div>' +
                             '</a></div>';
                     }
                 } else if (Game.specialTab === 'dragon') {
-                    var level = Game.dragonLevels[Game.dragonLevel];
+                    let level = Game.dragonLevels[Game.dragonLevel];
 
                     str += '<h3>' + level.name + '</h3>';
 
                     if (Game.dragonLevel >= 5) {
-                        var icon = Game.dragonAuras[Game.dragonAura].pic;
+                        icon = Game.dragonAuras[Game.dragonAura].pic;
                         str += '<div class="crate enabled" style="opacity:1;position:absolute;right:18px;top:-58px;' + (icon[2] ? 'background-image:url(' + icon[2] + ');' : '') + 'background-position:' + (-icon[0] * 48) + 'px ' + (-icon[1] * 48) + 'px;" ' + Game.clickStr + '="PlaySound(\'snd/tick.mp3\');Game.SelectDragonAura(0);" ' + Game.getTooltip(
                                 '<div style="min-width:200px;text-align:center;"><h4>' + Game.dragonAuras[Game.dragonAura].name + '</h4>' +
                                 '<div class="line"></div>' +
@@ -12994,7 +12795,7 @@ Game.Launch = function () {
                             '></div>';
                     }
                     if (Game.dragonLevel >= 23) {
-                        var icon = Game.dragonAuras[Game.dragonAura2].pic;
+                        icon = Game.dragonAuras[Game.dragonAura2].pic;
                         str += '<div class="crate enabled" style="opacity:1;position:absolute;right:80px;top:-58px;' + (icon[2] ? 'background-image:url(' + icon[2] + ');' : '') + 'background-position:' + (-icon[0] * 48) + 'px ' + (-icon[1] * 48) + 'px;" ' + Game.clickStr + '="PlaySound(\'snd/tick.mp3\');Game.SelectDragonAura(1);" ' + Game.getTooltip(
                                 '<div style="min-width:200px;text-align:center;"><h4>' + Game.dragonAuras[Game.dragonAura2].name + '</h4>' +
                                 '<div class="line"></div>' +
@@ -13006,7 +12807,7 @@ Game.Launch = function () {
 
                     if (Game.dragonLevel < Game.dragonLevels.length - 1) {
                         str += '<div class="line"></div>' +
-                            '<div class="optionBox" style="margin-bottom:0px;"><a class="option framed large title" ' + Game.clickStr + '="Game.UpgradeDragon();">' +
+                            '<div class="optionBox" style="margin-bottom:0;"><a class="option framed large title" ' + Game.clickStr + '="Game.UpgradeDragon();">' +
                             '<div style="display:table-cell;vertical-align:middle;">' + level.action + '</div>' +
                             '<div style="display:table-cell;vertical-align:middle;padding:4px 12px;">|</div>' +
                             '<div style="display:table-cell;vertical-align:middle;font-size:65%;">sacrifice<div' + (level.cost() ? '' : ' style="color:#777;"') + '>' + level.costStr() + '</div></div>' +
@@ -13024,7 +12825,7 @@ Game.Launch = function () {
                 if (Game.specialTab !== '') {
                     Game.specialTab = '';
                     elementByID('specialPopup').className = 'framed prompt offScreen';
-                    setTimeout(function () {
+                    setTimeout(() => {
                         if (Game.specialTab === '') {/*l('specialPopup').style.display='none';*/
                             elementByID('specialPopup').innerHTML = '';
                         }
@@ -13032,22 +12833,22 @@ Game.Launch = function () {
                 }
             }
         }
-        Game.DrawSpecial = function () {
-            var len = Game.specialTabs.length;
+        Game.DrawSpecial = () => {
+            const len = Game.specialTabs.length;
             if (len === 0) return;
             Game.LeftBackground.globalAlpha = 1;
-            var y = Game.LeftBackground.canvas.height - 24 - 48 * len;
-            var tabI = 0;
+            let y = Game.LeftBackground.canvas.height - 24 - 48 * len;
+            let tabI = 0;
 
-            for (var i in Game.specialTabs) {
-                var selected = 0;
-                var hovered = 0;
+            for (let i in Game.specialTabs) {
+                let selected = 0;
+                let hovered = 0;
                 if (Game.specialTab === Game.specialTabs[i]) selected = 1;
                 if (Game.specialTabHovered === Game.specialTabs[i]) hovered = 1;
-                var x = 24;
-                var s = 1;
-                var pic = '';
-                var frame = 0;
+                let x = 24;
+                let s = 1;
+                let pic = '';
+                let frame = 0;
                 if (hovered) {
                     s = 1;
                     x = 24;
@@ -13069,8 +12870,8 @@ Game.Launch = function () {
                 }
 
                 if (hovered || selected) {
-                    var ss = s * 64;
-                    var r = Math.floor((Game.T * 0.5) % 360);
+                    let ss = s * 64;
+                    let r = Math.floor((Game.T * 0.5) % 360);
                     Game.LeftBackground.save();
                     Game.LeftBackground.translate(x, y);
                     if (Game.prefs.fancy) Game.LeftBackground.rotate((r / 360) * Math.PI * 2);
@@ -13118,8 +12919,21 @@ Game.Launch = function () {
 
         Game.cookieOriginX = 0;
         Game.cookieOriginY = 0;
-        Game.DrawBackground = function () {
+        Game.DrawBackground = () => {
 
+            let me;
+            let y2;
+            let x2;
+            let n;
+            let d;
+            let a;
+            let amount;
+            let ii;
+            let pic;
+            let s;
+            let y;
+            let x;
+            let w;
             Timer.clean();
             //background
             if (!Game.Background)//init some stuff
@@ -13144,24 +12958,24 @@ Game.Launch = function () {
                 });
             }
 
-            var ctx = Game.LeftBackground;
+            let ctx = Game.LeftBackground;
 
             if (Game.OnAscend) {
                 Timer.clean();
                 //starry background on ascend screen
-                var w = Game.Background.canvas.width;
-                var h = Game.Background.canvas.height;
-                var b = Game.ascendl.getBoundingClientRect();
-                var x = (b.left + b.right) / 2;
-                var y = (b.top + b.bottom) / 2;
+                w = Game.Background.canvas.width;
+                let h = Game.Background.canvas.height;
+                let b = Game.ascendl.getBoundingClientRect();
+                x = (b.left + b.right) / 2;
+                y = (b.top + b.bottom) / 2;
                 Game.Background.globalAlpha = 0.5;
-                var s = 1 * Game.AscendZoom * (1 + Math.cos(Game.T * 0.0027) * 0.05);
+                s = 1 * Game.AscendZoom * (1 + Math.cos(Game.T * 0.0027) * 0.05);
                 Game.Background.fillPattern(Pic('starbg.jpg'), 0, 0, w, h, 1024 * s, 1024 * s, x + Game.AscendOffX * 0.25 * s, y + Game.AscendOffY * 0.25 * s);
                 Timer.track('star layer 1');
                 if (Game.prefs.fancy) {
                     //additional star layer
                     Game.Background.globalAlpha = 0.5 * (0.5 + Math.sin(Game.T * 0.02) * 0.3);
-                    var s = 2 * Game.AscendZoom * (1 + Math.sin(Game.T * 0.002) * 0.07);
+                    s = 2 * Game.AscendZoom * (1 + Math.sin(Game.T * 0.002) * 0.07);
                     //Game.Background.globalCompositeOperation='lighter';
                     Game.Background.fillPattern(Pic('starbg.jpg'), 0, 0, w, h, 1024 * s, 1024 * s, x + Game.AscendOffX * 0.25 * s, y + Game.AscendOffY * 0.25 * s);
                     //Game.Background.globalCompositeOperation='source-over';
@@ -13182,60 +12996,13 @@ Game.Launch = function () {
                     Game.Background.drawImage(Pic('heavenRing2.jpg'), -s / 2, -s / 2, s, s);
                     Game.Background.restore();
                     Timer.track('nebula');
-
-                    /*
-					//links between upgrades
-					//not in because I am bad at this
-					Game.Background.globalAlpha=1;
-					Game.Background.save();
-					Game.Background.translate(x,y);
-					s=(32)*Game.AscendZoom;
-
-					for (var i in Game.PrestigeUpgrades)
-					{
-						var me=Game.PrestigeUpgrades[i];
-						var ghosted=0;
-						if (me.canBePurchased || Game.Has('Neuromancy')){}
-						else
-						{
-							for (var ii in me.parents){if (me.parents[ii]!=-1 && me.parents[ii].canBePurchased) ghosted=1;}
-						}
-						for (var ii in me.parents)//create pulsing links
-						{
-							if (me.parents[ii]!=-1 && (me.canBePurchased || ghosted))
-							{
-								var origX=0;
-								var origY=0;
-								var targX=me.posX+28;
-								var targY=me.posY+28;
-								if (me.parents[ii]!=-1) {origX=me.parents[ii].posX+28;origY=me.parents[ii].posY+28;}
-								var rot=-Math.atan((targY-origY)/(origX-targX));
-								if (targX<=origX) rot+=180;
-								var dist=Math.floor(Math.sqrt((targX-origX)*(targX-origX)+(targY-origY)*(targY-origY)));
-								origX+=2;
-								origY-=18;
-								//rot=-(Math.PI/2)*(me.id%4);
-								Game.Background.translate(origX,origY);
-								Game.Background.rotate(rot);
-								//Game.Background.drawImage(Pic('linkPulse.png'),-s/2,-s/2,s,s);
-								Game.Background.fillPattern(Pic('linkPulse.png'),0,-4,dist,8,32,8);
-								Game.Background.rotate(-rot);
-								Game.Background.translate(-origX,-origY);
-							}
-						}
-					}
-					Game.Background.restore();
-					Timer.track('links');
-					*/
-
-                    //Game.Background.drawImage(Pic('shadedBorders.png'),0,0,w,h);
-                    //Timer.track('border');
                 }
             } else {
 
-                var goodBuff = 0;
-                var badBuff = 0;
-                for (var i in Game.buffs) {
+                let i;
+                let goodBuff = 0;
+                let badBuff = 0;
+                for (i in Game.buffs) {
                     if (Game.buffs[i].aura === 1) goodBuff = 1;
                     if (Game.buffs[i].aura === 2) badBuff = 1;
                 }
@@ -13250,16 +13017,16 @@ Game.Launch = function () {
                         Game.bg = Game.defaultBg;
                         Game.bgFade = Game.defaultBg;
                     } else if (Game.elderWrathD >= 1 && Game.elderWrathD < 2) {
-                        Game.bgR = (Game.elderWrathD - 1) / 1;
+                        Game.bgR = (Game.elderWrathD - 1);
                         Game.bg = Game.defaultBg;
                         Game.bgFade = 'grandmas1';
                     } else if (Game.elderWrathD >= 2 && Game.elderWrathD < 3) {
-                        Game.bgR = (Game.elderWrathD - 2) / 1;
+                        Game.bgR = (Game.elderWrathD - 2);
                         Game.bg = 'grandmas1';
                         Game.bgFade = 'grandmas2';
                     } else if (Game.elderWrathD >= 3)// && Game.elderWrathD<4)
                     {
-                        Game.bgR = (Game.elderWrathD - 3) / 1;
+                        Game.bgR = (Game.elderWrathD - 3);
                         Game.bg = 'grandmas2';
                         Game.bgFade = 'grandmas3';
                     }
@@ -13295,7 +13062,7 @@ Game.Launch = function () {
 				}*/
                 Timer.clean();
 
-                var showDragon = 0;
+                let showDragon = 0;
                 if (Game.hasBuff('Dragonflight') || Game.hasBuff('Dragon Harvest')) showDragon = 1;
 
                 Game.cookieOriginX = Math.floor(ctx.canvas.width / 2);
@@ -13304,8 +13071,8 @@ Game.Launch = function () {
                 if (Game.AscendTimer === 0) {
                     if (Game.prefs.particles) {
                         //falling cookies
-                        var pic = '';
-                        var opacity = 1;
+                        pic = '';
+                        let opacity = 1;
                         if (Game.elderWrathD <= 1.5) {
                             if (Game.cookiesPs >= 1000) pic = 'cookieShower3.png';
                             else if (Game.cookiesPs >= 500) pic = 'cookieShower2.png';
@@ -13315,13 +13082,13 @@ Game.Launch = function () {
                         if (pic !== '') {
                             if (Game.elderWrathD >= 1) opacity = 1 - ((Math.min(Game.elderWrathD, 1.5) - 1) / 0.5);
                             ctx.globalAlpha = opacity;
-                            var y = (Math.floor(Game.T * 2) % 512);
+                            y = (Math.floor(Game.T * 2) % 512);
                             ctx.fillPattern(Pic(pic), 0, 0, ctx.canvas.width, ctx.canvas.height + 512, 512, 512, 0, y);
                             ctx.globalAlpha = 1;
                         }
                         //snow
                         if (Game.season === 'christmas') {
-                            var y = (Math.floor(Game.T * 2.5) % 512);
+                            y = (Math.floor(Game.T * 2.5) % 512);
                             ctx.globalAlpha = 0.75;
                             ctx.globalCompositeOperation = 'lighter';
                             ctx.fillPattern(Pic('snow2.jpg'), 0, 0, ctx.canvas.width, ctx.canvas.height + 512, 512, 512, 0, y);
@@ -13330,7 +13097,7 @@ Game.Launch = function () {
                         }
                         //hearts
                         if (Game.season === 'valentines') {
-                            var y = (Math.floor(Game.T * 2.5) % 512);
+                            y = (Math.floor(Game.T * 2.5) % 512);
                             ctx.globalAlpha = 1;
                             ctx.fillPattern(Pic('heartStorm.png'), 0, 0, ctx.canvas.width, ctx.canvas.height + 512, 512, 512, 0, y);
                             ctx.globalAlpha = 1;
@@ -13342,18 +13109,18 @@ Game.Launch = function () {
                         Timer.track('particles');
 
                         //big cookie shine
-                        var s = 512;
+                        s = 512;
 
-                        var x = Game.cookieOriginX;
-                        var y = Game.cookieOriginY;
+                        x = Game.cookieOriginX;
+                        y = Game.cookieOriginY;
 
-                        var r = Math.floor((Game.T * 0.5) % 360);
+                        const r = Math.floor((Game.T * 0.5) % 360);
                         ctx.save();
                         ctx.translate(x, y);
                         ctx.rotate((r / 360) * Math.PI * 2);
-                        var alphaMult = 1;
+                        let alphaMult = 1;
                         if (Game.bgType === 2 || Game.bgType === 4) alphaMult = 0.5;
-                        var pic = 'shine.png';
+                        pic = 'shine.png';
                         if (goodBuff) {
                             pic = 'shineGold.png';
                             alphaMult = 1;
@@ -13379,86 +13146,60 @@ Game.Launch = function () {
 
                         if (showDragon) {
                             //big dragon
-                            var s = 300 * 2 * (1 + Math.sin(Game.T * 0.013) * 0.1);
-                            var x = Game.cookieOriginX - s / 2;
-                            var y = Game.cookieOriginY - s / (1.4 + 0.2 * Math.sin(Game.T * 0.01));
-                            ctx.drawImage(Pic('dragonBG.png'), x, y, s, s);
-                        }
-
-                        //big cookie
-                        if (false)//don't do that
-                        {
-                            ctx.globalAlpha = 1;
-                            var amount = Math.floor(Game.cookies).toString();
-                            var digits = amount.length;
-                            var space = 0;
-                            for (var i = 0; i < digits; i++) {
-                                var s = 16 * (digits - i);
-                                var num = parseInt(amount[i]);
-                                if (i > 0) space -= s * (1 - num / 10) / 2;
-                                if (i === 0 && num > 1) space += s * 0.1;
-                                for (var ii = 0; ii < num; ii++) {
-                                    var x = Game.cookieOriginX;
-                                    var y = Game.cookieOriginY;
-                                    var spin = Game.T * (0.005 + i * 0.001) + i + (ii / num) * Math.PI * 2;
-                                    x += Math.sin(spin) * space;
-                                    y += Math.cos(spin) * space;
-                                    ctx.drawImage(Pic('perfectCookie.png'), x - s / 2, y - s / 2, s, s);
-                                }
-                                space += s / 2;
-                            }
-                        } else {
-                            ctx.globalAlpha = 1;
-                            var s = 256 * Game.BigCookieSize;
-                            var x = Game.cookieOriginX;
-                            var y = Game.cookieOriginY;
-                            ctx.save();
-                            ctx.translate(x, y);
-                            if (Game.season === 'easter') {
-                                var nestW = 304 * 0.98 * Game.BigCookieSize;
-                                var nestH = 161 * 0.98 * Game.BigCookieSize;
-                                ctx.drawImage(Pic('nest.png'), -nestW / 2, -nestH / 2 + 130, nestW, nestH);
-                            }
-                            //ctx.rotate(((Game.startDate%360)/360)*Math.PI*2);
-                            ctx.drawImage(Pic('perfectCookie.png'), -s / 2, -s / 2, s, s);
-
-                            if (goodBuff && Game.prefs.particles)//sparkle
-                            {
-                                ctx.globalCompositeOperation = 'lighter';
-                                for (var i = 0; i < 1; i++) {
-                                    ctx.globalAlpha = Math.random() * 0.65 + 0.1;
-                                    var size = Math.random() * 30 + 5;
-                                    var a = Math.random() * Math.PI * 2;
-                                    var d = s * 0.9 * Math.random() / 2;
-                                    ctx.drawImage(Pic('glint.jpg'), -size / 2 + Math.sin(a) * d, -size / 2 + Math.cos(a) * d, size, size);
-                                }
-                            }
-
-                            ctx.restore();
-                            Timer.track('big cookie');
-                        }
-                    } else//no particles
-                    {
-                        //big cookie shine
-                        var s = 512;
-                        var x = Game.cookieOriginX - s / 2;
-                        var y = Game.cookieOriginY - s / 2;
-                        ctx.globalAlpha = 0.5;
-                        ctx.drawImage(Pic('shine.png'), x, y, s, s);
-
-                        if (showDragon) {
-                            //big dragon
-                            var s = 300 * 2 * (1 + Math.sin(Game.T * 0.013) * 0.1);
-                            var x = Game.cookieOriginX - s / 2;
-                            var y = Game.cookieOriginY - s / (1.4 + 0.2 * Math.sin(Game.T * 0.01));
+                            s = 300 * 2 * (1 + Math.sin(Game.T * 0.013) * 0.1);
+                            x = Game.cookieOriginX - s / 2;
+                            y = Game.cookieOriginY - s / (1.4 + 0.2 * Math.sin(Game.T * 0.01));
                             ctx.drawImage(Pic('dragonBG.png'), x, y, s, s);
                         }
 
                         //big cookie
                         ctx.globalAlpha = 1;
-                        var s = 256 * Game.BigCookieSize;
-                        var x = Game.cookieOriginX - s / 2;
-                        var y = Game.cookieOriginY - s / 2;
+                        s = 256 * Game.BigCookieSize;
+                        x = Game.cookieOriginX;
+                        y = Game.cookieOriginY;
+                        ctx.save();
+                        ctx.translate(x, y);
+                        if (Game.season === 'easter') {
+                            const nestW = 304 * 0.98 * Game.BigCookieSize;
+                            const nestH = 161 * 0.98 * Game.BigCookieSize;
+                            ctx.drawImage(Pic('nest.png'), -nestW / 2, -nestH / 2 + 130, nestW, nestH);
+                        }
+                        ctx.drawImage(Pic('perfectCookie.png'), -s / 2, -s / 2, s, s);
+                        if (goodBuff && Game.prefs.particles)//sparkle
+                        {
+                            ctx.globalCompositeOperation = 'lighter';
+                            for (i = 0; i < 1; i++) {
+                                ctx.globalAlpha = Math.random() * 0.65 + 0.1;
+                                let size = Math.random() * 30 + 5;
+                                a = Math.random() * Math.PI * 2;
+                                d = s * 0.9 * Math.random() / 2;
+                                ctx.drawImage(Pic('glint.jpg'), -size / 2 + Math.sin(a) * d, -size / 2 + Math.cos(a) * d, size, size);
+                            }
+                        }
+                        ctx.restore();
+                        Timer.track('big cookie');
+                    } else//no particles
+                    {
+                        //big cookie shine
+                        s = 512;
+                        x = Game.cookieOriginX - s / 2;
+                        y = Game.cookieOriginY - s / 2;
+                        ctx.globalAlpha = 0.5;
+                        ctx.drawImage(Pic('shine.png'), x, y, s, s);
+
+                        if (showDragon) {
+                            //big dragon
+                            s = 300 * 2 * (1 + Math.sin(Game.T * 0.013) * 0.1);
+                            x = Game.cookieOriginX - s / 2;
+                            y = Game.cookieOriginY - s / (1.4 + 0.2 * Math.sin(Game.T * 0.01));
+                            ctx.drawImage(Pic('dragonBG.png'), x, y, s, s);
+                        }
+
+                        //big cookie
+                        ctx.globalAlpha = 1;
+                        s = 256 * Game.BigCookieSize;
+                        x = Game.cookieOriginX - s / 2;
+                        y = Game.cookieOriginY - s / 2;
                         ctx.drawImage(Pic('perfectCookie.png'), x, y, s, s);
                     }
 
@@ -13466,26 +13207,26 @@ Game.Launch = function () {
                     if (Game.prefs.cursors) {
                         ctx.save();
                         ctx.translate(Game.cookieOriginX, Game.cookieOriginY);
-                        var pic = Pic('cursor.png');
-                        var fancy = Game.prefs.fancy;
+                        pic = Pic('cursor.png');
+                        let fancy = Game.prefs.fancy;
 
                         if (showDragon) ctx.globalAlpha = 0.25;
-                        var amount = Game.Objects['Cursor'].amount;
+                        amount = Game.Objects['Cursor'].amount;
                         //var spe=-1;
-                        for (var i = 0; i < amount; i++) {
-                            var n = Math.floor(i / 50);
+                        for (i = 0; i < amount; i++) {
+                            n = Math.floor(i / 50);
                             //var a=((i+0.5*n)%50)/50;
-                            var w = 0;
+                            w = 0;
                             if (fancy) w = (Math.sin(Game.T * 0.025 + (((i + n * 12) % 25) / 25) * Math.PI * 2));
                             if (w > 0.997) w = 1.5;
                             else if (w > 0.994) w = 0.5;
                             else w = 0;
                             w *= -4;
                             if (fancy) w += Math.sin((n + Game.T * 0.01) * Math.PI / 2) * 4;
-                            var x = 0;
-                            var y = (140/* *Game.BigCookieSize*/ + n * 16 + w) - 16;
+                            x = 0;
+                            y = (140/* *Game.BigCookieSize*/ + n * 16 + w) - 16;
 
-                            var rot = 7.2;//(1/50)*360
+                            let rot = 7.2;//(1/50)*360
                             if (i === 0 && fancy) rot -= Game.T * 0.1;
                             if (i % 50 === 0) rot += 7.2 / 2;
                             ctx.rotate((rot / 360) * Math.PI * 2);
@@ -13504,12 +13245,12 @@ Game.Launch = function () {
                         Timer.track('cursors');
                     }
                 } else {
-                    var tBase = Math.max(0, (Game.AscendTimer - Game.AscendBreakpoint) / (Game.AscendDuration - Game.AscendBreakpoint));
+                    let tBase = Math.max(0, (Game.AscendTimer - Game.AscendBreakpoint) / (Game.AscendDuration - Game.AscendBreakpoint));
                     //big crumbling cookie
                     //var t=(3*Math.pow(tBase,2)-2*Math.pow(tBase,3));//S curve
-                    var t = Math.pow(tBase, 0.5);
+                    let t = Math.pow(tBase, 0.5);
 
-                    var shake = 0;
+                    let shake = 0;
                     if (Game.AscendTimer < Game.AscendBreakpoint) {
                         shake = Game.AscendTimer / Game.AscendBreakpoint;
                     }
@@ -13517,24 +13258,24 @@ Game.Launch = function () {
 
                     ctx.globalAlpha = 1;
 
-                    var x = Game.cookieOriginX;
-                    var y = Game.cookieOriginY;
+                    x = Game.cookieOriginX;
+                    y = Game.cookieOriginY;
 
                     x += (Math.random() * 2 - 1) * 10 * shake;
                     y += (Math.random() * 2 - 1) * 10 * shake;
 
-                    var s = 1;
+                    s = 1;
                     if (tBase > 0) {
                         ctx.save();
                         ctx.globalAlpha = 1 - Math.pow(t, 0.5);
                         ctx.translate(x, y);
                         ctx.globalCompositeOperation = 'lighter';
                         ctx.rotate(Game.T * 0.007);
-                        s = 0.5 + Math.pow(tBase, 0.6) * 1;
-                        var s2 = (600) * s;
+                        s = 0.5 + Math.pow(tBase, 0.6);
+                        let s2 = (600) * s;
                         ctx.drawImage(Pic('heavenRing1.jpg'), -s2 / 2, -s2 / 2, s2, s2);
                         ctx.rotate(-Game.T * 0.002);
-                        s = 0.5 + Math.pow(1 - tBase, 0.4) * 1;
+                        s = 0.5 + Math.pow(1 - tBase, 0.4);
                         s2 = (600) * s;
                         ctx.drawImage(Pic('heavenRing2.jpg'), -s2 / 2, -s2 / 2, s2, s2);
                         ctx.restore();
@@ -13546,28 +13287,16 @@ Game.Launch = function () {
                     ctx.translate(x, y);
                     ctx.rotate((t * (-0.1)) * Math.PI * 2);
 
-                    var chunks = {0: 7, 1: 6, 2: 3, 3: 2, 4: 8, 5: 1, 6: 9, 7: 5, 8: 0, 9: 4};
+                    const chunks = {0: 7, 1: 6, 2: 3, 3: 2, 4: 8, 5: 1, 6: 9, 7: 5, 8: 0, 9: 4};
                     s *= t / 2 + 1;
-                    /*ctx.globalAlpha=(1-t)*0.33;
-					for (var i=0;i<10;i++)
-					{
-						var d=(t-0.2)*(80+((i+2)%3)*40);
-						ctx.drawImage(Pic('brokenCookie.png'),256*(chunks[i]),0,256,256,-s/2+Math.sin(-(((chunks[i]+4)%10)/10)*Math.PI*2)*d,-s/2+Math.cos(-(((chunks[i]+4)%10)/10)*Math.PI*2)*d,s,s);
-					}
-					ctx.globalAlpha=(1-t)*0.66;
-					for (var i=0;i<10;i++)
-					{
-						var d=(t-0.1)*(80+((i+2)%3)*40);
-						ctx.drawImage(Pic('brokenCookie.png'),256*(chunks[i]),0,256,256,-s/2+Math.sin(-(((chunks[i]+4)%10)/10)*Math.PI*2)*d,-s/2+Math.cos(-(((chunks[i]+4)%10)/10)*Math.PI*2)*d,s,s);
-					}*/
                     ctx.globalAlpha = 1 - t;
-                    for (var i = 0; i < 10; i++) {
-                        var d = (t) * (80 + ((i + 2) % 3) * 40);
-                        var x2 = (Math.random() * 2 - 1) * 5 * shake;
-                        var y2 = (Math.random() * 2 - 1) * 5 * shake;
+                    for (i = 0; i < 10; i++) {
+                        d = (t) * (80 + ((i + 2) % 3) * 40);
+                        x2 = (Math.random() * 2 - 1) * 5 * shake;
+                        y2 = (Math.random() * 2 - 1) * 5 * shake;
                         ctx.drawImage(Pic('brokenCookie.png'), 256 * (chunks[i]), 0, 256, 256, -s / 2 + Math.sin(-(((chunks[i] + 4) % 10) / 10) * Math.PI * 2) * d + x2, -s / 2 + Math.cos(-(((chunks[i] + 4) % 10) / 10) * Math.PI * 2) * d + y2, s, s);
                     }
-                    var brokenHalo = 1 - Math.min(t / (1 / 3), 1 / 3) * 3;
+                    let brokenHalo = 1 - Math.min(t / (1 / 3), 1 / 3) * 3;
                     if (Game.AscendTimer < Game.AscendBreakpoint) brokenHalo = Game.AscendTimer / Game.AscendBreakpoint;
                     ctx.globalAlpha = brokenHalo;
                     ctx.drawImage(Pic('brokenCookieHalo.png'), -s / 1.3333, -s / 1.3333, s * 1.5, s * 1.5);
@@ -13575,17 +13304,17 @@ Game.Launch = function () {
                     ctx.restore();
 
                     //flares
-                    var n = 9;
-                    var t = Game.AscendTimer / Game.AscendBreakpoint;
+                    n = 9;
+                    t = Game.AscendTimer / Game.AscendBreakpoint;
                     if (Game.AscendTimer < Game.AscendBreakpoint) {
                         ctx.save();
                         ctx.translate(x, y);
-                        for (var i = 0; i < n; i++) {
+                        for (i = 0; i < n; i++) {
                             if (Math.floor(t / 3 * n * 3 + i * 2.7) % 2) {
-                                var t2 = Math.pow((t / 3 * n * 3 + i * 2.7) % 1, 1.5);
+                                const t2 = Math.pow((t / 3 * n * 3 + i * 2.7) % 1, 1.5);
                                 ctx.globalAlpha = (1 - t) * (Game.drawT % 2 === 0 ? 0.5 : 1);
-                                var sw = (1 - t2 * 0.5) * 96;
-                                var sh = (0.5 + t2 * 1.5) * 96;
+                                const sw = (1 - t2 * 0.5) * 96;
+                                const sh = (0.5 + t2 * 1.5) * 96;
                                 ctx.drawImage(Pic('shineSpoke.png'), -sw / 2, -sh - 32 - (1 - t2) * 256, sw, sh);
                             }
                             ctx.rotate(Math.PI * 2 / n);
@@ -13611,11 +13340,11 @@ Game.Launch = function () {
 
                 //milk and milk accessories
                 if (Game.prefs.milk) {
-                    var width = ctx.canvas.width;
-                    var height = ctx.canvas.height;
-                    var x = Math.floor((Game.T * 2 - (Game.milkH - Game.milkHd) * 2000 + 480 * 2) % 480);//Math.floor((Game.T*2+Math.sin(Game.T*0.1)*2+Math.sin(Game.T*0.03)*2-(Game.milkH-Game.milkHd)*2000+480*2)%480);
-                    var y = (Game.milkHd) * height;//(((Game.milkHd)*ctx.canvas.height)*(1+0.05*(Math.sin(Game.T*0.017)/2+0.5)));
-                    var a = 1;
+                    let width = ctx.canvas.width;
+                    let height = ctx.canvas.height;
+                    x = Math.floor((Game.T * 2 - (Game.milkH - Game.milkHd) * 2000 + 480 * 2) % 480);//Math.floor((Game.T*2+Math.sin(Game.T*0.1)*2+Math.sin(Game.T*0.03)*2-(Game.milkH-Game.milkHd)*2000+480*2)%480);
+                    y = (Game.milkHd) * height;//(((Game.milkHd)*ctx.canvas.height)*(1+0.05*(Math.sin(Game.T*0.017)/2+0.5)));
+                    a = 1;
                     if (Game.AscendTimer > 0) {
                         y *= 1 - Math.pow((Game.AscendTimer / Game.AscendBreakpoint), 2) * 2;
                         a *= 1 - Math.pow((Game.AscendTimer / Game.AscendBreakpoint), 2) * 2;
@@ -13636,18 +13365,16 @@ Game.Launch = function () {
                                 this.xd = Math.random() * 10 - 5;
                                 this.yd = Math.random() * 10 - 5;
                                 this.r = Math.random() * Math.PI * 2;
-                                this.rd = Math.random() * 0.1 - 0.05;
-                                var v = Math.random();
-                                var a = 0.5;
-                                var b = 0.5;
+                                let v = Math.random();
+                                let a = 0.5;
+                                let b = 0.5;
                                 if (v <= a) v = b - b * Math.pow(1 - v / a, 3); else v = b + (1 - b) * Math.pow((v - a) / (1 - a), 3);
                                 this.s = (Game.toysType === 1 ? 64 : 48) * (0.1 + v * 1.9);
                                 if (Game.toysType === 2) this.s = (this.id % 10 === 1) ? 96 : 48;
-                                this.st = this.s;
                                 this.s = 0;
-                                var cookies = [[10, 0]];
-                                for (var i in Game.Upgrades) {
-                                    var cookie = Game.Upgrades[i];
+                                let cookies = [[10, 0]];
+                                for (let i in Game.Upgrades) {
+                                    let cookie = Game.Upgrades[i];
                                     if (cookie.bought > 0 && cookie.pool === 'cookie') cookies.push(cookie.icon);
                                 }
                                 this.icon = chooseRandomElement(cookies);
@@ -13669,13 +13396,13 @@ Game.Launch = function () {
                                 Game.toys.push(this);
                                 return this;
                             }
-                            for (var i = 0; i < Math.floor(Math.random() * 15 + (Game.toysType === 1 ? 5 : 30)); i++) {
+                            for (i = 0; i < Math.floor(Math.random() * 15 + (Game.toysType === 1 ? 5 : 30)); i++) {
                                 new Game.Toy(Math.random() * width, Math.random() * height * 0.3);
                             }
                         }
                         ctx.globalAlpha = 0.5;
-                        for (var i in Game.toys) {
-                            var me = Game.toys[i];
+                        for (i in Game.toys) {
+                            me = Game.toys[i];
                             ctx.save();
                             ctx.translate(me.x, me.y);
                             ctx.rotate(me.r);
@@ -13684,29 +13411,29 @@ Game.Launch = function () {
                             ctx.restore();
                         }
                         ctx.globalAlpha = 1;
-                        for (var i in Game.toys) {
-                            var me = Game.toys[i];
+                        for (i in Game.toys) {
+                            me = Game.toys[i];
                             //psst... not real physics
-                            for (var ii in Game.toys) {
-                                var it = Game.toys[ii];
+                            for (ii in Game.toys) {
+                                let it = Game.toys[ii];
                                 if (it.id !== me.id) {
-                                    var x1 = me.x + me.xd;
-                                    var y1 = me.y + me.yd;
-                                    var x2 = it.x + it.xd;
-                                    var y2 = it.y + it.yd;
-                                    var dist = Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2)) / (me.s / 2 + it.s / 2);
+                                    let x1 = me.x + me.xd;
+                                    let y1 = me.y + me.yd;
+                                    x2 = it.x + it.xd;
+                                    y2 = it.y + it.yd;
+                                    let dist = Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2)) / (me.s / 2 + it.s / 2);
                                     if (dist < (Game.toysType === 1 ? 0.95 : 0.75)) {
-                                        var angle = Math.atan2(y1 - y2, x1 - x2);
-                                        var v1 = Math.sqrt(Math.pow((me.xd), 2) + Math.pow((me.yd), 2));
-                                        var v2 = Math.sqrt(Math.pow((it.xd), 2) + Math.pow((it.yd), 2));
-                                        var v = ((v1 + v2) / 2 + dist) * 0.75;
-                                        var ratio = it.s / me.s;
+                                        let angle = Math.atan2(y1 - y2, x1 - x2);
+                                        let v1 = Math.sqrt(Math.pow((me.xd), 2) + Math.pow((me.yd), 2));
+                                        let v2 = Math.sqrt(Math.pow((it.xd), 2) + Math.pow((it.yd), 2));
+                                        let v = ((v1 + v2) / 2 + dist) * 0.75;
+                                        let ratio = it.s / me.s;
                                         me.xd += Math.sin(-angle + Math.PI / 2) * v * (ratio);
                                         me.yd += Math.cos(-angle + Math.PI / 2) * v * (ratio);
                                         it.xd += Math.sin(-angle - Math.PI / 2) * v * (1 / ratio);
                                         it.yd += Math.cos(-angle - Math.PI / 2) * v * (1 / ratio);
-                                        me.rd += (Math.random() * 1 - 0.5) * 0.1 * (ratio);
-                                        it.rd += (Math.random() * 1 - 0.5) * 0.1 * (1 / ratio);
+                                        me.rd += (Math.random() - 0.5) * 0.1 * (ratio);
+                                        it.rd += (Math.random() - 0.5) * 0.1 * (1 / ratio);
                                         me.rd *= Math.min(1, v);
                                         it.rd *= Math.min(1, v);
                                     }
@@ -13717,9 +13444,9 @@ Game.Launch = function () {
                                 me.yd *= 0.85;
                                 me.rd *= 0.85;
                                 me.yd -= 1;
-                                me.xd += (Math.random() * 1 - 0.5) * 0.3;
-                                me.yd += (Math.random() * 1 - 0.5) * 0.05;
-                                me.rd += (Math.random() * 1 - 0.5) * 0.02;
+                                me.xd += (Math.random() - 0.5) * 0.3;
+                                me.yd += (Math.random() - 0.5) * 0.05;
+                                me.rd += (Math.random() - 0.5) * 0.02;
                             } else {
                                 me.xd *= 0.99;
                                 me.rd *= 0.99;
@@ -13762,7 +13489,7 @@ Game.Launch = function () {
                         }
                     }
 
-                    var pic = Game.Milk.pic;
+                    pic = Game.Milk.pic;
                     if (Game.milkType !== 0 && Game.ascensionMode !== 1) pic = Game.MilksByChoice[Game.milkType].pic;
                     ctx.globalAlpha = 0.9 * a;
                     ctx.fillPattern(Pic(pic + '.png'), 0, height - y, width + 480, 1, 480, 480, x, 0);
@@ -13789,7 +13516,7 @@ Game.Launch = function () {
 
                     //shiny border during frenzies etc
                     ctx.globalAlpha = 1;
-                    var borders = 'shadedBordersSoft.png';
+                    let borders = 'shadedBordersSoft.png';
                     if (goodBuff) borders = 'shadedBordersGold.png';
                     else if (badBuff) borders = 'shadedBordersRed.png';
                     if (goodBuff && Game.prefs.fancy) ctx.globalCompositeOperation = 'lighter';
@@ -13807,7 +13534,7 @@ Game.Launch = function () {
         Game.killShimmers();
 
         //booooo
-        Game.RuinTheFun = function (silent) {
+        Game.RuinTheFun = silent => {
             Game.popups = 0;
             Game.SetAllUpgrades(1);
             Game.SetAllAchievs(1);
@@ -13819,8 +13546,8 @@ Game.Launch = function () {
             Game.upgradesToRebuild = 1;
             Game.recalculateGains = 1;
             Game.popups = 1;
-            for (var i in Game.Objects) {
-                var me = Game.Objects[i];
+            for (let i in Game.Objects) {
+                let me = Game.Objects[i];
                 if (me.minigame && me.minigame.onRuinTheFun) me.minigame.onRuinTheFun();
             }
             if (!silent) {
@@ -13830,10 +13557,10 @@ Game.Launch = function () {
             return 'You feel a bitter taste in your mouth...';
         }
 
-        Game.SetAllUpgrades = function (on) {
+        Game.SetAllUpgrades = on => {
             Game.popups = 0;
-            var leftout = ['Magic shenanigans', 'Occult obstruction', 'Glucose-charged air'];
-            for (var i in Game.Upgrades) {
+            const leftout = ['Magic shenanigans', 'Occult obstruction', 'Glucose-charged air'];
+            for (let i in Game.Upgrades) {
                 if (on && (Game.Upgrades[i].pool === 'toggle' || leftout.indexOf(Game.Upgrades[i].name) !== -1)) {
                 } else if (on) Game.Upgrades[i].earn();
                 else if (!on) Game.Upgrades[i].lose();
@@ -13842,31 +13569,31 @@ Game.Launch = function () {
             Game.recalculateGains = 1;
             Game.popups = 1;
         }
-        Game.SetAllAchievs = function (on) {
+        Game.SetAllAchievs = on => {
             Game.popups = 0;
-            for (var i in Game.Achievements) {
+            for (let i in Game.Achievements) {
                 if (on && Game.Achievements[i].pool !== 'dungeon') Game.Win(Game.Achievements[i].name);
                 else if (!on) Game.RemoveAchiev(Game.Achievements[i].name);
             }
             Game.recalculateGains = 1;
             Game.popups = 1;
         }
-        Game.GetAllDebugs = function () {
+        Game.GetAllDebugs = () => {
             Game.popups = 0;
-            for (var i in Game.Upgrades) {
+            for (let i in Game.Upgrades) {
                 if (Game.Upgrades[i].pool === 'debug') Game.Upgrades[i].earn();
             }
             Game.upgradesToRebuild = 1;
             Game.recalculateGains = 1;
             Game.popups = 1;
         }
-        Game.MaxSpecials = function () {
+        Game.MaxSpecials = () => {
             Game.dragonLevel = Game.dragonLevels.length - 1;
             Game.santaLevel = Game.santaLevels.length - 1;
         }
 
-        Game.SesameReset = function () {
-            var name = Game.bakeryName;
+        Game.SesameReset = () => {
+            let name = Game.bakeryName;
             Game.HardReset(2);
             Game.bakeryName = name;
             Game.bakeryNameRefresh();
@@ -13875,10 +13602,10 @@ Game.Launch = function () {
 
         Game.debugTimersOn = 0;
         Game.sesame = 0;
-        Game.OpenSesame = function () {
-            var str = '';
+        Game.OpenSesame = () => {
+            let str = '';
             str += '<div class="icon" style="position:absolute;left:-9px;top:-6px;background-position:' + (-10 * 48) + 'px ' + (-6 * 48) + 'px;"></div>';
-            str += '<div style="position:absolute;left:0px;top:0px;z-index:10;font-size:10px;background:#000;padding:1px;" id="fpsCounter"></div>';
+            str += '<div style="position:absolute;left:0;top:0;z-index:10;font-size:10px;background:#000;padding:1px;" id="fpsCounter"></div>';
 
             str += '<div id="devConsoleContent">';
             str += '<div class="title" style="font-size:14px;margin:6px;">Dev tools</div>';
@@ -13910,7 +13637,7 @@ Game.Launch = function () {
             str += '<a class="option neato" ' + Game.clickStr + '="Game.seed=Game.makeSeed();">Re-seed</a>';
             str += '<a class="option neato" ' + Game.clickStr + '="Game.heralds=100;l(\'heraldsAmount\').innerHTML=Game.heralds;Game.externalDataLoaded=true;Game.recalculateGains=1;">Max heralds</a>';
             str += '<div class="line"></div>';
-            for (var i = 0; i < Game.goldenCookieChoices.length / 2; i++) {
+            for (let i = 0; i < Game.goldenCookieChoices.length / 2; i++) {
                 str += '<a class="option neato" ' + Game.clickStr + '="var newShimmer=new Game.shimmer(\'golden\');newShimmer.force=\'' + Game.goldenCookieChoices[i * 2 + 1] + '\';">' + Game.goldenCookieChoices[i * 2] + '</a>';
                 //str+='<a class="option neato" '+Game.clickStr+'="Game.goldenCookie.force=\''+Game.goldenCookie.choices[i*2+1]+'\';Game.goldenCookie.spawn();">'+Game.goldenCookie.choices[i*2]+'</a>';
                 //str+='<a class="option neato" '+Game.clickStr+'="Game.goldenCookie.click(0,\''+Game.goldenCookie.choices[i*2+1]+'\');">'+Game.goldenCookie.choices[i*2]+'</a>';
@@ -13920,7 +13647,7 @@ Game.Launch = function () {
             elementByID('devConsole').innerHTML = str;
 
             if (!elementByID('fpsGraph')) {
-                var div = document.createElement('canvas');
+                let div = document.createElement('canvas');
                 div.id = 'fpsGraph';
                 div.width = 128;
                 div.height = 64;
@@ -13932,7 +13659,7 @@ Game.Launch = function () {
                 elementByID('devConsole').parentNode.insertBefore(div, elementByID('devConsole').nextSibling);
                 Game.fpsGraph = div;
                 Game.fpsGraphCtx = Game.fpsGraph.getContext('2d', {alpha: false});
-                var ctx = Game.fpsGraphCtx;
+                let ctx = Game.fpsGraphCtx;
                 ctx.fillStyle = '#000';
                 ctx.fillRect(0, 0, 128, 64);
             }
@@ -13942,7 +13669,7 @@ Game.Launch = function () {
             Game.Achievements['Cheated cookies taste awful'].won = 1;
         }
 
-        Game.EditAscend = function () {
+        Game.EditAscend = () => {
             if (!Game.DebuggingPrestige) {
                 Game.DebuggingPrestige = true;
                 Game.AscendTimer = 0;
@@ -13960,14 +13687,14 @@ Game.Launch = function () {
         Game.debuggedUpgradeCpS = [];
         Game.debuggedUpgradeCpClick = [];
         Game.debugColors = ['#322', '#411', '#600', '#900', '#f30', '#f90', '#ff0', '#9f0', '#0f9', '#09f', '#90f'];
-        Game.DebugUpgradeCpS = function () {
+        Game.DebugUpgradeCpS = () => {
             Game.CalculateGains();
             Game.debuggedUpgradeCpS = [];
             Game.debuggedUpgradeCpClick = [];
-            var CpS = Game.cookiesPs;
-            var CpClick = Game.computedMouseCps;
-            for (var i in Game.Upgrades) {
-                var me = Game.Upgrades[i];
+            let CpS = Game.cookiesPs;
+            let CpClick = Game.computedMouseCps;
+            for (let i in Game.Upgrades) {
+                let me = Game.Upgrades[i];
                 if (me.bought) {
                     me.bought = 0;
                     Game.CalculateGains();
@@ -13986,14 +13713,14 @@ Game.Launch = function () {
         }
 
         if (!Game.LoadSave()) {//try to load the save when we open the page. if this fails, try to brute-force it half a second later
-            setTimeout(function () {
-                var local = Game.localStorageGet(Game.SaveTo);
+            setTimeout(() => {
+                let local = Game.localStorageGet(Game.SaveTo);
                 Game.LoadSave(local);
             }, 500);
         }
 
         Game.ready = 1;
-        setTimeout(function () {
+        setTimeout(() => {
             if (typeof showAds === 'undefined' && (!elementByID('detectAds') || elementByID('detectAds').clientHeight < 1)) Game.addClass('noAds');
         }, 500);
         elementByID('javascriptError').innerHTML = '';
@@ -14005,10 +13732,13 @@ Game.Launch = function () {
 	LOGIC
 	=======================================================================================*/
     Game.Logic = function () {
+        let me;
+        let str;
+        let i;
         Game.bounds = Game.l.getBoundingClientRect();
 
         if (!Game.OnAscend && Game.AscendTimer === 0) {
-            for (var i in Game.Objects) {
+            for (i in Game.Objects) {
                 if (Game.Objects[i].eachFrame) Game.Objects[i].eachFrame();
             }
             Game.UpdateSpecial();
@@ -14080,7 +13810,7 @@ Game.Launch = function () {
                 Game.seasonT--;
             }
             if (Game.seasonT <= 0 && Game.season !== '' && Game.season !== Game.baseSeason && !Game.Has('Eternal seasons')) {
-                var str = Game.seasons[Game.season].over;
+                str = Game.seasons[Game.season].over;
                 if (Game.prefs.popups) Game.Popup(str);
                 else Game.Notify(str, '', Game.seasons[Game.season].triggerUpgrade.icon);
                 if (Game.Has('Season switcher')) {
@@ -14116,8 +13846,8 @@ Game.Launch = function () {
             Game.doLumps();
 
             //minigames
-            for (var i in Game.Objects) {
-                var me = Game.Objects[i];
+            for (i in Game.Objects) {
+                me = Game.Objects[i];
                 if (Game.isMinigameReady(me) && me.minigame.logic && Game.ascensionMode !== 1) me.minigame.logic();
             }
 
@@ -14135,8 +13865,8 @@ Game.Launch = function () {
             //var cps=Game.cookiesPs+Game.cookies*0.01;//exponential cookies
             //Game.Earn(cps/Game.fps);//add cookies per second
 
-            for (var i in Game.Objects) {
-                var me = Game.Objects[i];
+            for (i in Game.Objects) {
+                me = Game.Objects[i];
                 me.totalCookies += (me.storedTotalCps * Game.globalCpsMult) / Game.fps;
             }
             if (Game.cookies && Game.T % Math.ceil(Game.fps / Math.min(10, Game.cookiesPs)) === 0 && Game.prefs.particles) Game.particleAdd();//cookie shower
@@ -14155,7 +13885,7 @@ Game.Launch = function () {
                     Game.recalculateGains = 1;
                 }
 
-                var timePlayed = new Date();
+                let timePlayed = new Date();
                 timePlayed.setTime(Date.now() - Game.startDate);
 
                 if (!Game.fullDate || (Date.now() - Game.fullDate) >= 365 * 24 * 60 * 60 * 1000) Game.Win('So much to do so much to see');
@@ -14171,10 +13901,10 @@ Game.Launch = function () {
                     if (Game.cookiesEarned >= 1000000000 && Game.UpgradesOwned === 0) Game.Win('Hardcore');
                 }
 
-                for (var i in Game.UnlockAt) {
-                    var unlock = Game.UnlockAt[i];
+                for (i in Game.UnlockAt) {
+                    let unlock = Game.UnlockAt[i];
                     if (Game.cookiesEarned >= unlock.cookies) {
-                        var pass = 1;
+                        let pass = 1;
                         if (unlock.require && !Game.Has(unlock.require) && !Game.HasAchiev(unlock.require)) pass = 0;
                         if (unlock.season && Game.season !== unlock.season) pass = 0;
                         if (pass) {
@@ -14196,8 +13926,8 @@ Game.Launch = function () {
 
                 if (Game.Has('Eternal heart biscuits')) Game.Win('Lovely cookies');
                 if (Game.season === 'easter') {
-                    var eggs = 0;
-                    for (var i in Game.easterEggs) {
+                    let eggs = 0;
+                    for (i in Game.easterEggs) {
                         if (Game.HasUnlocked(Game.easterEggs[i])) eggs++;
                     }
                     if (eggs >= 1) Game.Win('The hunt is on');
@@ -14216,15 +13946,15 @@ Game.Launch = function () {
                     if (Game.Has('Heavenly key')) Game.Win('Wholesome');
                 }
 
-                for (var i in Game.GymAchievements) {
+                for (i in Game.GymAchievements) {
                     if (Game.cookiesEarned >= Game.GymAchievements[i].threshold) Game.Win(Game.GymAchievements[i].name);
                 }
 
-                var buildingsOwned = 0;
-                var mathematician = 1;
-                var base10 = 1;
-                var minAmount = 100000;
-                for (var i in Game.Objects) {
+                let buildingsOwned = 0;
+                let mathematician = 1;
+                let base10 = 1;
+                let minAmount = 100000;
+                for (i in Game.Objects) {
                     buildingsOwned += Game.Objects[i].amount;
                     minAmount = Math.min(Game.Objects[i].amount, minAmount);
                     if (!Game.HasAchiev('Mathematician')) {
@@ -14357,8 +14087,8 @@ Game.Launch = function () {
 
                 if (Game.shimmerTypes['golden'].n >= 4) Game.Win('Four-leaf cookie');
 
-                var grandmas = 0;
-                for (var i in Game.GrandmaSynergies) {
+                let grandmas = 0;
+                for (i in Game.GrandmaSynergies) {
                     if (Game.Has(Game.GrandmaSynergies[i])) grandmas++;
                 }
                 if (!Game.HasAchiev('Elder') && grandmas >= 7) Game.Win('Elder');
@@ -14369,9 +14099,9 @@ Game.Launch = function () {
                 if (Game.pledges >= 10) Game.Unlock('Sacrificial rolling pins');
                 if (Game.Objects['Cursor'].amount + Game.Objects['Grandma'].amount >= 777) Game.Win('The elder scrolls');
 
-                for (var i in Game.Objects) {
-                    var it = Game.Objects[i];
-                    for (var ii in it.productionAchievs) {
+                for (i in Game.Objects) {
+                    const it = Game.Objects[i];
+                    for (let ii in it.productionAchievs) {
                         if (it.totalCookies >= it.productionAchievs[ii].pow) Game.Win(it.productionAchievs[ii].achiev.name);
                     }
                 }
@@ -14379,7 +14109,7 @@ Game.Launch = function () {
                 if (!Game.HasAchiev('Cookie-dunker') && Game.LeftBackground && Game.milkProgress > 0.1 && (Game.LeftBackground.canvas.height * 0.4 + 256 / 2 - 16) > ((1 - Game.milkHd) * Game.LeftBackground.canvas.height)) Game.Win('Cookie-dunker');
                 //&& l('bigCookie').getBoundingClientRect().bottom>l('milk').getBoundingClientRect().top+16 && Game.milkProgress>0.1) Game.Win('Cookie-dunker');
 
-                for (var i in Game.customChecks) {
+                for (i in Game.customChecks) {
                     Game.customChecks[i]();
                 }
             }
@@ -14396,26 +14126,26 @@ Game.Launch = function () {
         }
 
         if (Game.T % (Game.fps * 2) === 0) {
-            var title = 'Neuro Clicker';
+            let title = 'Neuro Clicker';
             if (Game.season === 'fools') title = 'Neuro Baker';
             document.title = (Game.OnAscend ? 'Ascending! ' : '') + Beautify(Game.cookies) + ' ' + (Game.cookies === 1 ? 'Neuro' : 'Neuros') + ' - ' + title;
         }
         if (Game.T % 15 === 0) {
             //written through the magic of "hope for the best" maths
-            var chipsOwned = Game.HowMuchPrestige(Game.cookiesReset);
-            var ascendNowToOwn = Math.floor(Game.HowMuchPrestige(Game.cookiesReset + Game.cookiesEarned));
-            var ascendNowToGet = ascendNowToOwn - Math.floor(chipsOwned);
-            var nextChipAt = Game.HowManyCookiesReset(Math.floor(chipsOwned + ascendNowToGet + 1)) - Game.HowManyCookiesReset(Math.floor(chipsOwned + ascendNowToGet));
-            var cookiesToNext = Game.HowManyCookiesReset(ascendNowToOwn + 1) - (Game.cookiesEarned + Game.cookiesReset);
-            var percent = 1 - (cookiesToNext / nextChipAt);
+            let chipsOwned = Game.HowMuchPrestige(Game.cookiesReset);
+            let ascendNowToOwn = Math.floor(Game.HowMuchPrestige(Game.cookiesReset + Game.cookiesEarned));
+            let ascendNowToGet = ascendNowToOwn - Math.floor(chipsOwned);
+            let nextChipAt = Game.HowManyCookiesReset(Math.floor(chipsOwned + ascendNowToGet + 1)) - Game.HowManyCookiesReset(Math.floor(chipsOwned + ascendNowToGet));
+            let cookiesToNext = Game.HowManyCookiesReset(ascendNowToOwn + 1) - (Game.cookiesEarned + Game.cookiesReset);
+            let percent = 1 - (cookiesToNext / nextChipAt);
 
             //fill the tooltip under the Legacy tab
-            var date = new Date();
+            let date = new Date();
             date.setTime(Date.now() - Game.startDate);
-            var timeInSeconds = date.getTime() / 1000;
-            var startDate = Game.sayTime(timeInSeconds * Game.fps, -1);
+            let timeInSeconds = date.getTime() / 1000;
+            const startDate = Game.sayTime(timeInSeconds * Game.fps, -1);
 
-            var str = '';
+            str = '';
             str += 'You\'ve been on this run for <b>' + (startDate === '' ? 'not very long' : (startDate)) + '</b>.<br>';
             str += '<div class="line"></div>';
             if (Game.prestige > 0) {
@@ -14431,9 +14161,9 @@ Game.Launch = function () {
 
             if (ascendNowToGet > 0)//show number saying how many chips you'd get resetting now
             {
-                var str = ascendNowToGet.toString();
-                var str2 = '';
-                for (var i in str)//add commas
+                str = ascendNowToGet.toString();
+                let str2 = '';
+                for (i in str)//add commas
                 {
                     if ((str.length - i) % 3 === 0 && i > 0) str2 += ',';
                     str2 += str[i];
@@ -14461,12 +14191,12 @@ Game.Launch = function () {
         if (Game.mouseMoved || Game.Scroll || Game.tooltip.dynamic) Game.tooltip.update();
 
         if (Game.T % (Game.fps * 5) === 0 && !Game.mouseDown && (Game.onMenu === 'stats' || Game.onMenu === 'prefs')) Game.UpdateMenu();
-        if (Game.T % (Game.fps * 1) === 0) Game.UpdatePrompt();
+        if (Game.T % (Game.fps) === 0) Game.UpdatePrompt();
         if (Game.AscendTimer > 0) Game.UpdateAscendIntro();
         if (Game.ReincarnateTimer > 0) Game.UpdateReincarnateIntro();
         if (Game.OnAscend) Game.UpdateAscend();
 
-        for (var i in Game.customLogic) {
+        for (i in Game.customLogic) {
             Game.customLogic[i]();
         }
 
@@ -14483,9 +14213,9 @@ Game.Launch = function () {
 
         if ((Game.toSave || (Game.T % (Game.fps * 60) === 0 && Game.T > Game.fps * 10 && Game.prefs.autosave)) && !Game.OnAscend) {
             //check if we can save : no minigames are loading
-            var canSave = true;
-            for (var i in Game.Objects) {
-                var me = Game.Objects[i];
+            let canSave = true;
+            for (i in Game.Objects) {
+                me = Game.Objects[i];
                 if (me.minigameLoading) {
                     canSave = false;
                     break;
@@ -14508,18 +14238,21 @@ Game.Launch = function () {
 	=======================================================================================*/
 
     Game.Draw = function () {
+        let price;
+        let me;
+        let i;
         Game.DrawBackground();
         Timer.track('end of background');
 
         if (!Game.OnAscend) {
 
-            var unit = (Math.round(Game.cookiesd) === 1 ? ' Neuro' : ' Neuros');
-            var str = Beautify(Math.round(Game.cookiesd));
+            let unit = (Math.round(Game.cookiesd) === 1 ? ' Neuro' : ' Neuros');
+            let str = Beautify(Math.round(Game.cookiesd));
             if (Game.cookiesd >= 1000000)//dirty padding
             {
-                var spacePos = str.indexOf(' ');
-                var dotPos = str.indexOf('.');
-                var add = '';
+                const spacePos = str.indexOf(' ');
+                const dotPos = str.indexOf('.');
+                let add = '';
                 if (spacePos !== -1) {
                     if (dotPos === -1) add += '.000';
                     else {
@@ -14537,21 +14270,21 @@ Game.Launch = function () {
             elementByID('compactCookies').innerHTML = str;
             Timer.track('Neuro amount');
 
-            for (var i in Game.Objects) {
-                var me = Game.Objects[i];
+            for (i in Game.Objects) {
+                me = Game.Objects[i];
                 if (me.onMinigame && me.minigame.draw && !me.muted) me.minigame.draw();
             }
             Timer.track('draw minigames');
 
             if (Game.drawT % 5 === 0) {
                 //if (Game.prefs.monospace) {l('cookies').className='title monospace';} else {l('cookies').className='title';}
-                var lastLocked = 0;
-                for (var i in Game.Objects) {
-                    var me = Game.Objects[i];
+                let lastLocked = 0;
+                for (i in Game.Objects) {
+                    me = Game.Objects[i];
 
                     //make products full-opacity if we can buy them
-                    var classes = 'product';
-                    var price = me.bulkPrice;
+                    let classes = 'product';
+                    price = me.bulkPrice;
                     if (Game.cookiesEarned >= me.basePrice || me.bought > 0) {
                         classes += ' unlocked';
                         lastLocked = 0;
@@ -14568,19 +14301,19 @@ Game.Launch = function () {
                 }
 
                 //make upgrades full-opacity if we can buy them
-                var lastPrice = 0;
-                for (var i in Game.UpgradesInStore) {
-                    var me = Game.UpgradesInStore[i];
+                let lastPrice = 0;
+                for (i in Game.UpgradesInStore) {
+                    me = Game.UpgradesInStore[i];
                     if (!me.bought) {
-                        var price = me.getPrice();
-                        var canBuy = me.canBuy();//(Game.cookies>=price);
-                        var enabled = (elementByID('upgrade' + i).className.indexOf('enabled') > -1);
+                        price = me.getPrice();
+                        let canBuy = me.canBuy();//(Game.cookies>=price);
+                        let enabled = (elementByID('upgrade' + i).className.indexOf('enabled') > -1);
                         if ((canBuy && !enabled) || (!canBuy && enabled)) Game.upgradesToRebuild = 1;
                         if (price < lastPrice) Game.storeToRefresh = 1;//is this upgrade less expensive than the previous one? trigger a refresh to sort it again
                         lastPrice = price;
                     }
                     if (me.timerDisplay) {
-                        var T = me.timerDisplay();
+                        let T = me.timerDisplay();
                         if (T !== -1) {
                             if (!elementByID('upgradePieTimer' + i)) elementByID('upgrade' + i).innerHTML = elementByID('upgrade' + i).innerHTML + '<div class="pieTimer" id="upgradePieTimer' + i + '"></div>';
                             T = (T * 144) % 144;
@@ -14595,7 +14328,7 @@ Game.Launch = function () {
 
             if (Game.PARTY)//i was bored and felt like messing with CSS
             {
-                var pulse = Math.pow((Game.T % 10) / 10, 0.5);
+                let pulse = Math.pow((Game.T % 10) / 10, 0.5);
                 Game.l.style.filter = 'hue-rotate(' + ((Game.T * 5) % 360) + 'deg) brightness(' + (150 - 50 * pulse) + '%)';
                 Game.l.style.webkitFilter = 'hue-rotate(' + ((Game.T * 5) % 360) + 'deg) brightness(' + (150 - 50 * pulse) + '%)';
                 Game.l.style.transform = 'scale(' + (1.02 - 0.02 * pulse) + ',' + (1.02 - 0.02 * pulse) + ') rotate(' + (Math.sin(Game.T * 0.5) * 0.5) + 'deg)';
@@ -14615,7 +14348,7 @@ Game.Launch = function () {
         Timer.track('notes');
         //Game.tooltip.update();//changed to only update when the mouse is moved
 
-        for (var i in Game.customDraw) {
+        for (i in Game.customDraw) {
             Game.customDraw[i]();
         }
 
@@ -14626,7 +14359,7 @@ Game.Launch = function () {
     /*=====================================================================================
 	MAIN LOOP
 	=======================================================================================*/
-    Game.Loop = function () {
+    Game.Loop = () => {
         if (Game.timedout) return false;
         Timer.say('START');
         Timer.track('browser stuff');

@@ -19,9 +19,9 @@ All this code is copyright Orteil, 2013-2019.
 		- Promote: Server hosting
 		- Superbox: Code help
 		- Others: Read credits.txt for more
-Hello, and welcome to the joyous mess that is main.js. Code contained herein is not guaranteed to be good, consistent, or sane. Most of this is years old at this point and harkens back to simpler, cruder times. Have a nice trip.
+Hello, and welcome to the joyous mess that is main.js (Update: go to game.js instead). Code contained herein is not guaranteed to be good, consistent, or sane. Most of this is years old at this point and harkens back to simpler, cruder times. Have a nice trip.
 *Tbh, this code is dogshit (but nobody wants to re-write, this was supposed to be a simple skin, aaaaa the feature creep)
- ** Oh hi, I'm gonna refactor this because I feel like it
+ ** Oh hi, I'm going to refactor this because I feel like it
 Spoilers ahead.
 https://www.twitch.tv/vedal987 because this is Orteils no more.
 */
@@ -30,6 +30,9 @@ https://www.twitch.tv/vedal987 because this is Orteils no more.
 Stuff that is important to the NC team:
 	-Mod Tags: above custom fuctions is a little thingy ( //modTags ), this is just to quickly find our custom code.
 	-The word "Ladle" is funny, may be my fav english word now
+
+	-Most of the code is in scripts/game.js, because the Game class is absolutely enormous
+	-Don't touch seededRandom, it breaks easily
 */
 
 //disable sounds coming from soundjay.com (sorry)
@@ -52,30 +55,6 @@ if (!Array.prototype.indexOf) {
         return -1;
     };
 }
- /*
-function randomFloor(x) {
-    if ((x % 1) < Math.random()) return Math.floor(x); else return Math.ceil(x);
-}
-  */
-
-/*
-function shuffle(array)
-{
-	var counter = array.length, temp, index;
-	// While there are elements in the array
-	while (counter--)
-	{
-		// Pick a random index
-		index = (Math.random() * counter) | 0;
-
-		// And swap the last element with it
-		temp = array[counter];
-		array[counter] = array[index];
-		array[index] = temp;
-	}
-	return array;
-}
-*/
 
 //	if (kotlin == true){
 
@@ -90,137 +69,6 @@ for (i = 0; i < 360; i++) {
     //let's make a lookup table
     sinArray[i] = Math.sin(i / 360 * Math.PI * 2);
 }
-
-/*
-function quickSin(x)
-{
-	//oh man this isn't all that fast actually
-	//why do I do this. why
-	var sign=x<0?-1:1;
-	return sinArray[Math.round(
-		(Math.abs(x)*360/Math.PI/2)%360
-	)]*sign;
-}
- */
-
-/*function ajax(url,callback){
-	var ajaxRequest;
-	try{ajaxRequest = new XMLHttpRequest();} catch (e){try{ajaxRequest=new ActiveXObject('Msxml2.XMLHTTP');} catch (e) {try{ajaxRequest=new ActiveXObject('Microsoft.XMLHTTP');} catch (e){alert("Something broke!");return false;}}}
-	if (callback){ajaxRequest.onreadystatechange=function(){if(ajaxRequest.readyState==4){callback(ajaxRequest.responseText);}}}
-	ajaxRequest.open('GET',url+'&nocache='+(new Date().getTime()),true);ajaxRequest.send(null);
-}*/
-
-/*
-var ajax=function(url,callback)
-{
-	var httpRequest=new XMLHttpRequest();
-	if (!httpRequest){return false;}
-	httpRequest.onreadystatechange=function()
-	{
-		try{
-			if (httpRequest.readyState===XMLHttpRequest.DONE && httpRequest.status===200)
-			{
-				callback(httpRequest.responseText);
-			}
-		}catch(e){}
-	}
-	//httpRequest.onerror=function(e){console.log('ERROR',e);}
-	if (url.indexOf('?')===-1) url+='?'; else url+='&';
-	url+='nocache='+Date.now();
-	httpRequest.open('GET',url);
-	httpRequest.setRequestHeader('Content-Type','text/plain');
-	httpRequest.overrideMimeType('text/plain');
-	httpRequest.send();
-	return true;
-}
-*/
-
-/*
-function shortenNumber(value) {
-    //if no scientific notation, return as is, else :
-    //keep only the 5 first digits (plus dot), round the rest
-    //may or may not work properly
-    if (value >= 1000000 && isFinite(value)) {
-        var num = value.toString();
-        var ind = num.indexOf('e+');
-        if (ind === -1) return value;
-        var str = '';
-        for (var i = 0; i < ind; i++) {
-            str += (i < 6 ? num[i] : '0');
-        }
-        str += 'e+';
-        str += num.split('e+')[1];
-        return parseFloat(str);
-    }
-    return value;
-}
-*/
-
-//these are faulty, investigate later
-//function utf8_to_b64(str){return btoa(str);}
-//function b64_to_utf8(str){return atob(str);}
-/*
-function CompressBin(arr)//compress a sequence like [0,1,1,0,1,0]... into a number like 54.
-{
-    var str = '';
-    var arr2 = arr.slice(0);
-    arr2.unshift(1);
-    arr2.push(1);
-    arr2.reverse();
-    for (var i in arr2) {
-        str += arr2[i];
-    }
-    str = parseInt(str, 2);
-    return str;
-}
- */
-/*
-function UncompressBin(num)//uncompress a number like 54 to a sequence like [0,1,1,0,1,0].
-{
-    var arr = num.toString(2);
-    arr = arr.split('');
-    arr.reverse();
-    arr.shift();
-    arr.pop();
-    return arr;
-}
- */
-
-/*
-function CompressLargeBin(arr)//we have to compress in smaller chunks to avoid getting into scientific notation
-{
-	var arr2=arr.slice(0);
-	var thisBit=[];
-	var bits=[];
-	for (var i in arr2)
-	{
-		thisBit.push(arr2[i]);
-		if (thisBit.length>=50)
-		{
-			bits.push(CompressBin(thisBit));
-			thisBit=[];
-		}
-	}
-	if (thisBit.length>0) bits.push(CompressBin(thisBit));
-	arr2=bits.join(';');
-	return arr2;
-}
- */
-/*
-function UncompressLargeBin(arr) {
-    var arr2 = arr.split(';');
-    var bits = [];
-    for (var i in arr2) {
-        bits.push(UncompressBin(parseInt(arr2[i])));
-    }
-    arr2 = [];
-    for (var i in bits) {
-        for (var ii in bits[i]) arr2.push(bits[i][ii]);
-    }
-    return arr2;
-}
- */
-
 
 (typeof self !== "undefined" && self || typeof window !== "undefined" && window || this.content);
 
@@ -318,22 +166,11 @@ if (!document.hasFocus) document.hasFocus = function () {
     return document.hidden;
 };//for Opera
 
-function FireEvent(el, etype) {
-    if (el.fireEvent) {
-        el.fireEvent('on' + etype);
-    } else {
-        const evObj = document.createEvent('Events');
-        evObj.initEvent(etype, true, false);
-        el.dispatchEvent(evObj);
-    }
-}
 for (i = 0; i < 12; i++) {
     SoundInsts[i] = new Audio();
 }
 //note : Chrome turns out to not support webkitPreservesPitch despite the specifications claiming otherwise, and Firefox clips some short sounds when changing playbackRate, so i'm turning the feature off completely until browsers get it together
 //if (SoundInsts[0].preservesPitch || SoundInsts[0].mozPreservesPitch || SoundInsts[0].webkitPreservesPitch) pitchSupport=true;
-
-;
 
 if (!Date.now) {
     Date.now = function now() {
@@ -349,11 +186,14 @@ let triggerAnim = function (element, anim) {
 };
 
 //What is even the point of this thing?
-var debugStr = '';
-var Debug = function (what) {
+/*
+let debugStr = '';
+const Debug = function (what) {
     if (!debugStr) debugStr = what;
     else debugStr += '; ' + what;
-}
+};
+
+ */
 
 if (Game.bakeryName === 'Baa') {
 
@@ -367,8 +207,6 @@ if (Game.bakeryName === 'Baa') {
 LAUNCH THIS THING
 =======================================================================================*/
 Game.Launch();
-//try {Game.Launch();}
-//catch(err) {console.log('ERROR : '+err.message);}
 
 window.onload = function () {
 
@@ -380,8 +218,6 @@ window.onload = function () {
                 'Hiya, Xoda here, This has taken ( [current year] - [2023] ) years to make.'
             ]) + ' ===]');
             Game.Load();
-            //try {Game.Load();}
-            //catch(err) {console.log('ERROR : '+err.message);}
         }
     }
 };

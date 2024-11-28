@@ -8,7 +8,7 @@ export function saveAs(view) {
             return view.URL || view.webkitURL || view
         }, save_link = doc.createElementNS("http://www.w3.org/1999/xhtml", "a"),
         can_use_save_link = "download" in save_link, click = function (node) {
-            var event = new MouseEvent("click");
+            let event = new MouseEvent("click");
             node.dispatchEvent(event)
         }, is_safari = /Version\/[\d.]+.*Safari/.test(navigator.userAgent), webkit_req_fs = view.webkitRequestFileSystem,
         req_fs = view.requestFileSystem || webkit_req_fs || view.mozRequestFileSystem, throw_outside = function (ex) {
@@ -31,9 +31,9 @@ export function saveAs(view) {
             }
         }, dispatch = function (filesaver, event_types, event) {
             event_types = [].concat(event_types);
-            var i = event_types.length;
+            let i = event_types.length;
             while (i--) {
-                var listener = filesaver["on" + event_types[i]];
+                const listener = filesaver["on" + event_types[i]];
                 if (typeof listener === "function") {
                     try {
                         listener.call(filesaver, event || filesaver)
@@ -56,9 +56,9 @@ export function saveAs(view) {
                     dispatch(filesaver, "writestart progress write writeend".split(" "))
                 }, fs_error = function () {
                     if (target_view && is_safari && typeof FileReader !== "undefined") {
-                        var reader = new FileReader;
+                        let reader = new FileReader;
                         reader.onloadend = function () {
-                            var base64Data = reader.result;
+                            let base64Data = reader.result;
                             target_view.location.href = "data:attachment/file" + base64Data.slice(base64Data.search(/[,;]/));
                             filesaver.readyState = filesaver.DONE;
                             dispatch_all()
@@ -73,7 +73,7 @@ export function saveAs(view) {
                     if (target_view) {
                         target_view.location.href = object_url
                     } else {
-                        var new_tab = view.open(object_url, "_blank");
+                        let new_tab = view.open(object_url, "_blank");
                         if (new_tab === undefined && is_safari) {
                             view.location.href = object_url
                         }
