@@ -1,12 +1,16 @@
 //file save function from https://github.com/eligrey/FileSaver.js
-export function saveAs(view) {
+export const saveAs = generateSaveAs(window);
+
+function generateSaveAs(view) {
     "use strict";
     if (typeof navigator !== "undefined" && /MSIE [1-9]\./.test(navigator.userAgent)) {
         return
     }
-    let doc = view.document, get_URL = function () {
+    //let doc = view.document
+    let get_URL = function () {
             return view.URL || view.webkitURL || view
-        }, save_link = doc.createElementNS("http://www.w3.org/1999/xhtml", "a"),
+        }
+        let save_link = view.document.createElementNS("http://www.w3.org/1999/xhtml", "a"),
         can_use_save_link = "download" in save_link, click = function (node) {
             let event = new MouseEvent("click");
             node.dispatchEvent(event)

@@ -74,7 +74,7 @@ function rawFormatter(value) {
     return Math.round(value * 1000) / 1000;
 }
 
-function Beautify(value, floats) {
+export function Beautify(value, floats) {
     let negative = (value < 0);
     let decimal = '';
     const fixed = value.toFixed(floats);
@@ -638,7 +638,7 @@ Game.Launch = function () {
             Game.recalculateGains = 1;
         }
         Game.bakeryNamePrompt = () => {
-            Game.Prompt('<h3>Name your corpa</h3><div class="block" style="text-align:center;">What should your corpa\'s name be?</div><div class="block"><input type="text" style="text-align:center;width:100%;" id="bakeryNameInput" value="' + Game.bakeryName + '"/></div>', [['Confirm', 'if (l(\'bakeryNameInput\').value.length>0) {Game.bakeryNameSet(l(\'bakeryNameInput\').value);Game.Win(\'What\\\'s in a name\');Game.ClosePrompt();}'], ['Random', 'Game.bakeryNamePromptRandom();'], 'Cancel']);
+            Game.Prompt('<h3>Name your corpa</h3><div class="block" style="text-align:center;">What should your corpa\'s name be?</div><div class="block"><input type="text" style="text-align:center;width:100%;" id="bakeryNameInput" value="' + Game.bakeryName + '"/></div>', [['Confirm', 'if (elementByID(\'bakeryNameInput\').value.length>0) {Game.bakeryNameSet(elementByID(\'bakeryNameInput\').value);Game.Win(\'What\\\'s in a name\');Game.ClosePrompt();}'], ['Random', 'Game.bakeryNamePromptRandom();'], 'Cancel']);
             elementByID('bakeryNameInput').focus();
             elementByID('bakeryNameInput').select();
         }
@@ -920,6 +920,7 @@ Game.Launch = function () {
             try {
                 window.localStorage.setItem(key, str);
             } catch (exception) {
+                console.log(exception);
             }
         }
         //window.localStorage.clear();//won't switch back to cookie-based if there is localStorage info
@@ -934,7 +935,7 @@ Game.Launch = function () {
             elementByID('textareaPrompt').select();
         }
         Game.ImportSave = () => {
-            Game.Prompt('<h3>Import save</h3><div class="block">Please paste in the code that was given to you on save export.</div><div class="block"><textarea id="textareaPrompt" style="width:100%;height:128px;"></textarea></div>', [['Load', 'if (l(\'textareaPrompt\').value.length>0) {Game.ImportSaveCode(l(\'textareaPrompt\').value);Game.ClosePrompt();}'], 'Nevermind']);//prompt('Please paste in the text that was given to you on save export.','');
+            Game.Prompt('<h3>Import save</h3><div class="block">Please paste in the code that was given to you on save export.</div><div class="block"><textarea id="textareaPrompt" style="width:100%;height:128px;"></textarea></div>', [['Load', 'if (elementByID(\'textareaPrompt\').value.length>0) {Game.ImportSaveCode(elementByID(\'textareaPrompt\').value);Game.ClosePrompt();}'], 'Nevermind']);//prompt('Please paste in the text that was given to you on save export.','');
             elementByID('textareaPrompt').focus();
         }
         Game.ImportSaveCode = save => {
@@ -4569,7 +4570,7 @@ Game.Launch = function () {
                     '<div class="listing"><a class="option warning" ' + Game.clickStr + '="Game.HardReset();PlaySound(\'snd/tick.mp3\');">Wipe save</a><label>Delete all your progress, including your achievements</label></div>' +
                     '<div class="title">Settings</div>' +
                     '<div class="listing">' +
-                    Game.WriteSlider('volumeSlider', 'Volume', '[$]%', () => Game.volume, 'Game.setVolume(Math.round(l(\'volumeSlider\').value));l(\'volumeSliderRightText\').innerHTML=Game.volume+\'%\';') + '<br>' +
+                    Game.WriteSlider('volumeSlider', 'Volume', '[$]%', () => Game.volume, 'Game.setVolume(Math.round(elementByID(\'volumeSlider\').value));elementByID(\'volumeSliderRightText\').innerHTML=Game.volume+\'%\';') + '<br>' +
                     Game.WriteButton('fancy', 'fancyButton', 'Fancy graphics ON', 'Fancy graphics OFF', 'Game.ToggleFancy();') + '<label>(visual improvements; disabling may improve performance)</label><br>' +
                     Game.WriteButton('filters', 'filtersButton', 'CSS filters ON', 'CSS filters OFF', 'Game.ToggleFilters();') + '<label>(cutting-edge visual improvements; disabling may improve performance)</label><br>' +
                     Game.WriteButton('particles', 'particlesButton', 'Particles ON', 'Particles OFF') + '<label>(cookies falling down, etc; disabling may improve performance)</label><br>' +
@@ -6219,6 +6220,29 @@ Game.Launch = function () {
             return ((base) * (Math.pow(2, mult)) + bonus);
         }
 
+        function importMinigame(url, id, me) {
+            return new Promise((resolve, reject) => {
+                Game.scriptBindings['minigameScript-' + id] = me;
+                console.log("Load script " + url)
+                const script = document.createElement("script");
+                script.type = "module";
+                script.src = url;
+                script.id = id;
+
+                script.onload = () => {
+                    resolve(script.module);
+                    if (!me.minigameLoaded) Game.scriptLoaded(me);
+                };
+
+                script.onerror = () => {
+                    reject(new Error("Failed to load module script with URL " + url));
+                    script.remove();
+                };
+
+                document.head.appendChild(script);
+            });
+        }
+
         Game.isMinigameReady = me => (me.minigameUrl && me.minigameLoaded && me.level > 0)
         Game.scriptBindings = [];
         Game.LoadMinigames = () => {
@@ -6226,23 +6250,27 @@ Game.Launch = function () {
                 let me = Game.Objects[i];
                 if (me.minigameUrl && me.level > 0 && !me.minigameLoaded && !me.minigameLoading && !elementByID('minigameScript-' + me.id)) {
                     me.minigameLoading = true;
+                    console.log("Load minigame " + me.minigameUrl)
                     //we're only loading the minigame scripts that aren't loaded yet and which have enough building level
                     //we call this function on building level up and on load
                     //console.log('Loading script '+me.minigameUrl+'...');
                     setTimeout((me => () => {
-                        let script = document.createElement('script');
-                        script.id = 'minigameScript-' + me.id;
-                        Game.scriptBindings['minigameScript-' + me.id] = me;
-                        script.setAttribute('src', me.minigameUrl + '?r=' + Game.version);
-                        script.onload = ((me, script) => () => {
-                            if (!me.minigameLoaded) Game.scriptLoaded(me, script);
-                        })(me, 'minigameScript-' + me.id);
-                        document.head.appendChild(script);
+                        importMinigame(me.minigameUrl + '?r=' + Game.version, 'minigameScript-' + me.id, me)
+                        // let script = document.createElement('script');
+                        // script.id = 'minigameScript-' + me.id;
+                        // Game.scriptBindings['minigameScript-' + me.id] = me;
+                        // script.setAttribute('src', me.minigameUrl + '?r=' + Game.version);
+                        // //script.setAttribute('type', 'text/javascript')
+                        // script.type = 'text/javascript'
+                        // script.onload = ((me, script) => () => {
+                        //     if (!me.minigameLoaded) Game.scriptLoaded(me, script);
+                        // })(me, 'minigameScript-' + me.id);
+                        // document.head.appendChild(script);
                     })(me), 10);
                 }
             }
         }
-        Game.scriptLoaded = (who, script) => {
+        Game.scriptLoaded = (who) => {
             who.minigameLoading = false;
             who.minigameLoaded = true;
             who.refresh();
@@ -6401,7 +6429,7 @@ Game.Launch = function () {
             Game.UnlockTiered(this);
             if (this.amount >= Game.SpecialGrandmaUnlock && Game.Objects['Grandma'].amount > 0) Game.Unlock(this.grandma.name);
         });
-        Game.last.minigameUrl = 'minigameGarden.js';
+        Game.last.minigameUrl = '/scripts/minigameGarden.js';
         Game.last.minigameName = 'Garden';
 
         new Game.Object('Mining Rig', 'rig|rigs|hashed|Overclocked by [X] MHz.| Overclocked by [X] MHz.', 'Mines Crypto-Neuros.', 4, 3, {
@@ -6477,7 +6505,7 @@ Game.Launch = function () {
             Game.UnlockTiered(this);
             if (this.amount >= Game.SpecialGrandmaUnlock && Game.Objects['Grandma'].amount > 0) Game.Unlock(this.grandma.name);
         });
-        Game.last.minigameUrl = 'minigamePantheon.js';
+        Game.last.minigameUrl = '/scripts/minigamePantheon.js';
         Game.last.minigameName = 'Pantheon';
 
         new Game.Object('Wizard tower', 'wizard tower|wizard towers|summoned|Incantations have [X] more syllable|Incantations have [X] more syllables', 'Summons Neuros with magic spells.', 8, 17, {
@@ -6497,7 +6525,7 @@ Game.Launch = function () {
             Game.UnlockTiered(this);
             if (this.amount >= Game.SpecialGrandmaUnlock && Game.Objects['Grandma'].amount > 0) Game.Unlock(this.grandma.name);
         });
-        Game.last.minigameUrl = 'minigameGrimoire.js';
+        Game.last.minigameUrl = '/scripts/minigameGrimoire.js';
         Game.last.minigameName = 'Grimoire';
 
         new Game.Object('Shipment', 'shipment|shipments|shipped|[X] galaxy fully explored|[X] galaxies fully explored', 'Brings in fresh Neuros from the Neuro planet.', 9, 5, {
@@ -13635,7 +13663,7 @@ Game.Launch = function () {
             str += '<a class="option neato" ' + Game.clickStr + '="Game.EditAscend();">' + (Game.DebuggingPrestige ? 'Exit Ascend Edit' : 'Ascend Edit') + '</a>';
             str += '<a class="option neato" ' + Game.clickStr + '="Game.DebugUpgradeCpS();">Debug upgrades CpS</a>';
             str += '<a class="option neato" ' + Game.clickStr + '="Game.seed=Game.makeSeed();">Re-seed</a>';
-            str += '<a class="option neato" ' + Game.clickStr + '="Game.heralds=100;l(\'heraldsAmount\').innerHTML=Game.heralds;Game.externalDataLoaded=true;Game.recalculateGains=1;">Max heralds</a>';
+            str += '<a class="option neato" ' + Game.clickStr + '="Game.heralds=100;elementByID(\'heraldsAmount\').innerHTML=Game.heralds;Game.externalDataLoaded=true;Game.recalculateGains=1;">Max heralds</a>';
             str += '<div class="line"></div>';
             for (let i = 0; i < Game.goldenCookieChoices.length / 2; i++) {
                 str += '<a class="option neato" ' + Game.clickStr + '="var newShimmer=new Game.shimmer(\'golden\');newShimmer.force=\'' + Game.goldenCookieChoices[i * 2 + 1] + '\';">' + Game.goldenCookieChoices[i * 2] + '</a>';

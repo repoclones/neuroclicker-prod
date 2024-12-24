@@ -1,13 +1,18 @@
 //wow, imports
 //such fancy
-import {chooseRandomElement} from "./scripts/helpers.js";
-import {Game} from "./scripts/game.js";
+import {chooseRandomElement, elementByID} from "./scripts/helpers.js";
+import {Game, Beautify} from "./scripts/game.js";
 import {SoundInsts, PlaySound} from "./scripts/playSound.js";
+import {AddEvent} from "./scripts/addEvent.js";
 
 // For HTML access
 window.Game = Game;
 window.PlaySound = PlaySound;
-
+window.elementByID = elementByID;
+window.AddEvent = AddEvent;
+window.chooseRandomElement = chooseRandomElement;
+window.randomFloor = randomFloor;
+window.Beautify = Beautify;
 /*
 All this code is copyright Orteil, 2013-2019.
 *Actually, the amount that's *not* Orteils is growing with every Neuro Clicker update.
@@ -55,6 +60,8 @@ if (!Array.prototype.indexOf) {
         return -1;
     };
 }
+
+function randomFloor(x) {if ((x%1)<Math.random()) return Math.floor(x); else return Math.ceil(x);}
 
 //	if (kotlin == true){
 

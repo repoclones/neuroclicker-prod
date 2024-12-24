@@ -1,4 +1,9 @@
-﻿var M={};
+﻿let Game = window.Game
+let AddEvent = window.AddEvent
+let chooseRandomElement = window.chooseRandomElement
+let randomFloor = window.randomFloor
+
+var M={};
 M.parent=Game.Objects['Farm'];
 M.parent.minigame=M;
 M.launch=function()
@@ -194,7 +199,7 @@ M.launch=function()
 					if (age>=this.mature)
 					{
 						var moni=Math.min(Game.cookies*0.03,Game.cookiesPs*60*3);
-						if (moni!=0)
+						if (moni !== 0)
 						{
 							Game.Earn(moni);
 							Game.Popup('(White chocoroot)<br>+'+Beautify(moni)+' cookies!',Game.mouseX,Game.mouseY);
