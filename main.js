@@ -13,6 +13,27 @@ window.AddEvent = AddEvent;
 window.chooseRandomElement = chooseRandomElement;
 window.randomFloor = randomFloor;
 window.Beautify = Beautify;
+window.shortenNumber = function shortenNumber(value)
+{
+    //if no scientific notation, return as is, else :
+    //keep only the 5 first digits (plus dot), round the rest
+    //may or may not work properly
+    if (value >= 1000000 && isFinite(value))
+    {
+        const num = value.toString();
+        const ind = num.indexOf('e+');
+        if (ind===-1) return value;
+        let str = '';
+        for (let i=0; i<ind; i++)
+        {
+            str+=(i<6?num[i]:'0');
+        }
+        str+='e+';
+        str+=num.split('e+')[1];
+        return parseFloat(str);
+    }
+    return value;
+}
 /*
 All this code is copyright Orteil, 2013-2019.
 *Actually, the amount that's *not* Orteils is growing with every Neuro Clicker update.
