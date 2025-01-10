@@ -420,8 +420,6 @@ Game.Launch = function () {
             me.parentNode.removeChild(me);
         }
 
-        let icon = [0, me.icon * 64];
-
         //l('links').innerHTML=(Game.beta?'<a href="../" target="blank">Live version</a> | ':'<a href="beta" target="blank">Try the beta!</a> | ')+'<a href="http://orteil.dashnet.org/experiments/cookie/" target="blank">Classic</a>';
         //l('links').innerHTML='<a href="http://orteil.dashnet.org/experiments/cookie/" target="blank">Cookie Clicker Classic</a>';
 
@@ -6777,6 +6775,11 @@ Game.Launch = function () {
                 me.canvas = elementByID('rowCanvas' + me.id);
                 me.ctx = me.canvas.getContext('2d', {alpha: false});
                 me.pics = [];
+
+                //console.log("me.icon: " + me.icon)
+                let icon = [0, me.icon * 64];
+
+                //console.log("Icon: " + icon)
                 muteStr += '<div class="tinyProductIcon" id="mutedProduct' + me.id + '" style="display:none;background-position:-' + icon[0] + 'px -' + icon[1] + 'px;" ' + Game.clickStr + '="Game.ObjectsById[' + me.id + '].mute(0);PlaySound(Game.ObjectsById[' + me.id + '].muted?\'snd/clickOff.mp3\':\'snd/clickOn.mp3\');" ' + Game.getDynamicTooltip('Game.mutedBuildingTooltip(' + me.id + ')', 'this') + '></div>';
                 //muteStr+='<div class="tinyProductIcon" id="mutedProduct'+me.id+'" style="display:none;background-position:-'+icon[0]+'px -'+icon[1]+'px;" '+Game.clickStr+'="Game.ObjectsById['+me.id+'].mute(0);PlaySound(Game.ObjectsById['+me.id+'].muted?\'snd/clickOff.mp3\':\'snd/clickOn.mp3\');" '+Game.getTooltip('<div style="width:150px;text-align:center;font-size:11px;"><b>Unmute '+me.plural+'</b><br>(Display this building)</div>')+'></div>';
 
