@@ -184,6 +184,16 @@ Game.Launch = function () {
         '<div class="title">Version history</div>' +
 
         '</div><div class="subsection update">' +
+        '<div class="title">07.01.2025  - Nwero Clicker: v8</div>' +
+        '<div class="listing">&bull; Refactor all the code from main.js and index.html. (rare Superbox appearance here)</div>' +
+        '<div class="listing">&bull; Fixed a bug causing random garbage characters at the ends of upgrade quote strings in the process.</div>' +
+        '<div class="listing">&bull; Changed Temples to Harrisson temples.</div>' +
+        '<div class="listing">&bull; Made Mato happy.</div>' +
+        '<div class="listing">&bull; Changed more icons, as always.</div>' +
+        '<div class="listing">&bull; Added the (unimplemented) Kitchen Utensils\' Heavenly. What may those be?</div>' +
+        '<div class="listing">&bull; Local running is now done by a local server, due to refracture changes. This should affect only the small amount of people who run this locally.</div>' +
+
+        '</div><div class="subsection update">' +
         '<div class="title">28.11.2024  - Nwero Clicker: v7_18_experimental</div>' +
         '<div class="listing">&bull; Refactor all the code from main.js and index.html. (rare Superbox appearance here)</div>' +
         '<div class="listing">&bull; Fixed a bug causing random garbage characters at the ends of upgrade quote strings in the process</div>' +
@@ -400,7 +410,7 @@ Game.Launch = function () {
 
         Game.SaveTo = 'CookieClickerGame';
         if (Game.beta) Game.SaveTo = 'CookieClickerGameBeta';
-        elementByID('versionNumber').innerHTML = 'v. ' + Game.version + (Game.beta ? ' <span style="color:#ff0;">Modified (Nwero Clicker v7_18_EXPERIMENTAL)</span>' : '');
+        elementByID('versionNumber').innerHTML = 'v. ' + Game.version + (Game.beta ? ' <span style="color:#ff0;">Modified (Nwero Clicker v8)</span>' : '');
 
         if (Game.version === 1.0466) {
             me = elementByID('linkVersionOld');
