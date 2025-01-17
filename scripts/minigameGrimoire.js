@@ -1,4 +1,4 @@
-﻿let Beautify = window.Beautify;
+let Beautify = window.Beautify;
 
 var M={};
 M.parent=Game.Objects['Wizard tower'];

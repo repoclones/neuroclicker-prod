@@ -13,6 +13,27 @@ window.AddEvent = AddEvent;
 window.chooseRandomElement = chooseRandomElement;
 window.randomFloor = randomFloor;
 window.Beautify = Beautify;
+window.shortenNumber = function shortenNumber(value)
+{
+    //if no scientific notation, return as is, else :
+    //keep only the 5 first digits (plus dot), round the rest
+    //may or may not work properly
+    if (value >= 1000000 && isFinite(value))
+    {
+        const num = value.toString();
+        const ind = num.indexOf('e+');
+        if (ind===-1) return value;
+        let str = '';
+        for (let i=0; i<ind; i++)
+        {
+            str+=(i<6?num[i]:'0');
+        }
+        str+='e+';
+        str+=num.split('e+')[1];
+        return parseFloat(str);
+    }
+    return value;
+}
 /*
 All this code is copyright Orteil, 2013-2019.
 *Actually, the amount that's *not* Orteils is growing with every Neuro Clicker update.
@@ -27,7 +48,6 @@ All this code is copyright Orteil, 2013-2019.
 Hello, and welcome to the joyous mess that is main.js (Update: go to game.js instead). Code contained herein is not guaranteed to be good, consistent, or sane. Most of this is years old at this point and harkens back to simpler, cruder times. Have a nice trip.
 *Tbh, this code is dogshit (but nobody wants to re-write, this was supposed to be a simple skin, aaaaa the feature creep)
  ** Oh hi, I'm going to refactor this because I feel like it
- * How cool, isn't that nice of him to do? It appears to have worked fir- seco- third try! And as wel all know, third time's the charm! (ngl 3 tries til success is mad impressive, great work)
 Spoilers ahead.
 https://www.twitch.tv/vedal987 because this is Orteils no more.
 */
