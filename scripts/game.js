@@ -14306,7 +14306,7 @@ Game.Launch = function () {
             if (str.length > 11 && !Game.mobile) unit = '<br>Neuros';
             str += unit;
             if (Game.prefs.monospace) str = '<span class="monospace">' + str + '</span>';
-            str = str + '<div style="font-size:50%;"' + (Game.cpsSucked > 0 ? ' class="warning"' : '') + '>per second : ' + Beautify(Game.cookiesPs * (1 - Game.cpsSucked), 1) + '</div>';//display cookie amount
+            str = str + '<div style="font-size:50%;" class="smallText' + (Game.cpsSucked > 0 ? ' warning' : '') + '">per second : ' + Beautify(Game.cookiesPs * (1 - Game.cpsSucked), 1) + '</div>';//display cookie amount
             elementByID('cookies').innerHTML = str;
             elementByID('compactCookies').innerHTML = str;
             Timer.track('Neuro amount');

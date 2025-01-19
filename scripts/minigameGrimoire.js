@@ -1,4 +1,4 @@
-﻿let Beautify = window.Beautify;
+let Beautify = window.Beautify;
 
 var M={};
 M.parent=Game.Objects['Wizard tower'];
@@ -406,11 +406,11 @@ M.launch=function()
 			{
 				var me=M.spells[i];
 				var icon=me.icon||[28,12];
-				str+='<div class="grimoireSpell titleFont" id="grimoireSpell'+me.id+'" '+Game.getDynamicTooltip('Game.ObjectsById['+M.parent.id+'].minigame.spellTooltip('+me.id+')','this')+'><div class="usesIcon shadowFilter grimoireIcon" style="background-position:'+(-icon[0]*48)+'px '+(-icon[1]*48)+'px;"></div><div class="grimoirePrice" id="grimoirePrice'+me.id+'">-</div></div>';
+				str+='<div class="grimoireSpell smallText" id="grimoireSpell'+me.id+'" '+Game.getDynamicTooltip('Game.ObjectsById['+M.parent.id+'].minigame.spellTooltip('+me.id+')','this')+'><div class="usesIcon shadowFilter grimoireIcon" style="background-position:'+(-icon[0]*48)+'px '+(-icon[1]*48)+'px;"></div><div class="grimoirePrice" id="grimoirePrice'+me.id+'">-</div></div>';
 			}
 			str+='</div>';
 			var icon=[29,14];
-			str+='<div id="grimoireBar" class="smallFramed meterContainer"><div '+Game.getTooltip('<div style="padding:8px;width:300px;font-size:11px;text-align:center;">Click to refill <b>100 units</b> of your magic meter<br>for <span class="price lump">1 sugar lump</span>.</div>')+' id="grimoireLumpRefill" class="usesIcon shadowFilter" style="background-position:'+(-icon[0]*48)+'px '+(-icon[1]*48)+'px;"></div><div id="grimoireBarFull" class="meter filling"></div><div id="grimoireBarText" class="titleFont"></div><div '+Game.getTooltip('<div style="padding:8px;width:300px;font-size:11px;text-align:center;">This is your magic meter. Each spell costs magic to use.<div class="line"></div>Your maximum amount of magic varies depending on your amount of <b>Wizard towers</b>, and their level.<div class="line"></div>Magic refills over time. The lower your magic meter, the slower it refills.</div>')+' style="position:absolute;left:0px;top:0px;right:0px;bottom:0px;"></div></div>';
+			str+='<div id="grimoireBar" class="smallFramed meterContainer"><div '+Game.getTooltip('<div style="padding:8px;width:300px;font-size:11px;text-align:center;">Click to refill <b>100 units</b> of your magic meter<br>for <span class="price lump">1 sugar lump</span>.</div>')+' id="grimoireLumpRefill" class="usesIcon shadowFilter" style="background-position:'+(-icon[0]*48)+'px '+(-icon[1]*48)+'px;"></div><div id="grimoireBarFull" class="meter filling"></div><div id="grimoireBarText" class="smallText"></div><div '+Game.getTooltip('<div style="padding:8px;width:300px;font-size:11px;text-align:center;">This is your magic meter. Each spell costs magic to use.<div class="line"></div>Your maximum amount of magic varies depending on your amount of <b>Wizard towers</b>, and their level.<div class="line"></div>Magic refills over time. The lower your magic meter, the slower it refills.</div>')+' style="position:absolute;left:0px;top:0px;right:0px;bottom:0px;"></div></div>';
 			str+='<div id="grimoireInfo"></div>';
 		str+='</div>';
 		div.innerHTML=str;
@@ -484,8 +484,8 @@ M.launch=function()
 				var me=M.spells[i];
 				var cost=M.getSpellCost(me);
 				elementByID('grimoirePrice'+me.id).innerHTML=Beautify(cost);
-				if (M.magic<cost) elementByID('grimoireSpell'+me.id).className='grimoireSpell titleFont';
-				else elementByID('grimoireSpell'+me.id).className='grimoireSpell titleFont ready';
+				if (M.magic<cost) elementByID('grimoireSpell'+me.id).className='grimoireSpell smallText';
+				else elementByID('grimoireSpell'+me.id).className='grimoireSpell smallText ready';
 			}
 		}
 	}
