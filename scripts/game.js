@@ -74,6 +74,7 @@ function rawFormatter(value) {
     return Math.round(value * 1000) / 1000;
 }
 
+//converts a number to a string, if floats is greater than 0 the decimal point will be included
 export function Beautify(value, floats) {
     let negative = (value < 0);
     let decimal = '';
@@ -7149,7 +7150,7 @@ Game.Launch = function () {
         //note : the cookie will not be added to the list if it contains locked:1 (use for seasonal cookies and such)
 
         Game.NewUpgradeCookie = obj => {
-            let upgrade = new Game.Upgrade(obj.name, 'Neuro production multiplier <b>+' + Beautify((typeof (obj.power) == 'function' ? obj.power(obj) : obj.power), 1) + '<q>' + obj.desc + '</q>', obj.price, obj.icon);
+            let upgrade = new Game.Upgrade(obj.name, 'Neuro production multiplier <b>+' + Beautify((typeof (obj.power) == 'function' ? obj.power(obj) : obj.power), 0) + '%<q>' + obj.desc + '</q>', obj.price, obj.icon);
             upgrade.power = obj.power;
             upgrade.pool = 'cookie';
             let toPush = {cookies: obj.price / 20, name: obj.name};
