@@ -128,5 +128,5 @@ export const UPDATE_LOG =
     '<div class="listing">&bull; Hello, I am Xodabeef; a part of the Team behind this Cookie Clicker Mod.</div>' +
     '<div class="listing">&bull; I am the main Artist, but i am here in the code now too. The reason is simple: we wanted to cut back on unnecessary files (Orteil left a LOT of shit in here). That made me look for references to the Dungeon Minigame in the code. It is not referenced anywhere, meaning i can (and likely have when you read this) delete all files related to the Dungeon Minigame, to both make this smaller and have a more clear estimate on how much is still to be done.</div>' +
     '<div class="listing">&bull; While looking for these references, i found out about the way these comments work. And because of how easy it is (and out of boredom), i decided to put our names in here.</div>' +
-    '<div class="listing">&bull; I have also removed some of the older changelogs, since they are not necesary.</div>' +
+    '<div class="listing">&bull; I have also removed some of the older changelogs, since they are not necesary.</div>' 
 ;
