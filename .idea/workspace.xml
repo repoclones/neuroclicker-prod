@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f745f3bd-024d-46e1-92bd-9a4767ce3dc6" name="Changes" comment="Fix cookie production multiplier percentage rendering">
+      <change afterPath="$PROJECT_DIR$/scripts/changes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/game.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/game.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="2pS62OEBfZowOruP15A8DpqWnbI" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;JavaScript Debug.index.html.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/modified_game_files/Cookie clicker Neuro mod&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.ide.settings.web.browsers&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\modified_game_files\Cookie clicker Neuro mod" />
+      <recent name="E:\modified_game_files\Cookie clicker Neuro mod\scripts" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\modified_game_files\Cookie clicker Neuro mod\scripts" />
+    </key>
+    <key name="es6.move.members.recent.items">
+      <recent name="E:\modified_game_files\Cookie clicker Neuro mod\scripts\playSound.js" />
+      <recent name="E:\modified_game_files\Cookie clicker Neuro mod\scripts\pic.js" />
+      <recent name="E:\modified_game_files\Cookie clicker Neuro mod\stringConverters.js" />
+      <recent name="E:\modified_game_files\Cookie clicker Neuro mod\saveAs.js" />
+      <recent name="E:\modified_game_files\Cookie clicker Neuro mod\scripts\addEvent.js" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-WS-243.21565.180" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f745f3bd-024d-46e1-92bd-9a4767ce3dc6" name="Changes" comment="" />
+      <created>1732746922987</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1732746922987</updated>
+      <workItem from="1732746924453" duration="8756000" />
+      <workItem from="1732779562243" duration="1115000" />
+      <workItem from="1732780694480" duration="43467000" />
+      <workItem from="1733731739087" duration="340000" />
+      <workItem from="1733732330366" duration="21000" />
+      <workItem from="1734735652157" duration="1000" />
+      <workItem from="1735041010637" duration="10868000" />
+      <workItem from="1735691548003" duration="461000" />
+      <workItem from="1736274092688" duration="117000" />
+      <workItem from="1736512234092" duration="441000" />
+      <workItem from="1736538843768" duration="8432000" />
+      <workItem from="1737286637545" duration="1012000" />
+      <workItem from="1737395163666" duration="1000" />
+      <workItem from="1737530828686" duration="2000" />
+      <workItem from="1737581453578" duration="8000" />
+      <workItem from="1739299807486" duration="1000" />
+      <workItem from="1739780456984" duration="325000" />
+      <workItem from="1740346087063" duration="2495000" />
+      <workItem from="1740852953417" duration="503000" />
+    </task>
+    <task id="LOCAL−00001" summary="Create git repo and clean index.html">
+      <option name="closed" value="true" />
+      <created>1732748144988</created>
+      <option name="number" value="LOCAL−00001" />
+      <option name="presentableId" value="LOCAL−00001" />
+      <updated>1732748144988</updated>
+    </task>
+    <task id="LOCAL−00002" summary="Move a load of stuff out of main.js">
+      <option name="closed" value="true" />
+      <created>1732795446986</created>
+      <option name="number" value="LOCAL−00002" />
+      <option name="presentableId" value="LOCAL−00002" />
+      <updated>1732795446986</updated>
+    </task>
+    <task id="LOCAL−00003" summary="This thing appears to be functional again">
+      <option name="closed" value="true" />
+      <created>1732805064704</created>
+      <option name="number" value="LOCAL−00003" />
+      <option name="presentableId" value="LOCAL−00003" />
+      <updated>1732805064704</updated>
+    </task>
+    <task id="LOCAL−00004" summary="Finish refactor">
+      <option name="closed" value="true" />
+      <created>1732827122383</created>
+      <option name="number" value="LOCAL−00004" />
+      <option name="presentableId" value="LOCAL−00004" />
+      <updated>1732827122383</updated>
+    </task>
+    <task id="LOCAL−00005" summary="Fix minigames and saving">
+      <option name="closed" value="true" />
+      <created>1735069824874</created>
+      <option name="number" value="LOCAL−00005" />
+      <option name="presentableId" value="LOCAL−00005" />
+      <updated>1735069824874</updated>
+    </task>
+    <task id="LOCAL−00006" summary="Fix shortenNumber not defined">
+      <option name="closed" value="true" />
+      <created>1735691995292</created>
+      <option name="number" value="LOCAL−00006" />
+      <option name="presentableId" value="LOCAL−00006" />
+      <updated>1735691995292</updated>
+    </task>
+    <task id="LOCAL−00007" summary="Add patch notes">
+      <option name="closed" value="true" />
+      <created>1736512364112</created>
+      <option name="number" value="LOCAL−00007" />
+      <option name="presentableId" value="LOCAL−00007" />
+      <updated>1736512364112</updated>
+    </task>
+    <task id="LOCAL−00008" summary="Fix incorrect muted icons being rendered">
+      <option name="closed" value="true" />
+      <created>1736549725274</created>
+      <option name="number" value="LOCAL−00008" />
+      <option name="presentableId" value="LOCAL−00008" />
+      <updated>1736549725274</updated>
+    </task>
+    <task id="LOCAL−00009" summary="Change font for a couple places">
+      <option name="closed" value="true" />
+      <created>1737288100669</created>
+      <option name="number" value="LOCAL−00009" />
+      <option name="presentableId" value="LOCAL−00009" />
+      <updated>1737288100669</updated>
+    </task>
+    <task id="LOCAL−00010" summary="Fix cookie production multiplier percentage rendering">
+      <option name="closed" value="true" />
+      <created>1740348508575</created>
+      <option name="number" value="LOCAL−00010" />
+      <option name="presentableId" value="LOCAL−00010" />
+      <updated>1740348508575</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Create git repo and clean index.html" />
+    <MESSAGE value="Move a load of stuff out of main.js" />
+    <MESSAGE value="This thing appears to be functional again" />
+    <MESSAGE value="Finish refactor" />
+    <MESSAGE value="Fix minigames and saving" />
+    <MESSAGE value="Fix shortenNumber not defined" />
+    <MESSAGE value="Add patch notes" />
+    <MESSAGE value="Fix incorrect muted icons being rendered" />
+    <MESSAGE value="Change font for a couple places" />
+    <MESSAGE value="Fix cookie production multiplier percentage rendering" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix cookie production multiplier percentage rendering" />
+  </component>
+</project>
